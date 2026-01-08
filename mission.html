@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>다움학교 실시간 현황</title>
+<style>
+  :root {
+    --bg: #f1f5f9; --card: #ffffff; --primary: #3b82f6;
+    --success: #10b981; --text: #1e293b; --muted: #64748b;
+    --easy: #3b82f6; --normal: #f59e0b; --hard: #ef4444;
+  }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; }
+
+  /* 상단 헤더 */
+  .top {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 30px; background: white; border-bottom: 2px solid #e2e8f0;
+  }
+  .title { font-size: 28px; font-weight: 900; color: var(--primary); }
+  .total-stats { text-align: right; font-weight: 700; }
+  .total-stats span { color: var(--primary); font-size: 24px; }
+
+  /* 카드 레이아웃 (3명 고정) */
+  .wrap { padding: 25px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 1100px) { .wrap { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--card); border-radius: 24px; padding: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative;
+    border: 1px solid #e2e8f0; transition: transform 0.3s;
+  }
+  .name { font-size: 36px; font-weight: 900; margin-bottom: 20px; color: #0f172a; }
+
+  /* 미션 정보 */
+  .mission-box {
+    background: #f8fafc; border-radius: 16px; padding: 18px; margin-bottom: 20px;
+    border-left: 6px solid #e2e8f0;
+  }
+  .mission-box.active-box { border-left-color: var(--success); background: #f0fdf4; }
+  
+  .label { font-size: 13px; color: var(--muted); font-weight: 700; margin-bottom: 5px; }
+  .m-name { font-size: 20px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  
+  /* 난이도 배지 */
+  .diff-badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; color: white; }
+  .diff-EASY { background: var(--easy); }
+  .diff-NORMAL { background: var(--normal); }
+  .diff-HARD { background: var(--hard); }
+
+  /* 금액 통계 */
+  .money-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .money-item { border-left: 4px solid #e2e8f0; padding-left: 12px; }
+  .money-val { font-size: 24px; font-weight: 900; color: #334155; }
+
+  /* 기여도 바 */
+  .bar-wrap { height: 12px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
+  .bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.8s ease-in-out; }
+
+  /* 상태 라벨 */
+  .status {
+    position: absolute; top: 25px; right: 25px;
+    padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 800;
+  }
+  .active { background: #dcfce7; color: var(--success); border: 1px solid #bbf7d0; animation: pulse 2s infinite; }
+  .waiting { background: #f1f5f9; color: var(--muted); border: 1px solid #e2e8f0; }
+
+  @keyframes pulse {
+    0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="title">다움학교 실시간 현황</div>
+  <div class="total-stats">전체 누적 후원금: <span id="totalAll">0원</span></div>
+</div>
+
+<div class="wrap" id="cards"></div>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby92ELezN4OuXTau2V-6SpcMaRj23WYsUlNGY4f8r7FLKm_LAj-IOVAKm2zQpG9h0Jq/exec";
+const ADMIN_TOKEN = "TEACHER_5678"; // 선생님의 토큰 사용
+const REFRESH_MS = 10000; // 10초마다 갱신
+
+const REWARD_MAP = { EASY: 10000, NORMAL: 15000, HARD: 20000 };
+let missionData = {};
+
+window.onload = () => { refresh(); setInterval(refresh, REFRESH_MS); };
+
+async function refresh() {
+  try {
+    const [mRes, lRes] = await Promise.all([
+      fetch(`${WEB_APP_URL}?action=missions`).then(r => r.json()),
+      fetch(`${WEB_APP_URL}?action=logs&token=${ADMIN_TOKEN}&limit=1000`).then(r => r.json())
+    ]);
+
+    // 1. 미션 정보 매핑 (난이도 포함)
+    mRes.missions.forEach(m => {
+      missionData[m.mission_id] = { 
+        name: m.mission_name, 
+        diff: String(m.difficulty).toUpperCase() 
+      };
+    });
+
+    // 2. 학생 데이터 초기화
+    const students = {
+      "S01": { name: "강태윤", today: 0, total: 0, active: false, current: "대기 중", curDiff: "" },
+      "S02": { name: "김대중", today: 0, total: 0, active: false, current: "대기 중", curDiff: "" },
+      "S03": { name: "최원준", today: 0, total: 0, active: false, current: "대기 중", curDiff: "" }
+    };
+
+    const logs = lRes.logs || [];
+    const today = new Date().toISOString().slice(0,10);
+    const sessions = {};
+
+    // 3. 로그 분석 (금액 합산 및 현재 상태 확인)
+    logs.forEach(l => {
+      const sid = l.student_id;
+      if (!students[sid]) return;
+
+      const info = missionData[l.mission_id] || { name: "수업", diff: "NORMAL" };
+      const reward = REWARD_MAP[info.diff] || 0;
+      const logDate = new Date(l.timestamp).toISOString().slice(0,10);
+
+      // 시도별로 묶기
+      if(!sessions[l.attempt_id]) sessions[l.attempt_id] = { sid: sid, mid: l.mission_id, end: false, date: logDate, reward: reward, diff: info.diff };
+      if(l.value === 'end') sessions[l.attempt_id].end = true;
+    });
+
+    let totalGlobal = 0;
+    Object.values(sessions).forEach(s => {
+      if(s.end) {
+        students[s.sid].total += s.reward;
+        totalGlobal += s.reward;
+        if(s.date === today) students[s.sid].today += s.reward;
+      } else if (s.date === today) {
+        // 오늘 날짜의 'end' 없는 로그는 수행 중으로 간주
+        students[s.sid].active = true;
+        const info = missionData[s.mid] || { name: s.mid, diff: "NORMAL" };
+        students[s.sid].current = info.name;
+        students[s.sid].curDiff = info.diff;
+      }
+    });
+
+    // 4. 화면 렌더링
+    document.getElementById("totalAll").textContent = totalGlobal.toLocaleString() + "원";
+    const maxVal = Math.max(1, ...Object.values(students).map(s => s.total));
+
+    document.getElementById("cards").innerHTML = Object.keys(students).map(id => {
+      const s = students[id];
+      const barPct = Math.round((s.total / maxVal) * 100);
+      return `
+        <div class="card">
+          <div class="status ${s.active ? 'active' : 'waiting'}">${s.active ? '● 수행 중' : '대기'}</div>
+          <div class="name">${s.name}</div>
+          
+          <div class="mission-box ${s.active ? 'active-box' : ''}">
+            <div class="label">${s.active ? '현재 진행 미션' : '최근 완료 미션'}</div>
+            <div class="m-name">
+              ${s.current}
+              ${s.curDiff ? `<span class="diff-badge diff-${s.curDiff}">${s.curDiff}</span>` : ''}
+            </div>
+          </div>
+
+          <div class="money-grid">
+            <div class="money-item">
+              <div class="label">오늘 획득</div>
+              <div class="money-val">${s.today.toLocaleString()}원</div>
+            </div>
+            <div class="money-item">
+              <div class="label">누적 합계</div>
+              <div class="money-val">${s.total.toLocaleString()}원</div>
+            </div>
+          </div>
+
+          <div class="bar-wrap"><div class="bar" style="width:${barPct}%"></div></div>
+          <div style="font-size:12px; color:var(--muted); margin-top:10px; text-align:right; font-weight:700;">목표 달성 기여도: ${barPct}%</div>
+        </div>
+      `;
+    }).join("");
+
+  } catch (err) { console.error("데이터 갱신 오류:", err); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>다움학교 - 교사용 관리자</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #ffffff; --primary: #3b82f6;
+    --success: #10b981; --text: #1e293b; --muted: #64748b; --border: #e2e8f0;
+    --easy: #3b82f6; --normal: #f59e0b; --hard: #ef4444;
+  }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; padding: 20px; }
+  
+  .header { text-align: center; margin-bottom: 30px; }
+  .header h1 { font-size: 26px; font-weight: 900; color: var(--primary); margin-bottom: 20px; }
+
+  /* 필터 컨트롤 */
+  .controls { max-width: 800px; margin: 0 auto 25px; display: flex; flex-direction: column; gap: 15px; }
+  .filter-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .tab-row { display: flex; justify-content: center; gap: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+
+  .btn { 
+    background: white; border: 1px solid var(--border); color: var(--text); 
+    padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.2s; 
+  }
+  .btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+  
+  .tab-btn { 
+    background: none; border: none; color: var(--muted); padding: 5px 15px; 
+    cursor: pointer; font-weight: 800; font-size: 15px; border-bottom: 3px solid transparent; 
+  }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  /* 상단 통계 요약 */
+  .summary { 
+    display: grid; grid-template-columns: 1fr 1fr; gap: 15px; 
+    max-width: 800px; margin: 0 auto 25px; 
+  }
+  .sum-card { 
+    background: white; padding: 20px; border-radius: 20px; text-align: center; 
+    border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  }
+  .sum-card span { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+  .sum-card strong { font-size: 24px; color: var(--primary); }
+
+  /* 로그 리스트 */
+  .log-container { max-width: 800px; margin: 0 auto; }
+  .log-item { 
+    background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; 
+    border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  }
+  .log-info { display: flex; flex-direction: column; gap: 6px; }
+  .log-date { font-size: 11px; color: var(--muted); font-weight: 800; }
+  .log-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+  .diff-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; color: white; text-transform: uppercase; }
+  .diff-EASY { background: var(--easy); }
+  .diff-NORMAL { background: var(--normal); }
+  .diff-HARD { background: var(--hard); }
+  
+  .log-meta { font-size: 13px; color: var(--muted); }
+  
+  .log-status { text-align: right; }
+  .badge { 
+    display: inline-block; padding: 4px 10px; border-radius: 20px; 
+    font-size: 11px; font-weight: 800; margin-bottom: 5px; 
+  }
+  .badge-start { background: #eff6ff; color: #3b82f6; }
+  .badge-end { background: #ecfdf5; color: #10b981; }
+  
+  .duration-tag { font-size: 16px; font-weight: 900; color: var(--success); }
+  .time-detail { font-size: 11px; color: var(--muted); font-family: monospace; margin-top: 4px; }
+  
+  .empty-msg { text-align: center; padding: 50px; color: var(--muted); background: white; border-radius: 20px; border: 1px dashed var(--border); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 다움학교 통합 관리 센터</h1>
+</div>
+
+<div class="controls">
+  <div class="filter-row">
+    <button class="btn active" onclick="setStudent('all', this)">전체보기</button>
+    <button class="btn" onclick="setStudent('S01', this)">강태윤</button>
+    <button class="btn" onclick="setStudent('S02', this)">김대중</button>
+    <button class="btn" onclick="setStudent('S03', this)">최원준</button>
+  </div>
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="setPeriod('all', this)">전체기록</button>
+    <button class="tab-btn" onclick="setPeriod('day', this)">오늘</button>
+    <button class="tab-btn" onclick="setPeriod('week', this)">이번 주</button>
+    <button class="tab-btn" onclick="setPeriod('month', this)">이번 달</button>
+  </div>
+</div>
+
+<div class="summary">
+  <div class="sum-card"><span>완료 미션</span><strong id="statCount">0건</strong></div>
+  <div class="sum-card"><span>총 학습 시간</span><strong id="statTime">0분</strong></div>
+</div>
+
+<div class="log-container" id="logList">
+  <div class="empty-msg">데이터를 동기화하고 있습니다...</div>
+</div>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby92ELezN4OuXTau2V-6SpcMaRj23WYsUlNGY4f8r7FLKm_LAj-IOVAKm2zQpG9h0Jq/exec";
+const ADMIN_TOKEN = "TEACHER_5678"; 
+const studentMap = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
+
+let allLogs = [];
+let missionMap = {};
+let curStudent = 'all';
+let curPeriod = 'all';
+
+window.onload = loadData;
+
+async function loadData() {
+  try {
+    const [mRes, lRes] = await Promise.all([
+      fetch(`${WEB_APP_URL}?action=missions`).then(r => r.json()),
+      fetch(`${WEB_APP_URL}?action=logs&token=${ADMIN_TOKEN}&limit=2000`).then(r => r.json())
+    ]);
+    
+    if(mRes.missions) mRes.missions.forEach(m => missionMap[m.mission_id] = m.mission_name);
+    allLogs = lRes.logs || [];
+    render();
+  } catch (e) {
+    document.getElementById('logList').innerHTML = `<div class="empty-msg" style="color:red">로드 실패. URL/토큰 확인.</div>`;
+  }
+}
+
+function setStudent(id, btn) {
+  document.querySelectorAll('.filter-row .btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  curStudent = id;
+  render();
+}
+
+function setPeriod(p, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  curPeriod = p;
+  render();
+}
+
+function checkPeriod(ts, period) {
+  if (period === 'all') return true;
+  const now = new Date();
+  const target = new Date(ts);
+  if (period === 'day') return target.toDateString() === now.toDateString();
+  if (period === 'week') {
+    const tempNow = new Date();
+    const weekStart = new Date(tempNow.setDate(tempNow.getDate() - tempNow.getDay()));
+    weekStart.setHours(0,0,0,0);
+    return target >= weekStart;
+  }
+  if (period === 'month') return target.getMonth() === now.getMonth() && target.getFullYear() === now.getFullYear();
+  return true;
+}
+
+function render() {
+  const list = document.getElementById('logList');
+  list.innerHTML = "";
+
+  const groups = {};
+  allLogs.forEach(log => {
+    const aid = log.attempt_id;
+    if (!groups[aid]) groups[aid] = { start: null, end: null };
+    if (log.value === 'start') groups[aid].start = log;
+    if (log.value === 'end') groups[aid].end = log;
+  });
+
+  let totalSec = 0;
+  let completeCount = 0;
+
+  const filtered = Object.values(groups).filter(g => {
+    const main = g.end || g.start;
+    if (!main) return false;
+    const matchS = curStudent === 'all' || String(main.student_id) === curStudent;
+    const matchP = checkPeriod(main.timestamp, curPeriod);
+    return matchS && matchP;
+  }).sort((a,b) => new Date((b.end||b.start).timestamp) - new Date((a.end||a.start).timestamp));
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-msg">기록이 없습니다.</div>`;
+    updateStats(0, 0);
+    return;
+  }
+
+  filtered.forEach(g => {
+    const main = g.end || g.start;
+    const sTime = g.start ? new Date(g.start.timestamp) : null;
+    const eTime = g.end ? new Date(g.end.timestamp) : null;
+    const diff = (main.difficulty || "NORMAL").toUpperCase();
+    
+    let durationStr = "";
+    if (g.end && g.end.note) {
+      const dMatch = g.end.note.match(/duration:(\d+)s/);
+      if (dMatch) {
+        const sec = parseInt(dMatch[1]);
+        totalSec += sec; completeCount++;
+        durationStr = sec >= 60 ? Math.floor(sec/60)+"분 "+(sec%60)+"초" : sec+"초";
+      }
+    }
+
+    list.innerHTML += `
+      <div class="log-item">
+        <div class="log-info">
+          <div class="log-date">📅 ${(sTime||eTime).toLocaleDateString()}</div>
+          <div class="log-title">
+            ${studentMap[main.student_id] || main.student_id}
+            <span class="diff-badge diff-${diff}">${diff}</span>
+          </div>
+          <div class="log-meta">
+            ${missionMap[main.mission_id] || '수업'} | 
+            ${sTime ? sTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '--:--'}
+          </div>
+        </div>
+        <div class="log-status">
+          <span class="badge ${g.end ? 'badge-end' : 'badge-start'}">${g.end ? '수행 완료' : '진행 중'}</span>
+          <div class="duration-tag">${durationStr}</div>
+          <div class="time-detail">${eTime ? '종료: ' + eTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</div>
+        </div>
+      </div>
+    `;
+  });
+
+  updateStats(completeCount, totalSec);
+}
+
+function updateStats(count, sec) {
+  document.getElementById('statCount').textContent = count + '건';
+  document.getElementById('statTime').textContent = Math.floor(sec / 60) + '분';
+}
+</script>
+</body>
+</html>
