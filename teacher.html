@@ -12,18 +12,32 @@
   body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; padding: 20px; }
   .header { text-align: center; margin-bottom: 20px; }
   .header h1 { font-size: 24px; color: var(--primary); }
+  
   .controls { max-width: 800px; margin: 0 auto 20px; }
   .filter-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  
+  /* 선택 삭제 버튼 라인 */
+  .bulk-action-row { display: flex; justify-content: flex-end; gap: 10px; max-width: 800px; margin: 0 auto 10px; }
+
   .btn { 
     background: white; border: 1px solid var(--border); padding: 10px; 
-    border-radius: 12px; cursor: pointer; font-weight: 700; 
+    border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.2s;
   }
   .btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
+
   .log-container { max-width: 800px; margin: 0 auto; }
   .log-item { 
     background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; 
-    border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    border: 1px solid var(--border); display: flex; align-items: flex-start; gap: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03); position: relative;
   }
+  .log-content { flex: 1; display: flex; flex-direction: column; }
+
+  /* 체크박스 기본 숨김, 편집 모드에서만 보임 */
+  .log-checkbox { width: 22px; height: 22px; margin-top: 5px; cursor: pointer; display: none; }
+  .edit-mode .log-checkbox { display: block; }
+
   .time-detail { 
     font-size: 13px; color: #475569; background: #f1f5f9; 
     padding: 10px; border-radius: 12px; margin-top: 8px; line-height: 1.5;
@@ -32,10 +46,10 @@
   .force-label { color: var(--danger); font-size: 11px; font-weight: bold; margin-left: 5px; }
   .photo-preview { margin-top: 10px; max-width: 150px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
   .photo-preview img { width: 100%; cursor: pointer; }
-  .action-btns { display: flex; gap: 8px; margin-top: 10px; }
+  
+  .action-btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
   .act-btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; border: 1px solid #ddd; background: #fff; }
   
-  /* 모달 */
   .modal-overlay {
     display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
@@ -44,7 +58,7 @@
   .time-input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 10px; }
 </style>
 </head>
-<body>
+<body id="mainBody">
 
 <div class="header"><h1>📊 다움학교 관리 센터</h1></div>
 
@@ -55,6 +69,11 @@
     <button class="btn" onclick="setStudent('S02', this)">김대중</button>
     <button class="btn" onclick="setStudent('S03', this)">최원준</button>
   </div>
+</div>
+
+<div class="bulk-action-row">
+  <button id="editModeBtn" class="btn" onclick="toggleEditMode()">선택 삭제 모드</button>
+  <button id="deleteSelectedBtn" class="btn btn-danger" style="display:none;" onclick="deleteSelected()">선택 로그 삭제</button>
 </div>
 
 <div class="log-container" id="logList"></div>
@@ -89,6 +108,7 @@ const studentMap = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" 
 let allLogs = [];
 let curStudent = 'all';
 let missionMap = {};
+let isEditMode = false;
 let pendingData = null;
 
 window.onload = () => { loadData(); setInterval(updateTimers, 1000); };
@@ -138,7 +158,6 @@ function render() {
     
     let timeInfoHtml = "";
     if (g.start && g.end) {
-      // 핵심: 서버(g.end)에서 받아온 시간을 '완료 시각'으로 사용
       timeInfoHtml = `
         <div class="time-detail">
           시작: ${formatTimeSec(g.start.timestamp)} / 완료: ${formatTimeSec(g.end.timestamp)} 
@@ -151,17 +170,41 @@ function render() {
 
     list.innerHTML += `
       <div class="log-item">
-        <div style="font-weight:900; font-size:18px;">${studentMap[main.student_id] || main.student_id} - ${missionMap[main.mission_id] || '수업'}</div>
-        <div style="font-size:12px; color:#888;">${new Date(main.timestamp).toLocaleDateString()}</div>
-        ${timeInfoHtml}
-        ${photoUrl ? `<div class="photo-preview"><img src="${photoUrl}" onclick="window.open('${photoUrl}')"></div>` : ''}
-        <div class="action-btns">
-          ${!g.end ? `<button class="act-btn" style="color:red;" onclick="openForceModal('${main.attempt_id}','${main.student_id}','${main.mission_id}','${main.timestamp}')">🚩 강제 완료</button>` : ''}
-          <button class="act-btn" onclick="addComment('${main.attempt_id}')">📝 코멘트</button>
-          <button class="act-btn" onclick="deleteLog('${main.attempt_id}')">🗑️ 삭제</button>
+        <input type="checkbox" class="log-checkbox" value="${main.attempt_id}">
+        <div class="log-content">
+          <div style="font-weight:900; font-size:18px;">${studentMap[main.student_id] || main.student_id} - ${missionMap[main.mission_id] || '수업'}</div>
+          <div style="font-size:12px; color:#888;">${new Date(main.timestamp).toLocaleDateString()}</div>
+          ${timeInfoHtml}
+          ${photoUrl ? `<div class="photo-preview"><img src="${photoUrl}" onclick="window.open('${photoUrl}')"></div>` : ''}
+          <div class="action-btns">
+            ${!g.end ? `<button class="act-btn" style="color:red;" onclick="openForceModal('${main.attempt_id}','${main.student_id}','${main.mission_id}','${main.timestamp}')">🚩 강제 완료</button>` : ''}
+            <button class="act-btn" onclick="addComment('${main.attempt_id}')">📝 코멘트</button>
+            <button class="act-btn" onclick="deleteLog('${main.attempt_id}')">🗑️ 삭제</button>
+          </div>
         </div>
       </div>`;
   });
+}
+
+// 선택 삭제 모드 토글
+function toggleEditMode() {
+  isEditMode = !isEditMode;
+  document.getElementById('mainBody').classList.toggle('edit-mode', isEditMode);
+  document.getElementById('editModeBtn').textContent = isEditMode ? "선택 모드 끄기" : "선택 삭제 모드";
+  document.getElementById('deleteSelectedBtn').style.display = isEditMode ? "block" : "none";
+}
+
+// 선택된 항목 삭제 실행
+async function deleteSelected() {
+  const selected = Array.from(document.querySelectorAll('.log-checkbox:checked')).map(cb => cb.value);
+  if (selected.length === 0) return alert("삭제할 로그를 선택하세요.");
+  if (!confirm(`${selected.length}개의 기록을 한꺼번에 삭제하시겠습니까?`)) return;
+
+  for (const aid of selected) {
+    await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "deleteLog", attempt_id: aid, token: ADMIN_TOKEN }) });
+  }
+  loadData();
+  toggleEditMode(); // 삭제 후 모드 자동 해제
 }
 
 function openForceModal(aid, sid, mid, startTime) {
@@ -192,7 +235,7 @@ async function submitForceEnd(endDate) {
     body: JSON.stringify({ 
       attempt_id: aid, student_id: sid, mission_id: mid, value: "end", 
       note: `duration:${dur}s|force_end:true`,
-      custom_timestamp: endDate.toISOString() // 서버에 전달할 수동 시간
+      custom_timestamp: endDate.toISOString()
     })
   });
   closeModal(); loadData();
