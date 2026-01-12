@@ -5,86 +5,148 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>다움학교 미션 센터</title>
   <style>
-    :root { --p1: #3b82f6; --p2: #10b981; --p3: #f59e0b; --bg: #f8fafc; }
+    :root { --p1: #3b82f6; --p2: #10b981; --bg: #f8fafc; }
     body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-    .main-title { text-align: center; font-weight: 900; font-size: 24px; margin-bottom: 20px; color: #1e293b; }
-    
-    /* 학생 선택 카드 레이아웃 */
     .student-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-    .student-card {
-      background: white; border-radius: 20px; padding: 20px; text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s;
-    }
+    .student-card { background: white; border-radius: 20px; padding: 25px 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; position: relative; transition: 0.2s; }
     .student-card:active { transform: scale(0.95); }
-    .student-card h2 { margin: 10px 0; font-size: 20px; }
-    .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ccc; margin-right: 5px; }
-    .status-dot.active { background: var(--p2); box-shadow: 0 0 8px var(--p2); }
-
-    /* 미션 수행 팝업/레이어 */
-    #missionOverlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); justify-content: center; align-items: center;
-    }
-    .popup {
-      background: white; width: 90%; max-width: 400px; padding: 25px;
-      border-radius: 30px; position: relative;
-    }
-    .close-btn { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; border: none; background: none; }
-    
-    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-    .circle-btn { aspect-ratio: 1/1; border-radius: 50%; border: none; color: white; font-weight: 800; font-size: 20px; cursor: pointer; }
-    .start { background: var(--p1); }
-    .end { background: var(--p2); }
-    select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; }
+    .status-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #ccc; margin-bottom: 10px; }
+    .status-dot.active { background: var(--p2); box-shadow: 0 0 8px var(--p2); animation: pulse 2s infinite; }
+    .elapsed-tag { font-size: 13px; color: var(--p1); font-weight: 800; margin-top: 10px; background: #eff6ff; padding: 5px; border-radius: 10px; }
+    #missionOverlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:100; }
+    .popup { background:white; width:90%; max-width:400px; padding:30px; border-radius:30px; position:relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
+    .circle-btn { aspect-ratio: 1/1; border-radius: 50%; border: none; color: white; font-weight: 900; font-size: 18px; cursor: pointer; }
+    .start { background: var(--p1); } .end { background: var(--p2); }
+    .circle-btn:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+    .photo-area { margin-top:20px; border:2px dashed #3b82f6; padding:15px; border-radius:20px; text-align:center; background: #eff6ff; }
+    #photoPreview { width:100%; display:none; margin-top:10px; border-radius:15px; border: 1px solid #ddd; }
+    select { width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border: 1px solid #ddd; font-size: 16px; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
   </style>
 </head>
 <body>
 
-<div class="main-title">오늘의 미션 대시보드</div>
-
-<div class="student-grid" id="studentGrid">
-  </div>
+<h2 style="text-align:center; color:#1e293b; margin-bottom:20px;">다움학교 미션 대시보드</h2>
+<div class="student-grid" id="studentGrid"></div>
 
 <div id="missionOverlay">
   <div class="popup">
-    <button class="close-btn" onclick="closePopup()">×</button>
-    <h1 id="popName" style="color:var(--p1)">학생이름</h1>
-    <p id="popStatus" style="font-size:14px; color:#666;">미션을 선택하세요</p>
+    <h2 id="popName" style="margin-top:0; color:#1e293b;">학생이름</h2>
     
-    <label>수업 선택</label>
-    <select id="mSelect"></select>
-    
-    <label>난이도</label>
-    <select id="dSelect" disabled></select>
+    <div id="selectionArea">
+      <label style="font-size:13px; color:#64748b;">미션 선택</label>
+      <select id="mSelect"></select>
+      <div id="diffArea">
+        <label style="font-size:13px; color:#64748b;">난이도 선택</label>
+        <select id="dSelect"></select>
+      </div>
+    </div>
+
+    <div id="lifeMissionArea" style="display:none;">
+      <div class="photo-area">
+        <label for="photoInput" style="cursor:pointer; font-weight:bold; color:var(--p1);">📸 생활미션 사진 촬영하기</label>
+        <input type="file" id="photoInput" accept="image/*" capture="camera" style="display:none;" onchange="previewImage(this)">
+        <img id="photoPreview">
+        <p id="photoStatus" style="font-size:12px; color:#64748b; margin-top:5px;">사진을 찍어야 완료할 수 있습니다.</p>
+      </div>
+    </div>
 
     <div class="btn-group">
       <button id="sBtn" class="circle-btn start" onclick="doStart()">시작</button>
-      <button id="eBtn" class="circle-btn end" onclick="doEnd()" disabled>완료</button>
+      <button id="eBtn" class="circle-btn end" onclick="doEnd()">완료</button>
     </div>
+    <button onclick="closePopup()" style="margin-top:20px; width:100%; border:none; background:none; color:#94a3b8; font-weight:bold;">닫기</button>
   </div>
 </div>
 
 <script>
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby92ELezN4OuXTau2V-6SpcMaRj23WYsUlNGY4f8r7FLKm_LAj-IOVAKm2zQpG9h0Jq/exec";
+  // [주의] 선생님의 앱스크립트 배포 URL을 넣어주세요
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxeLTBIEznrBrZHokDS-U5AyQiK1FHyobCpnbzjUNsCiVyl4FruNkP-ld1J2qNcUBDMdA/exec"; 
   const STUDENT_TOKEN = "STUDENT_1234";
 
-// 🔴 명단 순서 변경: 강태윤, 김대중, 최원준
   let studentStates = {
-    "S01": { name: "강태윤", startTime: null, attemptId: "", mId: "", d: "", active: false },
-    "S02": { name: "김대중", startTime: null, attemptId: "", mId: "", d: "", active: false },
-    "S03": { name: "최원준", startTime: null, attemptId: "", mId: "", d: "", active: false }
+    "S01": { name: "강태윤", active: false, startTime: null, mId: "", attemptId: "", mName: "" },
+    "S02": { name: "김대중", active: false, startTime: null, mId: "", attemptId: "", mName: "" },
+    "S03": { name: "최원준", active: false, startTime: null, mId: "", attemptId: "", mName: "" }
   };
- 
-  
-  let currentId = ""; // 현재 팝업에 떠있는 학생 ID
+
+  let currentId = "";
   let missionsMap = {};
+  let currentImageData = "";
 
   window.onload = async () => {
     renderCards();
     await loadMissions();
+    await refreshAllStatus();
+    setInterval(updateTimers, 1000); 
   };
 
-  // 카드 그리기
+  async function loadMissions() {
+    const res = await fetch(`${WEB_APP_URL}?action=missions`);
+    const data = await res.json();
+    data.missions.forEach(m => {
+      if(!missionsMap[m.mission_name]) missionsMap[m.mission_name] = {};
+      missionsMap[m.mission_name][String(m.difficulty).toLowerCase()] = m.mission_id;
+    });
+    const mSel = document.getElementById('mSelect');
+    mSel.innerHTML = '<option value="">미션을 선택해 주세요</option>';
+    Object.keys(missionsMap).sort().forEach(n => mSel.innerHTML += `<option value="${n}">${n}</option>`);
+    mSel.onchange = onMChange;
+  }
+
+  function onMChange() {
+    const name = document.getElementById('mSelect').value;
+    const dSel = document.getElementById('dSelect');
+    const diffArea = document.getElementById('diffArea');
+    
+    // 시작 전에는 사진 영역을 절대 보여주지 않음
+    document.getElementById('lifeMissionArea').style.display = "none";
+    
+    if (name.includes("생활")) {
+      diffArea.style.display = "none";
+    } else {
+      diffArea.style.display = "block";
+      dSel.innerHTML = '<option value="">난이도</option>';
+      const diffs = missionsMap[name];
+      ["easy", "normal", "hard"].forEach(d => { if(diffs[d]) dSel.innerHTML += `<option value="${d}">${d.toUpperCase()}</option>`; });
+    }
+  }
+
+  async function refreshAllStatus() {
+    for (let id in studentStates) {
+      const res = await fetch(`${WEB_APP_URL}?action=checkStatus&student_id=${id}`);
+      const data = await res.json();
+      if (data.ok && data.lastLog && data.lastLog.value === "start") {
+        const s = studentStates[id];
+        s.active = true;
+        s.attemptId = data.lastLog.attempt_id;
+        s.mId = data.lastLog.mission_id;
+        s.startTime = new Date(data.lastLog.timestamp).getTime();
+        
+        // 3번 복구 시 미션 이름도 찾아서 저장 (생활미션 판별용)
+        for (let mName in missionsMap) {
+          if (Object.values(missionsMap[mName]).includes(s.mId)) {
+            s.mName = mName;
+            break;
+          }
+        }
+      }
+    }
+    renderCards();
+  }
+
+  function updateTimers() {
+    Object.keys(studentStates).forEach(id => {
+      const s = studentStates[id];
+      const el = document.getElementById(`timer_${id}`);
+      if (s.active && s.startTime && el) {
+        const diff = Math.floor((Date.now() - s.startTime) / 1000);
+        el.textContent = `${Math.floor(diff/60)}분 ${diff%60}초 진행 중`;
+      }
+    });
+  }
+
   function renderCards() {
     const grid = document.getElementById('studentGrid');
     grid.innerHTML = "";
@@ -93,90 +155,95 @@
       grid.innerHTML += `
         <div class="student-card" onclick="openPopup('${id}')">
           <div class="status-dot ${s.active ? 'active' : ''}"></div>
-          <div style="font-size:40px">👤</div>
-          <h2>${s.name}</h2>
-          <div style="font-size:12px; color:#888">${s.active ? '미션 진행 중' : '대기 중'}</div>
-        </div>
-      `;
-    });
-  }
-
-  async function loadMissions() {
-    const res = await fetch(`${WEB_APP_URL}?action=missions&token=${STUDENT_TOKEN}`);
-    const data = await res.json();
-    data.missions.forEach(m => {
-      if(!missionsMap[m.mission_name]) missionsMap[m.mission_name] = {};
-      missionsMap[m.mission_name][m.difficulty] = m.mission_id;
-    });
-    
-    const mSel = document.getElementById('mSelect');
-    mSel.innerHTML = '<option value="">수업 선택</option>';
-    Object.keys(missionsMap).sort().forEach(n => mSel.innerHTML += `<option value="${n}">${n}</option>`);
-    mSel.onchange = onMChange;
-  }
-
-  function onMChange() {
-    const dSel = document.getElementById('dSelect');
-    const name = document.getElementById('mSelect').value;
-    dSel.innerHTML = '<option value="">난이도 선택</option>';
-    if(!name) { dSel.disabled = true; return; }
-    dSel.disabled = false;
-    ["easy", "normal", "hard"].forEach(d => {
-      if(missionsMap[name][d]) dSel.innerHTML += `<option value="${d}">${d.toUpperCase()}</option>`;
+          <div style="font-size:30px; margin-bottom:5px;">👤</div>
+          <div style="font-weight:bold; font-size:18px;">${s.name}</div>
+          <div id="timer_${id}" class="elapsed-tag" style="${s.active ? '' : 'display:none'}"></div>
+        </div>`;
     });
   }
 
   function openPopup(id) {
-    currentId = id;
-    const s = studentStates[id];
+    currentId = id; const s = studentStates[id];
     document.getElementById('popName').textContent = s.name;
     document.getElementById('missionOverlay').style.display = "flex";
     
-    // 이 학생의 기존 상태 복구
+    // 버튼 및 영역 초기화
     document.getElementById('sBtn').disabled = s.active;
     document.getElementById('eBtn').disabled = !s.active;
-    document.getElementById('mSelect').disabled = s.active;
-    document.getElementById('dSelect').disabled = s.active;
-    if(!s.active) document.getElementById('popStatus').textContent = "새 미션을 시작하세요.";
-    else document.getElementById('popStatus').textContent = "미션이 진행 중입니다...";
+    
+    // 미션 시작 전: 선택창 보여줌, 사진창 숨김
+    if(!s.active) {
+      document.getElementById('selectionArea').style.display = "block";
+      document.getElementById('lifeMissionArea').style.display = "none";
+    } 
+    // 미션 시작 후: 선택창 숨김
+    else {
+      document.getElementById('selectionArea').style.display = "none";
+      // 생활미션인 경우에만 사진창 보여줌
+      if(s.mName && s.mName.includes("생활")) {
+        document.getElementById('lifeMissionArea').style.display = "block";
+      } else {
+        document.getElementById('lifeMissionArea').style.display = "none";
+      }
+    }
+    
+    document.getElementById('photoPreview').style.display = "none";
+    currentImageData = "";
   }
 
-  function closePopup() { document.getElementById('missionOverlay').style.display = "none"; }
+  function previewImage(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => { 
+        document.getElementById('photoPreview').src = e.target.result;
+        document.getElementById('photoPreview').style.display = "block";
+        document.getElementById('photoStatus').textContent = "사진이 준비되었습니다! 완료를 눌러주세요.";
+        currentImageData = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
 
-  function doStart() {
+  async function doStart() {
     const s = studentStates[currentId];
     const mName = document.getElementById('mSelect').value;
-    const diff = document.getElementById('dSelect').value;
-    if(!mName || !diff) return alert("미션과 난이도를 선택하세요.");
-
-    s.active = true;
-    s.startTime = Date.now();
-    s.attemptId = currentId + "_" + s.startTime;
-    s.mId = missionsMap[mName][diff];
-
-    sendLog("start", s.attemptId, currentId, s.mId, `difficulty:${diff}`);
-    renderCards();
-    closePopup();
-  }
-
-  function doEnd() {
-    const s = studentStates[currentId];
-    const duration = Math.round((Date.now() - s.startTime) / 1000);
-
-    sendLog("end", s.attemptId, currentId, s.mId, `duration:${duration}s`);
+    let diff = document.getElementById('dSelect').value || "normal";
+    if(!mName) return alert("미션을 먼저 선택하세요!");
     
-    s.active = false; // 상태 해제
-    renderCards();
+    s.active = true; 
+    s.startTime = Date.now(); 
+    s.attemptId = currentId + "_" + s.startTime; 
+    s.mName = mName;
+    s.mId = missionsMap[mName][diff] || Object.values(missionsMap[mName])[0];
+    
+    await sendLog("start", s.attemptId, currentId, s.mId, "");
+    renderCards(); 
+    closePopup(); // 시작 후 일단 닫기 -> 선생님 말씀대로 다시 들어와서 사진 찍게 함
+  }
+
+  async function doEnd() {
+    const s = studentStates[currentId];
+    // 생활미션인데 사진이 없는 경우 체크
+    if(s.mName && s.mName.includes("생활") && !currentImageData) {
+      return alert("📸 사진을 촬영해야 완료할 수 있습니다!");
+    }
+    
+    const duration = Math.round((Date.now()-s.startTime)/1000);
+    const note = `duration:${duration}s${currentImageData ? `|image:${currentImageData}` : ''}`;
+    
+    await sendLog("end", s.attemptId, currentId, s.mId, note);
+    s.active = false; s.startTime = null; s.mName = "";
+    renderCards(); 
     closePopup();
   }
 
-  function sendLog(val, attId, sId, mId, note) {
-    fetch(WEB_APP_URL, {
+  async function sendLog(val, attId, sId, mId, note) {
+    await fetch(WEB_APP_URL, {
       method: "POST",
-      headers: { "Content-Type": "text/plain" },
       body: JSON.stringify({ token: STUDENT_TOKEN, attempt_id: attId, student_id: sId, mission_id: mId, value: val, note: note })
     });
   }
+  function closePopup() { document.getElementById('missionOverlay').style.display = "none"; }
 </script>
 </body>
 </html>

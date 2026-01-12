@@ -18,10 +18,10 @@
     padding: 20px 30px; background: white; border-bottom: 2px solid #e2e8f0;
   }
   .title { font-size: 28px; font-weight: 900; color: var(--primary); }
-  .total-stats { text-align: right; font-weight: 700; }
-  .total-stats span { color: var(--primary); font-size: 24px; }
+  /* 누적 후원금 문구 삭제에 따른 우측 정렬 유지용 */
+  .total-stats { text-align: right; font-weight: 700; font-size: 24px; color: var(--primary); }
 
-  /* 카드 레이아웃 (3명 고정) */
+  /* 카드 레이아웃 */
   .wrap { padding: 25px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   @media (max-width: 1100px) { .wrap { grid-template-columns: 1fr; } }
 
@@ -32,7 +32,7 @@
   }
   .name { font-size: 36px; font-weight: 900; margin-bottom: 20px; color: #0f172a; }
 
-  /* 미션 정보 */
+  /* 미션 정보 박스 */
   .mission-box {
     background: #f8fafc; border-radius: 16px; padding: 18px; margin-bottom: 20px;
     border-left: 6px solid #e2e8f0;
@@ -42,13 +42,16 @@
   .label { font-size: 13px; color: var(--muted); font-weight: 700; margin-bottom: 5px; }
   .m-name { font-size: 20px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
   
+  /* 실시간 타이머 */
+  .timer-val { font-size: 18px; color: var(--primary); font-weight: 900; margin-top: 5px; }
+
   /* 난이도 배지 */
   .diff-badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; color: white; }
   .diff-EASY { background: var(--easy); }
   .diff-NORMAL { background: var(--normal); }
   .diff-HARD { background: var(--hard); }
 
-  /* 금액 통계 */
+  /* 금액 통계 그리드 */
   .money-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
   .money-item { border-left: 4px solid #e2e8f0; padding-left: 12px; }
   .money-val { font-size: 24px; font-weight: 900; color: #334155; }
@@ -57,7 +60,7 @@
   .bar-wrap { height: 12px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
   .bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.8s ease-in-out; }
 
-  /* 상태 라벨 */
+  /* 상태 배지 */
   .status {
     position: absolute; top: 25px; right: 25px;
     padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 800;
@@ -65,68 +68,93 @@
   .active { background: #dcfce7; color: var(--success); border: 1px solid #bbf7d0; animation: pulse 2s infinite; }
   .waiting { background: #f1f5f9; color: var(--muted); border: 1px solid #e2e8f0; }
 
-  @keyframes pulse {
-    0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; }
+  /* 하단 갤러리 영역 */
+  .gallery-wrap { padding: 0 25px 25px; }
+  .gallery-title { font-weight: 900; font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+  .photo-stream { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+  .photo-item { 
+    flex: 0 0 140px; height: 140px; border-radius: 15px; overflow: hidden; 
+    border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative;
   }
+  .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-name { 
+    position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); 
+    color: white; font-size: 10px; padding: 3px; text-align: center; 
+  }
+
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
 </style>
 </head>
 <body>
 
 <div class="top">
   <div class="title">다움학교 실시간 현황</div>
-  <div class="total-stats">전체 누적 후원금: <span id="totalAll">0원</span></div>
+  <div class="total-stats" id="totalAll">0원</div>
 </div>
 
 <div class="wrap" id="cards"></div>
 
+<div class="gallery-wrap">
+  <div class="gallery-title">📸 오늘의 미션 인증샷</div>
+  <div class="photo-stream" id="photoStream"></div>
+</div>
+
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby92ELezN4OuXTau2V-6SpcMaRj23WYsUlNGY4f8r7FLKm_LAj-IOVAKm2zQpG9h0Jq/exec";
-const ADMIN_TOKEN = "TEACHER_5678"; // 선생님의 토큰 사용
-const REFRESH_MS = 10000; // 10초마다 갱신
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxeLTBIEznrBrZHokDS-U5AyQiK1FHyobCpnbzjUNsCiVyl4FruNkP-ld1J2qNcUBDMdA/exec";
+const ADMIN_TOKEN = "TEACHER_5678";
+const REFRESH_MS = 10000; 
 
 const REWARD_MAP = { EASY: 10000, NORMAL: 15000, HARD: 20000 };
 let missionData = {};
 
-window.onload = () => { refresh(); setInterval(refresh, REFRESH_MS); };
+window.onload = () => { 
+  refresh(); 
+  setInterval(refresh, REFRESH_MS); 
+  setInterval(updateTimers, 1000); 
+};
 
 async function refresh() {
   try {
     const [mRes, lRes] = await Promise.all([
       fetch(`${WEB_APP_URL}?action=missions`).then(r => r.json()),
-      fetch(`${WEB_APP_URL}?action=logs&token=${ADMIN_TOKEN}&limit=1000`).then(r => r.json())
+      fetch(`${WEB_APP_URL}?action=logs&token=${ADMIN_TOKEN}`).then(r => r.json())
     ]);
 
-    // 1. 미션 정보 매핑 (난이도 포함)
     mRes.missions.forEach(m => {
-      missionData[m.mission_id] = { 
-        name: m.mission_name, 
-        diff: String(m.difficulty).toUpperCase() 
-      };
+      missionData[m.mission_id] = { name: m.mission_name, diff: String(m.difficulty).toUpperCase() };
     });
 
-    // 2. 학생 데이터 초기화
     const students = {
-      "S01": { name: "강태윤", today: 0, total: 0, active: false, current: "대기 중", curDiff: "" },
-      "S02": { name: "김대중", today: 0, total: 0, active: false, current: "대기 중", curDiff: "" },
-      "S03": { name: "최원준", today: 0, total: 0, active: false, current: "대기 중", curDiff: "" }
+      "S01": { name: "강태윤", today: 0, total: 0, active: false, current: "대기 중", curDiff: "", startTime: null },
+      "S02": { name: "김대중", today: 0, total: 0, active: false, current: "대기 중", curDiff: "", startTime: null },
+      "S03": { name: "최원준", today: 0, total: 0, active: false, current: "대기 중", curDiff: "", startTime: null }
     };
 
     const logs = lRes.logs || [];
     const today = new Date().toISOString().slice(0,10);
     const sessions = {};
+    const todayPhotos = [];
 
-    // 3. 로그 분석 (금액 합산 및 현재 상태 확인)
     logs.forEach(l => {
       const sid = l.student_id;
       if (!students[sid]) return;
 
-      const info = missionData[l.mission_id] || { name: "수업", diff: "NORMAL" };
-      const reward = REWARD_MAP[info.diff] || 0;
+      const info = missionData[l.mission_id] || { name: l.mission_id, diff: "NORMAL" };
+      
+      // 생활미션은 무조건 30,000원 적용
+      let reward = info.name.includes("생활") ? 30000 : (REWARD_MAP[info.diff] || 0);
+
       const logDate = new Date(l.timestamp).toISOString().slice(0,10);
 
-      // 시도별로 묶기
-      if(!sessions[l.attempt_id]) sessions[l.attempt_id] = { sid: sid, mid: l.mission_id, end: false, date: logDate, reward: reward, diff: info.diff };
+      if(!sessions[l.attempt_id]) {
+        sessions[l.attempt_id] = { sid: sid, mid: l.mission_id, end: false, date: logDate, reward: reward, diff: info.diff, ts: l.timestamp };
+      }
       if(l.value === 'end') sessions[l.attempt_id].end = true;
+
+      if (logDate === today && l.note && l.note.includes("|photo:")) {
+        const url = l.note.split("|photo:")[1].split("|")[0];
+        todayPhotos.push({ url: url, name: students[sid].name });
+      }
     });
 
     let totalGlobal = 0;
@@ -136,15 +164,14 @@ async function refresh() {
         totalGlobal += s.reward;
         if(s.date === today) students[s.sid].today += s.reward;
       } else if (s.date === today) {
-        // 오늘 날짜의 'end' 없는 로그는 수행 중으로 간주
         students[s.sid].active = true;
         const info = missionData[s.mid] || { name: s.mid, diff: "NORMAL" };
         students[s.sid].current = info.name;
         students[s.sid].curDiff = info.diff;
+        students[s.sid].startTime = s.ts;
       }
     });
 
-    // 4. 화면 렌더링
     document.getElementById("totalAll").textContent = totalGlobal.toLocaleString() + "원";
     const maxVal = Math.max(1, ...Object.values(students).map(s => s.total));
 
@@ -155,33 +182,41 @@ async function refresh() {
         <div class="card">
           <div class="status ${s.active ? 'active' : 'waiting'}">${s.active ? '● 수행 중' : '대기'}</div>
           <div class="name">${s.name}</div>
-          
           <div class="mission-box ${s.active ? 'active-box' : ''}">
             <div class="label">${s.active ? '현재 진행 미션' : '최근 완료 미션'}</div>
             <div class="m-name">
               ${s.current}
               ${s.curDiff ? `<span class="diff-badge diff-${s.curDiff}">${s.curDiff}</span>` : ''}
             </div>
+            ${s.active ? `<div class="timer-val" id="timer_${id}" data-start="${s.startTime}">0분 0초 진행 중</div>` : ''}
           </div>
-
           <div class="money-grid">
-            <div class="money-item">
-              <div class="label">오늘 획득</div>
-              <div class="money-val">${s.today.toLocaleString()}원</div>
-            </div>
-            <div class="money-item">
-              <div class="label">누적 합계</div>
-              <div class="money-val">${s.total.toLocaleString()}원</div>
-            </div>
+            <div class="money-item"><div class="label">오늘 획득</div><div class="money-val">${s.today.toLocaleString()}원</div></div>
+            <div class="money-item"><div class="label">누적 합계</div><div class="money-val">${s.total.toLocaleString()}원</div></div>
           </div>
-
           <div class="bar-wrap"><div class="bar" style="width:${barPct}%"></div></div>
-          <div style="font-size:12px; color:var(--muted); margin-top:10px; text-align:right; font-weight:700;">목표 달성 기여도: ${barPct}%</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:10px; text-align:right; font-weight:700;">기여도: ${barPct}%</div>
         </div>
       `;
     }).join("");
 
-  } catch (err) { console.error("데이터 갱신 오류:", err); }
+    const stream = document.getElementById("photoStream");
+    stream.innerHTML = todayPhotos.length ? "" : "<p style='font-size:12px; color:#888;'>오늘 올라온 사진이 없습니다.</p>";
+    todayPhotos.reverse().forEach(p => {
+      stream.innerHTML += `<div class="photo-item"><img src="${p.url}"><div class="photo-name">${p.name}</div></div>`;
+    });
+
+  } catch (err) { console.error("갱신 오류:", err); }
+}
+
+function updateTimers() {
+  document.querySelectorAll('[id^="timer_"]').forEach(el => {
+    const start = new Date(el.dataset.start).getTime();
+    const diff = Math.floor((Date.now() - start) / 1000);
+    const min = Math.floor(diff / 60);
+    const sec = diff % 60;
+    el.textContent = `${min}분 ${sec}초 진행 중`;
+  });
 }
 </script>
 </body>

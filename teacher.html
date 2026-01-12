@@ -3,237 +3,222 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>다움학교 - 교사용 관리자</title>
+<title>다움학교 - 교사용 관리 센터</title>
 <style>
   :root {
     --bg: #f8fafc; --card: #ffffff; --primary: #3b82f6;
-    --success: #10b981; --text: #1e293b; --muted: #64748b; --border: #e2e8f0;
-    --easy: #3b82f6; --normal: #f59e0b; --hard: #ef4444;
+    --danger: #ef4444; --success: #10b981; --text: #1e293b; --muted: #64748b; --border: #e2e8f0;
   }
   body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; padding: 20px; }
-  
-  .header { text-align: center; margin-bottom: 30px; }
-  .header h1 { font-size: 26px; font-weight: 900; color: var(--primary); margin-bottom: 20px; }
-
-  /* 필터 컨트롤 */
-  .controls { max-width: 800px; margin: 0 auto 25px; display: flex; flex-direction: column; gap: 15px; }
+  .header { text-align: center; margin-bottom: 20px; }
+  .header h1 { font-size: 24px; color: var(--primary); }
+  .controls { max-width: 800px; margin: 0 auto 20px; }
   .filter-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  .tab-row { display: flex; justify-content: center; gap: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
-
   .btn { 
-    background: white; border: 1px solid var(--border); color: var(--text); 
-    padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.2s; 
+    background: white; border: 1px solid var(--border); padding: 10px; 
+    border-radius: 12px; cursor: pointer; font-weight: 700; 
   }
-  .btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-  
-  .tab-btn { 
-    background: none; border: none; color: var(--muted); padding: 5px 15px; 
-    cursor: pointer; font-weight: 800; font-size: 15px; border-bottom: 3px solid transparent; 
-  }
-  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-
-  /* 상단 통계 요약 */
-  .summary { 
-    display: grid; grid-template-columns: 1fr 1fr; gap: 15px; 
-    max-width: 800px; margin: 0 auto 25px; 
-  }
-  .sum-card { 
-    background: white; padding: 20px; border-radius: 20px; text-align: center; 
-    border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-  }
-  .sum-card span { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
-  .sum-card strong { font-size: 24px; color: var(--primary); }
-
-  /* 로그 리스트 */
+  .btn.active { background: var(--primary); color: white; border-color: var(--primary); }
   .log-container { max-width: 800px; margin: 0 auto; }
   .log-item { 
     background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; 
-    border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.03);
   }
-  .log-info { display: flex; flex-direction: column; gap: 6px; }
-  .log-date { font-size: 11px; color: var(--muted); font-weight: 800; }
-  .log-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-  .diff-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; color: white; text-transform: uppercase; }
-  .diff-EASY { background: var(--easy); }
-  .diff-NORMAL { background: var(--normal); }
-  .diff-HARD { background: var(--hard); }
-  
-  .log-meta { font-size: 13px; color: var(--muted); }
-  
-  .log-status { text-align: right; }
-  .badge { 
-    display: inline-block; padding: 4px 10px; border-radius: 20px; 
-    font-size: 11px; font-weight: 800; margin-bottom: 5px; 
+  .time-detail { 
+    font-size: 13px; color: #475569; background: #f1f5f9; 
+    padding: 10px; border-radius: 12px; margin-top: 8px; line-height: 1.5;
   }
-  .badge-start { background: #eff6ff; color: #3b82f6; }
-  .badge-end { background: #ecfdf5; color: #10b981; }
+  .time-detail b { color: var(--primary); }
+  .force-label { color: var(--danger); font-size: 11px; font-weight: bold; margin-left: 5px; }
+  .photo-preview { margin-top: 10px; max-width: 150px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  .photo-preview img { width: 100%; cursor: pointer; }
+  .action-btns { display: flex; gap: 8px; margin-top: 10px; }
+  .act-btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; border: 1px solid #ddd; background: #fff; }
   
-  .duration-tag { font-size: 16px; font-weight: 900; color: var(--success); }
-  .time-detail { font-size: 11px; color: var(--muted); font-family: monospace; margin-top: 4px; }
-  
-  .empty-msg { text-align: center; padding: 50px; color: var(--muted); background: white; border-radius: 20px; border: 1px dashed var(--border); }
+  /* 모달 */
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
+  }
+  .modal-content { background: white; padding: 20px; border-radius: 20px; width: 90%; max-width: 320px; text-align: center; }
+  .time-input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 10px; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>📊 다움학교 통합 관리 센터</h1>
-</div>
+<div class="header"><h1>📊 다움학교 관리 센터</h1></div>
 
 <div class="controls">
   <div class="filter-row">
-    <button class="btn active" onclick="setStudent('all', this)">전체보기</button>
+    <button class="btn active" onclick="setStudent('all', this)">전체</button>
     <button class="btn" onclick="setStudent('S01', this)">강태윤</button>
     <button class="btn" onclick="setStudent('S02', this)">김대중</button>
     <button class="btn" onclick="setStudent('S03', this)">최원준</button>
   </div>
-  <div class="tab-row">
-    <button class="tab-btn active" onclick="setPeriod('all', this)">전체기록</button>
-    <button class="tab-btn" onclick="setPeriod('day', this)">오늘</button>
-    <button class="tab-btn" onclick="setPeriod('week', this)">이번 주</button>
-    <button class="tab-btn" onclick="setPeriod('month', this)">이번 달</button>
+</div>
+
+<div class="log-container" id="logList"></div>
+
+<div id="forceEndModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 id="modalTitle">강제 완료</h3>
+    <div id="step1">
+      <p>정말로 강제 완료 하시겠습니까?</p>
+      <button class="btn active" style="width:100%; margin-bottom:10px;" onclick="goStep2()">네</button>
+      <button class="btn" style="width:100%" onclick="closeModal()">아니오</button>
+    </div>
+    <div id="step2" style="display:none;">
+      <p>시간 설정 방식을 선택하세요.</p>
+      <button class="btn active" style="width:100%; margin-bottom:10px;" onclick="submitForceEnd(new Date())">현재 시간으로 완료</button>
+      <button class="btn" style="width:100%" onclick="goStep3()">시간 직접 지정</button>
+    </div>
+    <div id="step3" style="display:none;">
+      <p>완료 시각을 선택하세요.</p>
+      <input type="datetime-local" id="customTimeInput" class="time-input">
+      <button class="btn active" style="width:100%; margin-bottom:10px;" onclick="submitForceEndWithTime()">선택한 시간으로 완료</button>
+      <button class="btn" style="width:100%" onclick="closeModal()">취소</button>
+    </div>
   </div>
 </div>
 
-<div class="summary">
-  <div class="sum-card"><span>완료 미션</span><strong id="statCount">0건</strong></div>
-  <div class="sum-card"><span>총 학습 시간</span><strong id="statTime">0분</strong></div>
-</div>
-
-<div class="log-container" id="logList">
-  <div class="empty-msg">데이터를 동기화하고 있습니다...</div>
-</div>
-
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby92ELezN4OuXTau2V-6SpcMaRj23WYsUlNGY4f8r7FLKm_LAj-IOVAKm2zQpG9h0Jq/exec";
-const ADMIN_TOKEN = "TEACHER_5678"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxh8fhyL52Mf91V3aaFwW3zR0CHj-7weDslW7--ArcQfeLuAf4Er7qWRpXq5oUwWrWlQw/exec"; 
+const ADMIN_TOKEN = "TEACHER_5678";
 const studentMap = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
 
 let allLogs = [];
-let missionMap = {};
 let curStudent = 'all';
-let curPeriod = 'all';
+let missionMap = {};
+let pendingData = null;
 
-window.onload = loadData;
+window.onload = () => { loadData(); setInterval(updateTimers, 1000); };
 
 async function loadData() {
-  try {
-    const [mRes, lRes] = await Promise.all([
-      fetch(`${WEB_APP_URL}?action=missions`).then(r => r.json()),
-      fetch(`${WEB_APP_URL}?action=logs&token=${ADMIN_TOKEN}&limit=2000`).then(r => r.json())
-    ]);
-    
-    if(mRes.missions) mRes.missions.forEach(m => missionMap[m.mission_id] = m.mission_name);
-    allLogs = lRes.logs || [];
-    render();
-  } catch (e) {
-    document.getElementById('logList').innerHTML = `<div class="empty-msg" style="color:red">로드 실패. URL/토큰 확인.</div>`;
-  }
-}
-
-function setStudent(id, btn) {
-  document.querySelectorAll('.filter-row .btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  curStudent = id;
+  const [mRes, lRes] = await Promise.all([
+    fetch(`${WEB_APP_URL}?action=missions`).then(r => r.json()),
+    fetch(`${WEB_APP_URL}?action=logs&token=${ADMIN_TOKEN}`).then(r => r.json())
+  ]);
+  mRes.missions.forEach(m => missionMap[m.mission_id] = m.mission_name);
+  allLogs = lRes.logs || [];
   render();
 }
 
-function setPeriod(p, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  curPeriod = p;
-  render();
+function formatTimeSec(date) {
+  const d = new Date(date);
+  return d.getHours().toString().padStart(2, '0') + ":" + 
+         d.getMinutes().toString().padStart(2, '0') + ":" + 
+         d.getSeconds().toString().padStart(2, '0');
 }
 
-function checkPeriod(ts, period) {
-  if (period === 'all') return true;
-  const now = new Date();
-  const target = new Date(ts);
-  if (period === 'day') return target.toDateString() === now.toDateString();
-  if (period === 'week') {
-    const tempNow = new Date();
-    const weekStart = new Date(tempNow.setDate(tempNow.getDate() - tempNow.getDay()));
-    weekStart.setHours(0,0,0,0);
-    return target >= weekStart;
-  }
-  if (period === 'month') return target.getMonth() === now.getMonth() && target.getFullYear() === now.getFullYear();
-  return true;
+function getDurationText(start, end) {
+  const diffSec = Math.floor((new Date(end) - new Date(start)) / 1000);
+  if (diffSec < 0) return "시간 오류";
+  return `${Math.floor(diffSec / 60)}분 ${diffSec % 60}초`;
 }
 
 function render() {
   const list = document.getElementById('logList');
   list.innerHTML = "";
-
   const groups = {};
-  allLogs.forEach(log => {
-    const aid = log.attempt_id;
-    if (!groups[aid]) groups[aid] = { start: null, end: null };
-    if (log.value === 'start') groups[aid].start = log;
-    if (log.value === 'end') groups[aid].end = log;
+  
+  allLogs.forEach(l => {
+    if(!groups[l.attempt_id]) groups[l.attempt_id] = { start: null, end: null };
+    groups[l.attempt_id][l.value] = l;
   });
 
-  let totalSec = 0;
-  let completeCount = 0;
-
-  const filtered = Object.values(groups).filter(g => {
+  const sorted = Object.values(groups).filter(g => {
     const main = g.end || g.start;
-    if (!main) return false;
-    const matchS = curStudent === 'all' || String(main.student_id) === curStudent;
-    const matchP = checkPeriod(main.timestamp, curPeriod);
-    return matchS && matchP;
+    return curStudent === 'all' || main.student_id === curStudent;
   }).sort((a,b) => new Date((b.end||b.start).timestamp) - new Date((a.end||a.start).timestamp));
 
-  if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty-msg">기록이 없습니다.</div>`;
-    updateStats(0, 0);
-    return;
-  }
-
-  filtered.forEach(g => {
+  sorted.forEach(g => {
     const main = g.end || g.start;
-    const sTime = g.start ? new Date(g.start.timestamp) : null;
-    const eTime = g.end ? new Date(g.end.timestamp) : null;
-    const diff = (main.difficulty || "NORMAL").toUpperCase();
+    const note = main.note || "";
+    const photoUrl = note.includes("|photo:") ? note.split("|photo:")[1].split("|")[0] : null;
     
-    let durationStr = "";
-    if (g.end && g.end.note) {
-      const dMatch = g.end.note.match(/duration:(\d+)s/);
-      if (dMatch) {
-        const sec = parseInt(dMatch[1]);
-        totalSec += sec; completeCount++;
-        durationStr = sec >= 60 ? Math.floor(sec/60)+"분 "+(sec%60)+"초" : sec+"초";
-      }
+    let timeInfoHtml = "";
+    if (g.start && g.end) {
+      // 핵심: 서버(g.end)에서 받아온 시간을 '완료 시각'으로 사용
+      timeInfoHtml = `
+        <div class="time-detail">
+          시작: ${formatTimeSec(g.start.timestamp)} / 완료: ${formatTimeSec(g.end.timestamp)} 
+          ${note.includes("force_end:true") ? '<span class="force-label">(교사종료)</span>' : ''} <br>
+          <b>걸린 시간: ${getDurationText(g.start.timestamp, g.end.timestamp)}</b>
+        </div>`;
+    } else if (g.start) {
+      timeInfoHtml = `<div class="live-timer" data-start="${g.start.timestamp}" style="color:blue; font-weight:bold; font-size:13px; margin-top:5px;">⏱ 실시간 계산 중...</div>`;
     }
 
     list.innerHTML += `
       <div class="log-item">
-        <div class="log-info">
-          <div class="log-date">📅 ${(sTime||eTime).toLocaleDateString()}</div>
-          <div class="log-title">
-            ${studentMap[main.student_id] || main.student_id}
-            <span class="diff-badge diff-${diff}">${diff}</span>
-          </div>
-          <div class="log-meta">
-            ${missionMap[main.mission_id] || '수업'} | 
-            ${sTime ? sTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '--:--'}
-          </div>
+        <div style="font-weight:900; font-size:18px;">${studentMap[main.student_id] || main.student_id} - ${missionMap[main.mission_id] || '수업'}</div>
+        <div style="font-size:12px; color:#888;">${new Date(main.timestamp).toLocaleDateString()}</div>
+        ${timeInfoHtml}
+        ${photoUrl ? `<div class="photo-preview"><img src="${photoUrl}" onclick="window.open('${photoUrl}')"></div>` : ''}
+        <div class="action-btns">
+          ${!g.end ? `<button class="act-btn" style="color:red;" onclick="openForceModal('${main.attempt_id}','${main.student_id}','${main.mission_id}','${main.timestamp}')">🚩 강제 완료</button>` : ''}
+          <button class="act-btn" onclick="addComment('${main.attempt_id}')">📝 코멘트</button>
+          <button class="act-btn" onclick="deleteLog('${main.attempt_id}')">🗑️ 삭제</button>
         </div>
-        <div class="log-status">
-          <span class="badge ${g.end ? 'badge-end' : 'badge-start'}">${g.end ? '수행 완료' : '진행 중'}</span>
-          <div class="duration-tag">${durationStr}</div>
-          <div class="time-detail">${eTime ? '종료: ' + eTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</div>
-        </div>
-      </div>
-    `;
+      </div>`;
   });
-
-  updateStats(completeCount, totalSec);
 }
 
-function updateStats(count, sec) {
-  document.getElementById('statCount').textContent = count + '건';
-  document.getElementById('statTime').textContent = Math.floor(sec / 60) + '분';
+function openForceModal(aid, sid, mid, startTime) {
+  pendingData = { aid, sid, mid, startTime };
+  document.getElementById('forceEndModal').style.display = "flex";
+  document.getElementById('step1').style.display = "block";
+  document.getElementById('step2').style.display = "none";
+  document.getElementById('step3').style.display = "none";
+}
+function goStep2() { document.getElementById('step1').style.display = "none"; document.getElementById('step2').style.display = "block"; }
+function goStep3() {
+  document.getElementById('step2').style.display = "none";
+  document.getElementById('step3').style.display = "block";
+  const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById('customTimeInput').value = now.toISOString().slice(0,16);
+}
+async function submitForceEndWithTime() {
+  const time = new Date(document.getElementById('customTimeInput').value);
+  if(isNaN(time.getTime())) return alert("올바른 시간을 선택하세요.");
+  await submitForceEnd(time);
+}
+async function submitForceEnd(endDate) {
+  const { aid, sid, mid, startTime } = pendingData;
+  const dur = Math.round((endDate - new Date(startTime))/1000);
+  if(dur < 0) return alert("완료 시간이 시작보다 빠를 수 없습니다.");
+  await fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify({ 
+      attempt_id: aid, student_id: sid, mission_id: mid, value: "end", 
+      note: `duration:${dur}s|force_end:true`,
+      custom_timestamp: endDate.toISOString() // 서버에 전달할 수동 시간
+    })
+  });
+  closeModal(); loadData();
+}
+function closeModal() { document.getElementById('forceEndModal').style.display = "none"; }
+function updateTimers() {
+  document.querySelectorAll('.live-timer').forEach(el => {
+    const diff = Math.floor((Date.now() - new Date(el.dataset.start))/1000);
+    el.textContent = `⏱ 실시간: ${Math.floor(diff/60)}분 ${diff%60}초 진행 중`;
+  });
+}
+function setStudent(id, btn) {
+  document.querySelectorAll('.filter-row .btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); curStudent = id; render();
+}
+async function deleteLog(aid) {
+  if(!confirm("정말 삭제하시겠습니까?")) return;
+  await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "deleteLog", attempt_id: aid, token: ADMIN_TOKEN }) });
+  loadData();
+}
+async function addComment(aid) {
+  const msg = prompt("코멘트:");
+  if(msg) {
+    await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "addComment", attempt_id: aid, comment: msg, token: ADMIN_TOKEN }) });
+    loadData();
+  }
 }
 </script>
 </body>
