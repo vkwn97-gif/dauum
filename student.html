@@ -1,249 +1,402 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>다움학교 미션 센터</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    :root { --p1: #3b82f6; --p2: #10b981; --bg: #f8fafc; }
-    body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-    .student-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-    .student-card { background: white; border-radius: 20px; padding: 25px 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; position: relative; transition: 0.2s; }
-    .student-card:active { transform: scale(0.95); }
-    .status-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #ccc; margin-bottom: 10px; }
-    .status-dot.active { background: var(--p2); box-shadow: 0 0 8px var(--p2); animation: pulse 2s infinite; }
-    .elapsed-tag { font-size: 13px; color: var(--p1); font-weight: 800; margin-top: 10px; background: #eff6ff; padding: 5px; border-radius: 10px; }
-    #missionOverlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:100; }
-    .popup { background:white; width:90%; max-width:400px; padding:30px; border-radius:30px; position:relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
-    .circle-btn { aspect-ratio: 1/1; border-radius: 50%; border: none; color: white; font-weight: 900; font-size: 18px; cursor: pointer; }
-    .start { background: var(--p1); } .end { background: var(--p2); }
-    .circle-btn:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
-    .photo-area { margin-top:20px; border:2px dashed #3b82f6; padding:15px; border-radius:20px; text-align:center; background: #eff6ff; }
-    #photoPreview { width:100%; display:none; margin-top:10px; border-radius:15px; border: 1px solid #ddd; }
-    select { width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border: 1px solid #ddd; font-size: 16px; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    :root { --p: #4f46e5; --bg: #f8fafc; --card: #ffffff; --ok: #10b981; --fail: #ef4444; }
+    body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 15px; margin: 0; color:#333; }
+    
+    .view { display: none; }
+    .view.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    .container { max-width: 500px; margin: 0 auto; }
+    .card { background: var(--card); border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; text-align: center; }
+    
+    .user-card { cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+    .user-card:active { transform: scale(0.98); border-color: var(--p); }
+    .avatar { font-size: 40px; margin-bottom: 10px; display: block; }
+
+    select, button { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 10px; font-size: 16px; box-sizing: border-box; }
+    button.primary { background: var(--p); color: white; border: none; font-weight: bold; cursor: pointer; }
+    
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    label { font-size: 14px; font-weight: 800; color: var(--p); margin: 20px 0 10px; display: block; text-align: left; }
+    .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .fix-label { background: #f1f5f9; padding: 12px; border-radius: 12px; flex: 1; font-weight: bold; font-size: 15px; }
+    .day-badge { display: inline-block; background: #e0e7ff; color: var(--p); padding: 5px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
+
+    /* 미션 아이템 */
+    .mission-item { background: white; border: 1px solid #e2e8f0; border-radius: 15px; padding: 15px; margin-bottom: 10px; text-align: left; position: relative; }
+    .mission-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .mission-name { font-weight: bold; font-size: 16px; }
+    .mission-lv { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+    
+    /* 버튼 스타일 */
+    .btn-action { width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: 1px solid var(--p); background: white; color: var(--p); transition: 0.2s; }
+    
+    /* 진행 중 (깜빡임 효과) */
+    .btn-action.ing { 
+      background: #fff7ed; border: 2px solid orange; color: #d97706; 
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+    
+    /* 완료됨 (클릭 불가) */
+    .btn-action.done { 
+      background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; 
+      cursor: not-allowed; pointer-events: none; 
+    }
+    
+    /* 대기중 (잠김) */
+    .btn-action:disabled { opacity: 0.6; cursor: not-allowed; background: #f8fafc; border-color: #cbd5e1; color: #94a3b8; }
+
+    .live-timer { font-size: 24px; font-weight: 800; color: #d97706; text-align: center; margin: 10px 0; display: none; }
+    
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-<h2 style="text-align:center; color:#1e293b; margin-bottom:20px;">다움학교 미션 대시보드</h2>
-<div class="student-grid" id="studentGrid"></div>
+<div id="view-dashboard" class="view active container">
+  <div style="text-align:center; margin: 30px 0;">
+    <h1 style="color:var(--p); margin:0;">다움학교</h1>
+    <p id="todayDate" style="color:#64748b; margin:5px; font-weight:bold;"></p>
+  </div>
+  <div class="card user-card" onclick="checkUser('S01','강태윤')"><span class="avatar">👤</span><h2>강태윤</h2></div>
+  <div class="card user-card" onclick="checkUser('S02','김대중')"><span class="avatar">👤</span><h2>김대중</h2></div>
+  <div class="card user-card" onclick="checkUser('S03','최원준')"><span class="avatar">👤</span><h2>최원준</h2></div>
+</div>
 
-<div id="missionOverlay">
-  <div class="popup">
-    <h2 id="popName" style="margin-top:0; color:#1e293b;">학생이름</h2>
+<div id="view-plan" class="view container">
+  <div class="card">
+    <div class="day-badge" id="planDayBadge">요일</div>
+    <h2 id="planTitle"></h2>
     
-    <div id="selectionArea">
-      <label style="font-size:13px; color:#64748b;">미션 선택</label>
-      <select id="mSelect"></select>
-      <div id="diffArea">
-        <label style="font-size:13px; color:#64748b;">난이도 선택</label>
-        <select id="dSelect"></select>
+    <div id="plan-normal" class="hidden">
+      <label>🕰️ 09:30 ~ 11:00 아이브러리</label>
+      <div class="row"><div class="fix-label">글쓰기</div><select id="m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+      <div class="row"><div class="fix-label">독서</div><select id="m2_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+      <div class="row"><div class="fix-label">자서전</div><select id="m3_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+      <label>🕰️ 11:00 ~ 12:00 선택 수업 (2개)</label>
+      <div class="grid">
+        <select id="c1_a"><option>컴퓨터</option><option>운동</option><option>글씨 연습</option><option>영어회화</option></select>
+        <select id="c1_a_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select>
+      </div>
+      <div class="grid">
+        <select id="c1_b"><option selected>운동</option><option>컴퓨터</option><option>글씨 연습</option><option>영어회화</option></select>
+        <select id="c1_b_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select>
+      </div>
+      <label>🕰️ 13:00 ~ 15:00 오후 활동</label>
+      <select id="c2"><option>검정고시</option><option>음악</option><option>SCL책력</option><option>심화공부</option><option>운동</option></select>
+    </div>
+
+    <div id="plan-thursday" class="hidden">
+      <p style="color:#64748b; font-size:13px; margin:10px 0;">😴 오전 수업 없음</p>
+      <label>🕰️ 13:00 ~ 15:00 오후 활동</label>
+      <select id="th_c2"><option>검정고시</option><option>교류수업</option><option>음악</option><option>심화수업</option><option>SCL책력</option></select>
+      <label>🕰️ 15:00 ~ 17:00 아이브러리</label>
+      <div class="row"><div class="fix-label">글쓰기 기초</div><select id="th_m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+      <div class="row"><div class="fix-label">독서</div><select id="th_m2_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+      <div class="row"><div class="fix-label">자서전</div><select id="th_m3_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+      <label>➕ 선택 활동 (2개)</label>
+      <div class="grid">
+        <select id="th_c1_a"><option>컴퓨터</option><option>영어</option><option>글씨 연습</option><option>운동</option></select>
+        <select id="th_c1_a_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select>
+      </div>
+      <div class="grid">
+        <select id="th_c1_b"><option selected>운동</option><option>컴퓨터</option><option>영어</option><option>글씨 연습</option></select>
+        <select id="th_c1_b_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select>
       </div>
     </div>
 
-    <div id="lifeMissionArea" style="display:none;">
-      <div class="photo-area">
-        <label for="photoInput" style="cursor:pointer; font-weight:bold; color:var(--p1);">📸 생활미션 사진 촬영하기</label>
-        <input type="file" id="photoInput" accept="image/*" capture="camera" style="display:none;" onchange="previewImage(this)">
-        <img id="photoPreview">
-        <p id="photoStatus" style="font-size:12px; color:#64748b; margin-top:5px;">사진을 찍어야 완료할 수 있습니다.</p>
-      </div>
-    </div>
-
-    <div class="btn-group">
-      <button id="sBtn" class="circle-btn start" onclick="doStart()">시작</button>
-      <button id="eBtn" class="circle-btn end" onclick="doEnd()">완료</button>
-    </div>
-    <button onclick="closePopup()" style="margin-top:20px; width:100%; border:none; background:none; color:#94a3b8; font-weight:bold;">닫기</button>
+    <button class="primary" onclick="savePlan()" style="margin-top:20px;">스케줄 저장 완료</button>
+    <button onclick="goHome()" style="background:white; color:#64748b; margin-top:5px;">취소</button>
   </div>
 </div>
 
+<div id="view-mission" class="view container">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:0 5px;">
+    <h2 id="missionTitle" style="font-size:20px;"></h2>
+    <div style="display:flex; gap:8px;">
+      <button onclick="editPlan()" style="background:white; color:var(--p); border:1px solid var(--p); padding:6px 12px; width:auto; border-radius:8px; font-size:13px; margin:0;">✏️ 수정</button>
+      <button onclick="goHome()" style="background:#f1f5f9; color:#64748b; border:none; padding:6px 12px; width:auto; border-radius:8px; font-size:13px; margin:0;">나가기</button>
+    </div>
+  </div>
+  <div id="missionList"></div>
+</div>
+
 <script>
-  // [주의] 선생님의 앱스크립트 배포 URL을 넣어주세요
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxeLTBIEznrBrZHokDS-U5AyQiK1FHyobCpnbzjUNsCiVyl4FruNkP-ld1J2qNcUBDMdA/exec"; 
-  const STUDENT_TOKEN = "STUDENT_1234";
+// [필수] 배포된 URL 입력
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwtygjf78iOlNExb6AQJ2xKlO76XFK-ApnTYxNsCNV1iLWTkX-korPp7nu_EA8H1GKZpQ/exec"; 
 
-  let studentStates = {
-    "S01": { name: "강태윤", active: false, startTime: null, mId: "", attemptId: "", mName: "" },
-    "S02": { name: "김대중", active: false, startTime: null, mId: "", attemptId: "", mName: "" },
-    "S03": { name: "최원준", active: false, startTime: null, mId: "", attemptId: "", mName: "" }
-  };
+let curId, curName, curM;
+let currentScheduleData = null;
+let todayDay = new Date().getDay(); 
+let timerInterval = null; 
 
-  let currentId = "";
-  let missionsMap = {};
-  let currentImageData = "";
+document.addEventListener("DOMContentLoaded", () => {
+  const days = ['일','월','화','수','목','금','토'];
+  document.getElementById('todayDate').innerText = `${new Date().toLocaleDateString()} (${days[todayDay]})`;
+  document.getElementById('planDayBadge').innerText = `${days[todayDay]}요일 스케줄`;
+});
 
-  window.onload = async () => {
-    renderCards();
-    await loadMissions();
-    await refreshAllStatus();
-    setInterval(updateTimers, 1000); 
-  };
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome() { location.reload(); }
 
-  async function loadMissions() {
-    const res = await fetch(`${WEB_APP_URL}?action=missions`);
-    const data = await res.json();
-    data.missions.forEach(m => {
-      if(!missionsMap[m.mission_name]) missionsMap[m.mission_name] = {};
-      missionsMap[m.mission_name][String(m.difficulty).toLowerCase()] = m.mission_id;
-    });
-    const mSel = document.getElementById('mSelect');
-    mSel.innerHTML = '<option value="">미션을 선택해 주세요</option>';
-    Object.keys(missionsMap).sort().forEach(n => mSel.innerHTML += `<option value="${n}">${n}</option>`);
-    mSel.onchange = onMChange;
-  }
-
-  function onMChange() {
-    const name = document.getElementById('mSelect').value;
-    const dSel = document.getElementById('dSelect');
-    const diffArea = document.getElementById('diffArea');
-    
-    // 시작 전에는 사진 영역을 절대 보여주지 않음
-    document.getElementById('lifeMissionArea').style.display = "none";
-    
-    if (name.includes("생활")) {
-      diffArea.style.display = "none";
+function checkUser(id, name) {
+  curId = id; curName = name;
+  const card = event.currentTarget;
+  card.style.opacity = "0.5";
+  
+  fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "checkSchedule", id: id, date: new Date().toISOString().slice(0,10) })
+  })
+  .then(res => res.json())
+  .then(res => {
+    if(res.hasSchedule) {
+      currentScheduleData = res.data;
+      renderMissions(res.data);
+      showView('view-mission');
+      document.getElementById('missionTitle').innerText = `${name}님의 미션`;
+      restoreMissionState(); 
     } else {
-      diffArea.style.display = "block";
-      dSel.innerHTML = '<option value="">난이도</option>';
-      const diffs = missionsMap[name];
-      ["easy", "normal", "hard"].forEach(d => { if(diffs[d]) dSel.innerHTML += `<option value="${d}">${d.toUpperCase()}</option>`; });
+      currentScheduleData = null;
+      showView('view-plan');
+      document.getElementById('planTitle').innerText = `${name}님`;
+      togglePlanView();
+    }
+    card.style.opacity = "1";
+  });
+}
+
+function togglePlanView() {
+  if (todayDay === 4) {
+    document.getElementById('plan-normal').classList.add('hidden');
+    document.getElementById('plan-thursday').classList.remove('hidden');
+  } else {
+    document.getElementById('plan-normal').classList.remove('hidden');
+    document.getElementById('plan-thursday').classList.add('hidden');
+  }
+}
+
+function editPlan() {
+  if (!currentScheduleData) return;
+  showView('view-plan');
+  document.getElementById('planTitle').innerText = `${curName}님 스케줄 수정`;
+  togglePlanView();
+  // 데이터 채우기 (생략 - 기존과 동일)
+  const d = currentScheduleData;
+  if (todayDay === 4) {
+    document.getElementById('th_c2').value = d.c2.n;
+    document.getElementById('th_m1_lv').value = d.m1.l;
+    document.getElementById('th_m2_lv').value = d.m2.l;
+    document.getElementById('th_m3_lv').value = d.m3.l;
+    document.getElementById('th_c1_a').value = d.c1a.n;
+    document.getElementById('th_c1_a_lv').value = d.c1a.l;
+    document.getElementById('th_c1_b').value = d.c1b.n;
+    document.getElementById('th_c1_b_lv').value = d.c1b.l;
+  } else {
+    document.getElementById('m1_lv').value = d.m1.l;
+    document.getElementById('m2_lv').value = d.m2.l;
+    document.getElementById('m3_lv').value = d.m3.l;
+    document.getElementById('c1_a').value = d.c1a.n;
+    document.getElementById('c1_a_lv').value = d.c1a.l;
+    document.getElementById('c1_b').value = d.c1b.n;
+    document.getElementById('c1_b_lv').value = d.c1b.l;
+    document.getElementById('c2').value = d.c2.n;
+  }
+}
+
+function savePlan() {
+  let data = { action: "saveSchedule", id: curId, date: new Date().toISOString().slice(0,10), dayStr: (todayDay===4?"목":"평일") };
+  if (todayDay === 4) {
+    data.c2n = document.getElementById('th_c2').value;
+    data.m1l = document.getElementById('th_m1_lv').value;
+    data.m2l = document.getElementById('th_m2_lv').value;
+    data.m3l = document.getElementById('th_m3_lv').value;
+    data.c1an = document.getElementById('th_c1_a').value;
+    data.c1al = document.getElementById('th_c1_a_lv').value;
+    data.c1bn = document.getElementById('th_c1_b').value;
+    data.c1bl = document.getElementById('th_c1_b_lv').value;
+  } else {
+    data.m1l = document.getElementById('m1_lv').value;
+    data.m2l = document.getElementById('m2_lv').value;
+    data.m3l = document.getElementById('m3_lv').value;
+    data.c1an = document.getElementById('c1_a').value;
+    data.c1al = document.getElementById('c1_a_lv').value;
+    data.c1bn = document.getElementById('c1_b').value;
+    data.c1bl = document.getElementById('c1_b_lv').value;
+    data.c2n = document.getElementById('c2').value;
+  }
+  fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(data) })
+  .then(res => res.json())
+  .then(() => { alert("스케줄 저장 완료!"); goHome(); });
+}
+
+/* ======== 심플 미션 제어 로직 (팝업 제거됨) ======== */
+
+function renderMissions(d) {
+  const list = document.getElementById('missionList');
+  list.innerHTML = "";
+  
+  // 요일별 순서
+  if (d.day === "목") {
+    list.innerHTML += `<div style="font-size:12px; color:#888; margin:10px 0;">🕐 13:00 ~ 15:00</div>`;
+    renderItem(list, d.c2);
+    list.innerHTML += `<div style="font-size:12px; color:#888; margin:20px 0 10px;">🕒 15:00 ~ 17:00</div>`;
+    [d.m1, d.m2, d.m3, d.c1a, d.c1b].forEach(t => renderItem(list, t));
+  } else {
+    list.innerHTML += `<div style="font-size:12px; color:#888; margin:10px 0;">🕤 09:30 ~ 11:00</div>`;
+    [d.m1, d.m2, d.m3].forEach(t => renderItem(list, t));
+    list.innerHTML += `<div style="font-size:12px; color:#888; margin:20px 0 10px;">🕚 11:00 ~ 12:00</div>`;
+    [d.c1a, d.c1b].forEach(t => renderItem(list, t));
+    list.innerHTML += `<div style="font-size:12px; color:#888; margin:20px 0 10px;">🕐 13:00 ~ 15:00</div>`;
+    renderItem(list, d.c2);
+  }
+}
+
+function renderItem(container, t) {
+  if(!t || !t.n) return;
+  const isDone = localStorage.getItem(`${curId}_${t.n}_done`) === "yes";
+  
+  const div = document.createElement('div');
+  div.className = "mission-item";
+  div.innerHTML = `
+    <div class="mission-header">
+      <span class="mission-name">${t.n}</span>
+      <span class="mission-lv">${t.l || "-"}</span>
+    </div>
+    <div class="live-timer" id="timer-${t.n}">00:00:00</div>
+    <button class="btn-action ${isDone ? 'done' : ''}" 
+            id="btn-${t.n}" 
+            onclick="handleMissionClick('${t.n}', '${t.l||""}')"
+            ${isDone ? 'disabled' : ''}>
+      ${isDone ? '✅ 완료 (잠김)' : '시작하기'}
+    </button>
+  `;
+  container.appendChild(div);
+}
+
+function restoreMissionState() {
+  const activeMission = localStorage.getItem(`${curId}_active_mission`);
+  if (activeMission) {
+    curM = activeMission;
+    const btn = document.getElementById(`btn-${activeMission}`);
+    if (btn) {
+      btn.classList.add('ing');
+      btn.innerText = "🔥 진행 중 (완료하기)";
+      document.getElementById(`timer-${activeMission}`).style.display = 'block';
+      startTimerUI(activeMission);
+      disableOtherButtons(activeMission);
     }
   }
+}
 
-  async function refreshAllStatus() {
-    for (let id in studentStates) {
-      const res = await fetch(`${WEB_APP_URL}?action=checkStatus&student_id=${id}`);
-      const data = await res.json();
-      if (data.ok && data.lastLog && data.lastLog.value === "start") {
-        const s = studentStates[id];
-        s.active = true;
-        s.attemptId = data.lastLog.attempt_id;
-        s.mId = data.lastLog.mission_id;
-        s.startTime = new Date(data.lastLog.timestamp).getTime();
-        
-        // 3번 복구 시 미션 이름도 찾아서 저장 (생활미션 판별용)
-        for (let mName in missionsMap) {
-          if (Object.values(missionsMap[mName]).includes(s.mId)) {
-            s.mName = mName;
-            break;
-          }
-        }
-      }
+function handleMissionClick(name, scheduledLevel) {
+  const btn = document.getElementById(`btn-${name}`);
+  if(btn.disabled || btn.classList.contains('done')) return; // 중복 방지
+  
+  const activeMission = localStorage.getItem(`${curId}_active_mission`);
+
+  // [상황 A] 시작하기
+  if (!activeMission) {
+    localStorage.setItem(`${curId}_active_mission`, name);
+    localStorage.setItem(`${curId}_start_time`, Date.now());
+    
+    btn.classList.add('ing');
+    btn.innerText = "🔥 진행 중 (완료하기)";
+    document.getElementById(`timer-${name}`).style.display = 'block';
+    
+    fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
+      action:"saveLog", subAction:"start", student_id:curId, mission_id:name
+    })});
+
+    startTimerUI(name);
+    disableOtherButtons(name);
+  } 
+  // [상황 B] 완료하기 (팝업 없이 즉시 종료)
+  else if (activeMission === name) {
+    finishImmediate(name, scheduledLevel);
+  } else {
+    alert("현재 진행 중인 미션을 먼저 완료해주세요!");
+  }
+}
+
+// 팝업 없이 즉시 완료 처리 함수
+function finishImmediate(name, level) {
+  if(!confirm("정말 완료하시겠습니까?")) return;
+
+  const startTime = parseInt(localStorage.getItem(`${curId}_start_time`));
+  const diff = Math.floor((Date.now() - startTime) / 1000);
+  const m = Math.floor(diff/60) + "분 " + (diff%60) + "초";
+  
+  // 로컬 정리
+  localStorage.removeItem(`${curId}_active_mission`);
+  localStorage.removeItem(`${curId}_start_time`);
+  localStorage.setItem(`${curId}_${name}_done`, "yes");
+  
+  if (timerInterval) clearInterval(timerInterval);
+  document.getElementById(`timer-${name}`).style.display = 'none';
+  
+  // 서버 전송 (난이도는 스케줄링 때 정한 level을 그대로 사용)
+  fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
+    action:"saveLog", subAction:"end", student_id:curId, mission_id:name, 
+    difficulty: level, // 자동 할당
+    note: m
+  })})
+  .then(res => res.json())
+  .then(() => {
+    alert("수고하셨습니다! 완료되었습니다.");
+    
+    // 버튼 잠그기 (즉시 UI 반영)
+    const btn = document.getElementById(`btn-${name}`);
+    btn.classList.remove('ing');
+    btn.classList.add('done');
+    btn.innerText = "✅ 완료 (잠김)";
+    btn.disabled = true;
+    
+    enableAllButtons(); // 다른 버튼 잠금 해제
+  });
+}
+
+function startTimerUI(name) {
+  const startTime = parseInt(localStorage.getItem(`${curId}_start_time`));
+  const display = document.getElementById(`timer-${name}`);
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    const diff = Math.floor((Date.now() - startTime) / 1000);
+    const h = String(Math.floor(diff / 3600)).padStart(2,'0');
+    const m = String(Math.floor((diff % 3600) / 60)).padStart(2,'0');
+    const s = String(diff % 60).padStart(2,'0');
+    display.innerText = `${h}:${m}:${s}`;
+  }, 1000);
+}
+
+function disableOtherButtons(activeName) {
+  const btns = document.querySelectorAll('.btn-action');
+  btns.forEach(b => {
+    if (b.id !== `btn-${activeName}` && !b.classList.contains('done')) {
+      b.disabled = true;
+      b.innerText = "⛔ 대기중";
     }
-    renderCards();
-  }
+  });
+}
 
-  function updateTimers() {
-    Object.keys(studentStates).forEach(id => {
-      const s = studentStates[id];
-      const el = document.getElementById(`timer_${id}`);
-      if (s.active && s.startTime && el) {
-        const diff = Math.floor((Date.now() - s.startTime) / 1000);
-        el.textContent = `${Math.floor(diff/60)}분 ${diff%60}초 진행 중`;
-      }
-    });
-  }
-
-  function renderCards() {
-    const grid = document.getElementById('studentGrid');
-    grid.innerHTML = "";
-    Object.keys(studentStates).forEach(id => {
-      const s = studentStates[id];
-      grid.innerHTML += `
-        <div class="student-card" onclick="openPopup('${id}')">
-          <div class="status-dot ${s.active ? 'active' : ''}"></div>
-          <div style="font-size:30px; margin-bottom:5px;">👤</div>
-          <div style="font-weight:bold; font-size:18px;">${s.name}</div>
-          <div id="timer_${id}" class="elapsed-tag" style="${s.active ? '' : 'display:none'}"></div>
-        </div>`;
-    });
-  }
-
-  function openPopup(id) {
-    currentId = id; const s = studentStates[id];
-    document.getElementById('popName').textContent = s.name;
-    document.getElementById('missionOverlay').style.display = "flex";
-    
-    // 버튼 및 영역 초기화
-    document.getElementById('sBtn').disabled = s.active;
-    document.getElementById('eBtn').disabled = !s.active;
-    
-    // 미션 시작 전: 선택창 보여줌, 사진창 숨김
-    if(!s.active) {
-      document.getElementById('selectionArea').style.display = "block";
-      document.getElementById('lifeMissionArea').style.display = "none";
-    } 
-    // 미션 시작 후: 선택창 숨김
-    else {
-      document.getElementById('selectionArea').style.display = "none";
-      // 생활미션인 경우에만 사진창 보여줌
-      if(s.mName && s.mName.includes("생활")) {
-        document.getElementById('lifeMissionArea').style.display = "block";
-      } else {
-        document.getElementById('lifeMissionArea').style.display = "none";
-      }
+function enableAllButtons() {
+  const btns = document.querySelectorAll('.btn-action');
+  btns.forEach(b => {
+    if (!b.classList.contains('done')) {
+      b.disabled = false;
+      b.innerText = "시작하기";
     }
-    
-    document.getElementById('photoPreview').style.display = "none";
-    currentImageData = "";
-  }
-
-  function previewImage(input) {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = e => { 
-        document.getElementById('photoPreview').src = e.target.result;
-        document.getElementById('photoPreview').style.display = "block";
-        document.getElementById('photoStatus').textContent = "사진이 준비되었습니다! 완료를 눌러주세요.";
-        currentImageData = e.target.result;
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
-
-  async function doStart() {
-    const s = studentStates[currentId];
-    const mName = document.getElementById('mSelect').value;
-    let diff = document.getElementById('dSelect').value || "normal";
-    if(!mName) return alert("미션을 먼저 선택하세요!");
-    
-    s.active = true; 
-    s.startTime = Date.now(); 
-    s.attemptId = currentId + "_" + s.startTime; 
-    s.mName = mName;
-    s.mId = missionsMap[mName][diff] || Object.values(missionsMap[mName])[0];
-    
-    await sendLog("start", s.attemptId, currentId, s.mId, "");
-    renderCards(); 
-    closePopup(); // 시작 후 일단 닫기 -> 선생님 말씀대로 다시 들어와서 사진 찍게 함
-  }
-
-  async function doEnd() {
-    const s = studentStates[currentId];
-    // 생활미션인데 사진이 없는 경우 체크
-    if(s.mName && s.mName.includes("생활") && !currentImageData) {
-      return alert("📸 사진을 촬영해야 완료할 수 있습니다!");
-    }
-    
-    const duration = Math.round((Date.now()-s.startTime)/1000);
-    const note = `duration:${duration}s${currentImageData ? `|image:${currentImageData}` : ''}`;
-    
-    await sendLog("end", s.attemptId, currentId, s.mId, note);
-    s.active = false; s.startTime = null; s.mName = "";
-    renderCards(); 
-    closePopup();
-  }
-
-  async function sendLog(val, attId, sId, mId, note) {
-    await fetch(WEB_APP_URL, {
-      method: "POST",
-      body: JSON.stringify({ token: STUDENT_TOKEN, attempt_id: attId, student_id: sId, mission_id: mId, value: val, note: note })
-    });
-  }
-  function closePopup() { document.getElementById('missionOverlay').style.display = "none"; }
+  });
+}
 </script>
 </body>
 </html>

@@ -1,267 +1,346 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>다움학교 - 교사용 관리 센터</title>
-<style>
-  :root {
-    --bg: #f8fafc; --card: #ffffff; --primary: #3b82f6;
-    --danger: #ef4444; --success: #10b981; --text: #1e293b; --muted: #64748b; --border: #e2e8f0;
-  }
-  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; padding: 20px; }
-  .header { text-align: center; margin-bottom: 20px; }
-  .header h1 { font-size: 24px; color: var(--primary); }
-  
-  .controls { max-width: 800px; margin: 0 auto 20px; }
-  .filter-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  
-  /* 선택 삭제 버튼 라인 */
-  .bulk-action-row { display: flex; justify-content: flex-end; gap: 10px; max-width: 800px; margin: 0 auto 10px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>다움학교 선생님</title>
+  <style>
+    :root { --p: #4f46e5; --bg: #f1f5f9; --ok: #10b981; --fail: #ef4444; }
+    body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 20px; color:#333; }
+    
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab { padding: 12px 24px; border-radius: 10px; background: #cbd5e1; cursor: pointer; font-weight: bold; color: #475569; transition:0.2s; }
+    .tab.active { background: var(--p); color: white; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
+    .view { display: none; }
+    .view.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
-  .btn { 
-    background: white; border: 1px solid var(--border); padding: 10px; 
-    border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.2s;
-  }
-  .btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-  .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
+    /* 일간 */
+    .daily-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .student-col { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+    .money-badge { background: #fff7ed; color: #d97706; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+    
+    .m-item { border: 1px solid #eee; padding: 10px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .m-item.done { border-left: 5px solid var(--ok); background: #f0fdf4; }
+    .m-item.life-ok { border-left: 5px solid var(--ok); background: #dcfce7; }
+    .m-item.ing { border-left: 5px solid orange; background: #fff7ed; }
+    .m-item.fail { border-left: 5px solid var(--fail); background: #fef2f2; opacity: 0.8; }
+    
+    /* 주간 */
+    .weekly-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .weekly-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .total-box { text-align: right; }
+    .total-label { font-size: 13px; color: #666; }
+    .total-amount { font-size: 24px; font-weight: 800; color: var(--p); }
+    .penalty-info { font-size: 12px; color: var(--fail); font-weight: bold; margin-top: 5px; }
 
-  .log-container { max-width: 800px; margin: 0 auto; }
-  .log-item { 
-    background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; 
-    border: 1px solid var(--border); display: flex; align-items: flex-start; gap: 15px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03); position: relative;
-  }
-  .log-content { flex: 1; display: flex; flex-direction: column; }
-
-  /* 체크박스 기본 숨김, 편집 모드에서만 보임 */
-  .log-checkbox { width: 22px; height: 22px; margin-top: 5px; cursor: pointer; display: none; }
-  .edit-mode .log-checkbox { display: block; }
-
-  .time-detail { 
-    font-size: 13px; color: #475569; background: #f1f5f9; 
-    padding: 10px; border-radius: 12px; margin-top: 8px; line-height: 1.5;
-  }
-  .time-detail b { color: var(--primary); }
-  .force-label { color: var(--danger); font-size: 11px; font-weight: bold; margin-left: 5px; }
-  .photo-preview { margin-top: 10px; max-width: 150px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
-  .photo-preview img { width: 100%; cursor: pointer; }
-  
-  .action-btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-  .act-btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; border: 1px solid #ddd; background: #fff; }
-  
-  .modal-overlay {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
-  }
-  .modal-content { background: white; padding: 20px; border-radius: 20px; width: 90%; max-width: 320px; text-align: center; }
-  .time-input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 10px; }
-</style>
+    .weekly-table { width: 100%; border-collapse: collapse; overflow: hidden; }
+    .weekly-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 14px; border-bottom: 2px solid #e2e8f0; }
+    .weekly-table td { border: 1px solid #e2e8f0; padding: 12px; vertical-align: top; text-align: center; height: 60px; }
+    .cell-mission { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .cell-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+    .st-done { background: #dcfce7; color: #166534; }
+    .st-fail { background: #fee2e2; color: #991b1b; }
+    .st-ing { background: #fff7ed; color: #9a3412; }
+    
+    /* 모달 */
+    #modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index: 1000; }
+    .modal-box { background: white; padding: 25px; border-radius: 15px; width: 400px; max-height: 90vh; overflow-y: auto; }
+    input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+    .btn { padding: 10px; width: 100%; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; margin-top: 5px; }
+    .chk-group label { display: block; margin-bottom: 8px; cursor: pointer; }
+  </style>
 </head>
-<body id="mainBody">
+<body>
 
-<div class="header"><h1>📊 다움학교 관리 센터</h1></div>
+<div class="tabs">
+  <div class="tab active" onclick="goTab('daily')">📅 일간 관리</div>
+  <div class="tab" onclick="goTab('weekly')">📊 주간 리포트</div>
+</div>
 
-<div class="controls">
-  <div class="filter-row">
-    <button class="btn active" onclick="setStudent('all', this)">전체</button>
-    <button class="btn" onclick="setStudent('S01', this)">강태윤</button>
-    <button class="btn" onclick="setStudent('S02', this)">김대중</button>
-    <button class="btn" onclick="setStudent('S03', this)">최원준</button>
+<div id="daily" class="view active">
+  <div style="margin-bottom: 15px;">
+    <input type="date" id="dDate" style="width:auto; padding:8px;" onchange="loadDaily()">
+    <button onclick="loadDaily()" style="background:var(--p); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">새로고침</button>
+  </div>
+  <div class="daily-grid" id="dailyBoard"></div>
+</div>
+
+<div id="weekly" class="view">
+  <div class="weekly-card">
+    <div class="weekly-header">
+      <div style="display:flex; gap:10px;">
+        <select id="wStudent" onchange="loadWeekly()" style="padding:10px; font-weight:bold;">
+          <option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option>
+        </select>
+        <select id="wWeekSelect" onchange="loadWeekly()" style="padding:10px;"></select>
+      </div>
+      <div class="total-box">
+        <div class="total-label">이번 주 총 수입 (정산)</div>
+        <div class="total-amount" id="totalWeekMoney">0원</div>
+        <div class="penalty-info" id="penaltyMsg"></div>
+      </div>
+    </div>
+    <div id="weeklyBoard"></div>
   </div>
 </div>
 
-<div class="bulk-action-row">
-  <button id="editModeBtn" class="btn" onclick="toggleEditMode()">선택 삭제 모드</button>
-  <button id="deleteSelectedBtn" class="btn btn-danger" style="display:none;" onclick="deleteSelected()">선택 로그 삭제</button>
-</div>
+<div id="modal">
+  <div class="modal-box">
+    <h3 id="mTitle" style="margin-top:0; color:var(--p);"></h3>
+    <input type="hidden" id="mSid"><input type="hidden" id="mMid">
+    
+    <div id="ui-life" style="display:none;">
+      <div class="chk-group">
+        <label><input type="checkbox" class="life-chk"> 1. 방 청결도 확인</label>
+        <label><input type="checkbox" class="life-chk"> 2. 침구류 정리 정돈</label>
+        <label><input type="checkbox" class="life-chk"> 3. 개인 위생 (계절 의상)</label>
+        <label><input type="checkbox" class="life-chk"> 4. 출석체크 시간 준수</label>
+        <label><input type="checkbox" class="life-chk"> 5. 전기 및 불 끄기</label>
+      </div>
+      <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
+      
+      <p style="font-size:14px; font-weight:bold;">✅ 수행 완료 시 (사진 업로드)</p>
+      <input type="file" id="lifePhoto" accept="image/*">
+      <button class="btn" style="background:var(--ok);" onclick="uploadPhoto()">사진 저장 및 성공 처리</button>
+      
+      <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
+      <p style="font-size:14px; font-weight:bold; color:var(--fail);">❌ 수행 실패 시</p>
+      <button class="btn" style="background:var(--fail);" onclick="sendCtrl('fail')">생활미션 실패 처리 (주간 페널티 적용)</button>
+    </div>
 
-<div class="log-container" id="logList"></div>
+    <div id="ui-normal">
+      <label>시간 설정</label>
+      <div style="display:flex; gap:10px;">
+        <input type="time" id="tStart"><span style="align-self:center;">~</span><input type="time" id="tEnd">
+      </div>
+      <label>선생님 코멘트 / 난이도</label>
+      <select id="tComment">
+        <option value="">-- 난이도 선택 --</option>
+        <option value="EASY">EASY</option><option value="NORMAL">NORMAL</option><option value="HARD">HARD</option>
+      </select>
+      <div style="display:flex; gap:5px;">
+        <button class="btn" style="background:var(--p);" onclick="sendCtrl('start')">시작</button>
+        <button class="btn" style="background:var(--ok);" onclick="sendCtrl('end')">완료</button>
+        <button class="btn" style="background:var(--fail);" onclick="sendCtrl('fail')">실패</button>
+      </div>
+      <button class="btn" style="background:#94a3b8; margin-top:10px;" onclick="sendCtrl('delete')">기록 삭제</button>
+    </div>
 
-<div id="forceEndModal" class="modal-overlay">
-  <div class="modal-content">
-    <h3 id="modalTitle">강제 완료</h3>
-    <div id="step1">
-      <p>정말로 강제 완료 하시겠습니까?</p>
-      <button class="btn active" style="width:100%; margin-bottom:10px;" onclick="goStep2()">네</button>
-      <button class="btn" style="width:100%" onclick="closeModal()">아니오</button>
+    <div id="ui-day" style="display:none;">
+      <p style="text-align:center;">오늘 하루를 마감하고 일급을 지급하시겠습니까?</p>
+      <button class="btn" style="background:var(--p);" onclick="sendCtrl('end')">하루 기록 완료</button>
     </div>
-    <div id="step2" style="display:none;">
-      <p>시간 설정 방식을 선택하세요.</p>
-      <button class="btn active" style="width:100%; margin-bottom:10px;" onclick="submitForceEnd(new Date())">현재 시간으로 완료</button>
-      <button class="btn" style="width:100%" onclick="goStep3()">시간 직접 지정</button>
-    </div>
-    <div id="step3" style="display:none;">
-      <p>완료 시각을 선택하세요.</p>
-      <input type="datetime-local" id="customTimeInput" class="time-input">
-      <button class="btn active" style="width:100%; margin-bottom:10px;" onclick="submitForceEndWithTime()">선택한 시간으로 완료</button>
-      <button class="btn" style="width:100%" onclick="closeModal()">취소</button>
-    </div>
+
+    <button class="btn" style="background:white; color:#333; border:1px solid #ddd; margin-top:15px;" onclick="document.getElementById('modal').style.display='none'">닫기</button>
   </div>
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxh8fhyL52Mf91V3aaFwW3zR0CHj-7weDslW7--ArcQfeLuAf4Er7qWRpXq5oUwWrWlQw/exec"; 
-const ADMIN_TOKEN = "TEACHER_5678";
-const studentMap = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwrdD6Vh7A5OgCF3rzKVgagMcaClBbFe-1yUTCK0AlmtGDITqCp49xru7RdCwL2hZDGkA/exec"; 
+const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
 
-let allLogs = [];
-let curStudent = 'all';
-let missionMap = {};
-let isEditMode = false;
-let pendingData = null;
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById('dDate').value = new Date().toISOString().slice(0,10);
+  initWeekSelector();
+  loadDaily();
+});
 
-window.onload = () => { loadData(); setInterval(updateTimers, 1000); };
-
-async function loadData() {
-  const [mRes, lRes] = await Promise.all([
-    fetch(`${WEB_APP_URL}?action=missions`).then(r => r.json()),
-    fetch(`${WEB_APP_URL}?action=logs&token=${ADMIN_TOKEN}`).then(r => r.json())
-  ]);
-  mRes.missions.forEach(m => missionMap[m.mission_id] = m.mission_name);
-  allLogs = lRes.logs || [];
-  render();
+function goTab(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if(id === 'daily') loadDaily(); else loadWeekly();
 }
 
-function formatTimeSec(date) {
-  const d = new Date(date);
-  return d.getHours().toString().padStart(2, '0') + ":" + 
-         d.getMinutes().toString().padStart(2, '0') + ":" + 
-         d.getSeconds().toString().padStart(2, '0');
+function initWeekSelector() {
+  const sel = document.getElementById('wWeekSelect');
+  const today = new Date();
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - (i * 7));
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day == 0 ? -6 : 1);
+    const monday = new Date(d.setDate(diff));
+    const val = monday.toISOString().slice(0,10);
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.innerText = `${monday.getMonth()+1}월 ${Math.ceil(monday.getDate()/7)}주차 (${val}~)`;
+    sel.appendChild(opt);
+  }
 }
 
-function getDurationText(start, end) {
-  const diffSec = Math.floor((new Date(end) - new Date(start)) / 1000);
-  if (diffSec < 0) return "시간 오류";
-  return `${Math.floor(diffSec / 60)}분 ${diffSec % 60}초`;
+/* --- 일간 로직 --- */
+function loadDaily() {
+  const date = document.getElementById('dDate').value;
+  fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"getDailyData", date:date}) })
+  .then(res=>res.json()).then(data => {
+    const board = document.getElementById('dailyBoard');
+    board.innerHTML = "";
+    Object.keys(students).forEach(sid => {
+      const col = document.createElement('div'); col.className = 'student-col';
+      const s = data.schedules[sid]; const l = data.logs[sid] || {};
+      
+      let isPaid = l["하루 기록"] && l["하루 기록"].status === 'end';
+      // 일간에서는 페널티 적용 전 원금만 보여줌 (페널티는 주간에서 확인)
+      let rawMoney = 0;
+      Object.values(l).forEach(item => { if(item.money) rawMoney += item.money; });
+
+      col.innerHTML = `<div class="col-header"><h3>${students[sid]}</h3><span class="money-badge" style="display:${isPaid?'block':'none'}">일급(예상): ₩${rawMoney.toLocaleString()}</span></div>`;
+      
+      const life = l["생활미션"];
+      let lifeCls = ""; 
+      let lifeTxt = "미완료";
+      if(life) {
+        if(life.status === 'life_ok') { lifeCls = 'life-ok'; lifeTxt = '성공'; }
+        if(life.status === 'fail') { lifeCls = 'fail'; lifeTxt = '실패(페널티)'; }
+      }
+      
+      col.innerHTML += `<div class="m-item ${lifeCls}" onclick="openModal('${sid}','생활미션')"><b>🌞 생활미션</b> <span>${lifeTxt}</span></div>`;
+
+      if(s) {
+        [s.m1, s.m2, s.m3, s.c1a, s.c1b, s.c2].forEach(m => {
+          if(!m.n) return;
+          const ml = l[m.n];
+          let c = ""; 
+          if(ml){ if(ml.status=='start')c='ing'; if(ml.status=='end')c='done'; if(ml.status=='fail')c='fail'; }
+          let tStr = ml && ml.note && ml.note.includes("Start") ? ml.note.replace("Start:","시작:") : "-";
+          col.innerHTML += `<div class="m-item ${c}" onclick="openModal('${sid}','${m.n}')"><div>${m.n} <small>${m.l||""}</small></div><small>${tStr}</small></div>`;
+        });
+      }
+      
+      const btnTxt = isPaid ? "✅ 일급 지급 완료" : "하루 기록 (정산)";
+      const btnCls = isPaid ? "background:#94a3b8" : "background:#3b82f6; animation:pulse 2s infinite;";
+      col.innerHTML += `<button class="btn" style="${btnCls}; margin-top:10px;" onclick="openModal('${sid}','하루 기록')">${btnTxt}</button>`;
+      board.appendChild(col);
+    });
+  });
 }
 
-function render() {
-  const list = document.getElementById('logList');
-  list.innerHTML = "";
-  const groups = {};
+function openModal(sid, mid) {
+  document.getElementById('modal').style.display='flex';
+  document.getElementById('mTitle').innerText = students[sid] + " - " + mid;
+  document.getElementById('mSid').value = sid; document.getElementById('mMid').value = mid;
+  document.getElementById('tComment').value = "";
   
-  allLogs.forEach(l => {
-    if(!groups[l.attempt_id]) groups[l.attempt_id] = { start: null, end: null };
-    groups[l.attempt_id][l.value] = l;
-  });
+  document.getElementById('ui-life').style.display='none';
+  document.getElementById('ui-normal').style.display='none';
+  document.getElementById('ui-day').style.display='none';
 
-  const sorted = Object.values(groups).filter(g => {
-    const main = g.end || g.start;
-    return curStudent === 'all' || main.student_id === curStudent;
-  }).sort((a,b) => new Date((b.end||b.start).timestamp) - new Date((a.end||a.start).timestamp));
+  if(mid==='생활미션') document.getElementById('ui-life').style.display='block';
+  else if(mid==='하루 기록') document.getElementById('ui-day').style.display='block';
+  else document.getElementById('ui-normal').style.display='block';
+}
 
-  sorted.forEach(g => {
-    const main = g.end || g.start;
-    const note = main.note || "";
-    const photoUrl = note.includes("|photo:") ? note.split("|photo:")[1].split("|")[0] : null;
+function uploadPhoto() {
+  const chks = document.querySelectorAll('.life-chk');
+  for(let c of chks) if(!c.checked) return alert("체크리스트를 모두 완료해주세요.");
+  const file = document.getElementById('lifePhoto').files[0];
+  if(!file) return alert("사진 필요");
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const b64 = e.target.result.split(',')[1];
+    const sid = document.getElementById('mSid').value;
+    fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
+      action:"uploadLifePhoto", base64:b64, mimeType:file.type, sid:sid, 
+      name:students[sid], date:document.getElementById('dDate').value 
+    })}).then(r=>r.json()).then(()=>{ alert("완료"); document.getElementById('modal').style.display='none'; loadDaily(); });
+  };
+  reader.readAsDataURL(file);
+}
+
+function sendCtrl(act) {
+  fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
+    action:"teacherControl", sid:document.getElementById('mSid').value, mid:document.getElementById('mMid').value, act:act,
+    comment:document.getElementById('tComment').value, startTime:document.getElementById('tStart').value, endTime:document.getElementById('tEnd').value
+  })}).then(()=>{ alert("처리됨"); document.getElementById('modal').style.display='none'; loadDaily(); });
+}
+
+/* --- 주간 로직 (페널티 반영) --- */
+function loadWeekly() {
+  const sid = document.getElementById('wStudent').value;
+  const date = document.getElementById('wWeekSelect').value || new Date().toISOString().slice(0,10);
+  
+  fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"getWeeklyData", sid:sid, date:date}) })
+  .then(r=>r.json()).then(res => {
+    let h = `<table class="weekly-table"><thead><tr><th>시간</th>`;
+    ["월","화","수","목","금"].forEach(d=>h+=`<th>${d}</th>`);
+    h+=`</tr></thead><tbody>`;
     
-    let timeInfoHtml = "";
-    if (g.start && g.end) {
-      timeInfoHtml = `
-        <div class="time-detail">
-          시작: ${formatTimeSec(g.start.timestamp)} / 완료: ${formatTimeSec(g.end.timestamp)} 
-          ${note.includes("force_end:true") ? '<span class="force-label">(교사종료)</span>' : ''} <br>
-          <b>걸린 시간: ${getDurationText(g.start.timestamp, g.end.timestamp)}</b>
-        </div>`;
-    } else if (g.start) {
-      timeInfoHtml = `<div class="live-timer" data-start="${g.start.timestamp}" style="color:blue; font-weight:bold; font-size:13px; margin-top:5px;">⏱ 실시간 계산 중...</div>`;
+    const slots = [
+      {t:"09:00",k:"life"}, {t:"09:30",k:"am"}, {t:"11:00",k:"sel1"}, {t:"12:00",k:"lunch"}, {t:"13:00",k:"pm"}, {t:"15:00",k:"late"}, {t:"17:00",k:"end"}
+    ];
+    
+    slots.forEach(slot => {
+      h+=`<tr><td>${slot.t}</td>`;
+      for(let i=0; i<5; i++){
+        const d = res.days[i].data;
+        const s = d.schedules[sid]; const l = d.logs[sid]||{};
+        let content = "";
+        
+        if(slot.k==='life') {
+           content = "생활미션";
+           if(l["생활미션"] && l["생활미션"].status === 'life_ok') content += "<br>✅ 성공";
+           if(l["생활미션"] && l["생활미션"].status === 'fail') content += "<br>❌ 실패";
+        }
+        else if(slot.k==='lunch') content = "<span style='color:#ccc'>🍽️ 점심</span>";
+        else if(i <= 2) { 
+          if(slot.k==='am') content = getMList(s,['m1','m2','m3'],l);
+          if(slot.k==='sel1') content = getMList(s,['c1a','c1b'],l);
+          if(slot.k==='pm') content = getMList(s,['c2'],l);
+          if(slot.k==='late') content = "하루 정리";
+          if(slot.k==='end') content = "-";
+        }
+        else if(i === 3) {
+          if(slot.k==='am' || slot.k==='sel1') content = "⚽ 축구 수업";
+          if(slot.k==='pm') content = getMList(s,['c2'],l);
+          if(slot.k==='late') content = getMList(s,['m1','m2','m3','c1a','c1b'],l);
+          if(slot.k==='end') content = "하루 정리";
+        }
+        else if(i === 4) {
+          if(slot.k==='am') content = getMList(s,['m1','m2','m3'],l);
+          if(slot.k==='sel1') content = getMList(s,['c1a','c1b'],l);
+          if(slot.k==='pm') content = "🙏 예배";
+          if(slot.k==='late') content = "";
+          if(slot.k==='end') content = "하루 정리";
+        }
+        h+=`<td>${content}</td>`;
+      }
+      h+=`</tr>`;
+    });
+    
+    h+=`<tr><td style="font-weight:bold; color:#d97706;">일일 수입<br><small>(페널티 적용)</small></td>`;
+    for(let i=0; i<5; i++) h+=`<td style="font-weight:bold; color:#d97706;">₩${res.days[i].money.toLocaleString()}</td>`;
+    h+=`</tr></tbody></table>`;
+
+    document.getElementById('weeklyBoard').innerHTML = h;
+    document.getElementById('totalWeekMoney').innerText = res.total.toLocaleString() + "원";
+    
+    // 페널티 메시지
+    if(res.failCount > 0) {
+      document.getElementById('penaltyMsg').innerText = `⚠️ 생활미션 ${res.failCount}회 실패로 수입이 ${res.factor}로 감소했습니다.`;
+    } else {
+      document.getElementById('penaltyMsg').innerText = `✨ 생활미션 All Clear! (100% 지급)`;
     }
-
-    list.innerHTML += `
-      <div class="log-item">
-        <input type="checkbox" class="log-checkbox" value="${main.attempt_id}">
-        <div class="log-content">
-          <div style="font-weight:900; font-size:18px;">${studentMap[main.student_id] || main.student_id} - ${missionMap[main.mission_id] || '수업'}</div>
-          <div style="font-size:12px; color:#888;">${new Date(main.timestamp).toLocaleDateString()}</div>
-          ${timeInfoHtml}
-          ${photoUrl ? `<div class="photo-preview"><img src="${photoUrl}" onclick="window.open('${photoUrl}')"></div>` : ''}
-          <div class="action-btns">
-            ${!g.end ? `<button class="act-btn" style="color:red;" onclick="openForceModal('${main.attempt_id}','${main.student_id}','${main.mission_id}','${main.timestamp}')">🚩 강제 완료</button>` : ''}
-            <button class="act-btn" onclick="addComment('${main.attempt_id}')">📝 코멘트</button>
-            <button class="act-btn" onclick="deleteLog('${main.attempt_id}')">🗑️ 삭제</button>
-          </div>
-        </div>
-      </div>`;
   });
 }
 
-// 선택 삭제 모드 토글
-function toggleEditMode() {
-  isEditMode = !isEditMode;
-  document.getElementById('mainBody').classList.toggle('edit-mode', isEditMode);
-  document.getElementById('editModeBtn').textContent = isEditMode ? "선택 모드 끄기" : "선택 삭제 모드";
-  document.getElementById('deleteSelectedBtn').style.display = isEditMode ? "block" : "none";
-}
-
-// 선택된 항목 삭제 실행
-async function deleteSelected() {
-  const selected = Array.from(document.querySelectorAll('.log-checkbox:checked')).map(cb => cb.value);
-  if (selected.length === 0) return alert("삭제할 로그를 선택하세요.");
-  if (!confirm(`${selected.length}개의 기록을 한꺼번에 삭제하시겠습니까?`)) return;
-
-  for (const aid of selected) {
-    await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "deleteLog", attempt_id: aid, token: ADMIN_TOKEN }) });
-  }
-  loadData();
-  toggleEditMode(); // 삭제 후 모드 자동 해제
-}
-
-function openForceModal(aid, sid, mid, startTime) {
-  pendingData = { aid, sid, mid, startTime };
-  document.getElementById('forceEndModal').style.display = "flex";
-  document.getElementById('step1').style.display = "block";
-  document.getElementById('step2').style.display = "none";
-  document.getElementById('step3').style.display = "none";
-}
-function goStep2() { document.getElementById('step1').style.display = "none"; document.getElementById('step2').style.display = "block"; }
-function goStep3() {
-  document.getElementById('step2').style.display = "none";
-  document.getElementById('step3').style.display = "block";
-  const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  document.getElementById('customTimeInput').value = now.toISOString().slice(0,16);
-}
-async function submitForceEndWithTime() {
-  const time = new Date(document.getElementById('customTimeInput').value);
-  if(isNaN(time.getTime())) return alert("올바른 시간을 선택하세요.");
-  await submitForceEnd(time);
-}
-async function submitForceEnd(endDate) {
-  const { aid, sid, mid, startTime } = pendingData;
-  const dur = Math.round((endDate - new Date(startTime))/1000);
-  if(dur < 0) return alert("완료 시간이 시작보다 빠를 수 없습니다.");
-  await fetch(WEB_APP_URL, {
-    method: "POST",
-    body: JSON.stringify({ 
-      attempt_id: aid, student_id: sid, mission_id: mid, value: "end", 
-      note: `duration:${dur}s|force_end:true`,
-      custom_timestamp: endDate.toISOString()
-    })
-  });
-  closeModal(); loadData();
-}
-function closeModal() { document.getElementById('forceEndModal').style.display = "none"; }
-function updateTimers() {
-  document.querySelectorAll('.live-timer').forEach(el => {
-    const diff = Math.floor((Date.now() - new Date(el.dataset.start))/1000);
-    el.textContent = `⏱ 실시간: ${Math.floor(diff/60)}분 ${diff%60}초 진행 중`;
-  });
-}
-function setStudent(id, btn) {
-  document.querySelectorAll('.filter-row .btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active'); curStudent = id; render();
-}
-async function deleteLog(aid) {
-  if(!confirm("정말 삭제하시겠습니까?")) return;
-  await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "deleteLog", attempt_id: aid, token: ADMIN_TOKEN }) });
-  loadData();
-}
-async function addComment(aid) {
-  const msg = prompt("코멘트:");
-  if(msg) {
-    await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "addComment", attempt_id: aid, comment: msg, token: ADMIN_TOKEN }) });
-    loadData();
-  }
+function getMList(s, keys, l) {
+  if(!s) return "-";
+  return keys.map(k => {
+    if(!s[k] || !s[k].n) return "";
+    const m = s[k]; const ml = l[m.n];
+    let stClass = "", stTxt = "";
+    if(ml){ 
+      if(ml.status=='end') { stClass='st-done'; stTxt='완료'; }
+      else if(ml.status=='start') { stClass='st-ing'; stTxt='진행'; }
+      else if(ml.status=='fail') { stClass='st-fail'; stTxt='실패'; }
+    }
+    return `<div class="cell-mission">${m.n} <span class="cell-status ${stClass}">${stTxt}</span></div>`;
+  }).join("");
 }
 </script>
 </body>
