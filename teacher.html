@@ -5,54 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>다움학교 선생님</title>
   <style>
+    /* ... (기존 스타일 동일) ... */
     :root { --p: #4f46e5; --bg: #f1f5f9; --ok: #10b981; --fail: #ef4444; --cancel: #9ca3af; }
     body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 20px; color:#333; }
-    
     .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
     .tab { padding: 12px 24px; border-radius: 10px; background: #cbd5e1; cursor: pointer; font-weight: bold; color: #475569; transition:0.2s; }
     .tab.active { background: var(--p); color: white; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
-    .view { display: none; }
-    .view.active { display: block; animation: fadeIn 0.3s; }
+    .view { display: none; } .view.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-
     .daily-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
     .student-col { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     .col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
     .money-badge { background: #fff7ed; color: #d97706; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
-    
-    /* 미션 상태 디자인 */
     .m-item { border: 1px solid #eee; padding: 10px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
     .m-item.done { border-left: 5px solid var(--ok); background: #f0fdf4; }
     .m-item.life-ok { border-left: 5px solid var(--ok); background: #dcfce7; }
     .m-item.ing { border-left: 5px solid orange; background: #fff7ed; }
     .m-item.fail { border-left: 5px solid var(--fail); background: #fef2f2; opacity: 0.8; }
     .m-item.cancel { border-left: 5px solid var(--cancel); background: #f3f4f6; color: #6b7280; }
-    
     .weekly-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     .weekly-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .total-box { text-align: right; }
     .total-label { font-size: 13px; color: #666; }
     .total-amount { font-size: 24px; font-weight: 800; color: var(--p); }
     .penalty-info { font-size: 12px; color: var(--fail); font-weight: bold; margin-top: 5px; }
-
     .weekly-table { width: 100%; border-collapse: collapse; overflow: hidden; }
     .weekly-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 14px; border-bottom: 2px solid #e2e8f0; }
     .weekly-table td { border: 1px solid #e2e8f0; padding: 8px; vertical-align: top; text-align: center; min-height: 60px; }
-    
     .cell-mission { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
     .cell-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; }
-    
     .st-done { background: #dcfce7; color: #166534; }
     .st-fail { background: #fee2e2; color: #991b1b; }
     .st-ing { background: #fff7ed; color: #9a3412; }
     .st-cancel { background: #e5e7eb; color: #6b7280; text-decoration: line-through; }
-    
     .cell-detail { font-size: 10px; color: #64748b; line-height: 1.3; margin-top: 2px; font-family: monospace; }
     .diff-badge { font-size: 10px; font-weight: 800; padding: 1px 4px; border-radius: 3px; margin-left: 3px; }
     .diff-EASY { color: #10b981; background: #ecfdf5; border: 1px solid #10b981; }
     .diff-NORMAL { color: #3b82f6; background: #eff6ff; border: 1px solid #3b82f6; }
     .diff-HARD { color: #ef4444; background: #fef2f2; border: 1px solid #ef4444; }
-
     #modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index: 1000; }
     .modal-box { background: white; padding: 25px; border-radius: 15px; width: 400px; max-height: 90vh; overflow-y: auto; }
     input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
@@ -150,7 +140,7 @@
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEyYP7LYj0np9I3T8xSJbrNjwnSpvYr5ljigtQp2BB6SYbeUKIbGLB5o6iunDitLeA7g/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbysAu4f32G9Eo_gj6UlpTSepVACLyDSpo-c_Xr9FkM1Dn4slJK6sJ4bgsZMl2nSJQrwdQ/exec"; 
 const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -266,18 +256,22 @@ function uploadPhoto() {
   reader.onload = function(e) {
     const b64 = e.target.result.split(',')[1];
     const sid = document.getElementById('mSid').value;
+    const date = document.getElementById('dDate').value; // 날짜 포함
     fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
       action:"uploadLifePhoto", base64:b64, mimeType:file.type, sid:sid, 
-      name:students[sid], date:document.getElementById('dDate').value 
+      name:students[sid], date:date 
     })}).then(r=>r.json()).then(()=>{ alert("완료"); document.getElementById('modal').style.display='none'; loadDaily(); });
   };
   reader.readAsDataURL(file);
 }
 
 function sendCtrl(act) {
+  const date = document.getElementById('dDate').value; // [중요] 날짜 선택기 값 읽기
+  
   if(act === 'life_ok') {
      fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
-      action:"teacherControl", sid:document.getElementById('mSid').value, mid:"생활미션", act:"life_ok", note:"수동완료"
+      action:"teacherControl", sid:document.getElementById('mSid').value, mid:"생활미션", act:"life_ok", note:"수동완료",
+      date: date // 날짜 전송
     })}).then(()=>{ alert("완료됨"); document.getElementById('modal').style.display='none'; loadDaily(); });
     return;
   }
@@ -286,7 +280,8 @@ function sendCtrl(act) {
     action:"teacherControl", 
     sid:document.getElementById('mSid').value, mid:document.getElementById('mMid').value, 
     newMissionName: newName, act:act, comment:document.getElementById('tComment').value, 
-    startTime:document.getElementById('tStart').value, endTime:document.getElementById('tEnd').value
+    startTime:document.getElementById('tStart').value, endTime:document.getElementById('tEnd').value,
+    date: date // 날짜 전송
   })}).then(()=>{ alert("처리됨"); document.getElementById('modal').style.display='none'; loadDaily(); });
 }
 
@@ -384,7 +379,7 @@ function getMList(s, keys, l) {
         stClass='st-ing'; stTxt='진행중'; detailTxt = parseTimeStr(ml);
       }
       else if(ml.status=='fail') { stClass='st-fail'; stTxt='실패'; }
-      else if(ml.status=='cancel') { stClass='st-cancel'; stTxt='휴강'; } // 휴강 추가
+      else if(ml.status=='cancel') { stClass='st-cancel'; stTxt='휴강'; }
       
       return `<div class="cell-mission">${mName}${diffHtml}<span class="cell-status ${stClass}">${stTxt}</span><div class="cell-detail">${detailTxt}</div></div>`;
     }
