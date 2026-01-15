@@ -104,8 +104,8 @@
       <button class="btn" style="background:var(--ok);" onclick="handleLife('life_ok')">✅ 완료 승인 (사진 저장)</button>
       <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
       <div style="display:flex; gap:5px;">
-        <button class="btn" style="background:var(--fail);" onclick="handleLife('fail')">❌ 실패</button>
-        <button class="btn" style="background:var(--cancel); color:white;" onclick="sendCtrl('cancel')">🚫 휴강</button>
+        <button class="btn" style="background:var(--fail);" onclick="handleLife('fail')">❌ 실패 (사진 있으면 저장)</button>
+        <button class="btn" style="background:var(--cancel); color:white;" onclick="sendCtrl('cancel')">🚫 휴강 (면제)</button>
       </div>
     </div>
 
@@ -141,7 +141,7 @@
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwIcoWxmK66YswMR3FqTa6Xjsdymt9M8UvZkIHzXyQRHVpgY6dA-3Va1mhfVYuqtZK1EQ/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwKOIPp41cuWzkbAmop9Y_Ex5szg6cnq_xxIYa-LKZApxxWPPZ6GliMWrHTiTOIdxhSoA/exec"; 
 const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -215,12 +215,9 @@ function loadDaily() {
             if(ml.status=='start')c='ing'; if(ml.status=='end')c='done'; 
             if(ml.status=='fail')c='fail'; if(ml.status=='cancel')c='cancel';
           }
-          
           let tStr = parseTimeStr(ml);
           if(ml && ml.status=='cancel') tStr = "휴강됨";
           
-          // [수정] 계획된 난이도(m.l)도 함께 전달하여 모달에서 쓸 수 있게 함
-          // 여기서 난이도(badge)를 일간 화면에도 보여주면 더 좋음
           let diffHtml = "";
           let currentDiff = (ml && ml.comment) ? ml.comment : (m.l || "NORMAL");
           if(["EASY","NORMAL","HARD"].includes(currentDiff)) {
@@ -242,13 +239,11 @@ function loadDaily() {
   });
 }
 
-// [핵심 수정] 모달 열 때 현재 난이도(diff)를 받아서 세팅
 function openModal(sid, mid, diff) {
   document.getElementById('modal').style.display='flex';
   document.getElementById('mTitle').innerText = students[sid] + " - " + mid;
   document.getElementById('mSid').value = sid; document.getElementById('mMid').value = mid;
   
-  // 초기화
   document.getElementById('lifePhoto').value = ""; 
   document.querySelectorAll('.life-chk').forEach(c => c.checked = false);
   
@@ -256,10 +251,7 @@ function openModal(sid, mid, diff) {
   document.getElementById('ui-normal').style.display='none';
   document.getElementById('ui-day').style.display='none';
   document.getElementById('ctrlMissionSelect').value = "";
-  
-  // [중요] 받아온 난이도로 설정 (없으면 NORMAL)
   document.getElementById('tComment').value = diff || "NORMAL";
-  
   document.getElementById('tStart').value = "";
   document.getElementById('tEnd').value = "";
 
@@ -367,8 +359,9 @@ function loadWeekly() {
     h+=`</tr></tbody></table>`;
     document.getElementById('weeklyBoard').innerHTML = h;
     document.getElementById('totalWeekMoney').innerText = res.total.toLocaleString();
-    if(res.failCount > 0) document.getElementById('penaltyMsg').innerText = `⚠️ 생활미션 ${res.failCount}회 실패로 수입 ${res.factor} 감소`;
-    else document.getElementById('penaltyMsg').innerText = `✨ 생활미션 All Clear!`;
+    
+    // [수정] 페널티 문구 제거 (필요시 부활 가능)
+    document.getElementById('penaltyMsg').innerText = ""; 
   });
 }
 
