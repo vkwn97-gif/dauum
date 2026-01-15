@@ -7,40 +7,49 @@
   <style>
     :root { --p: #4f46e5; --bg: #f8fafc; --card: #ffffff; --ok: #10b981; --fail: #ef4444; }
     body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 15px; margin: 0; color:#333; }
-    .view { display: none; } .view.active { display: block; animation: fadeIn 0.3s; }
+    
+    .view { display: none; }
+    .view.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
     .container { max-width: 500px; margin: 0 auto; position: relative; }
     .card { background: var(--card); border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; text-align: center; }
+    
     .user-card { cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
     .user-card:active { transform: scale(0.98); border-color: var(--p); }
     .avatar { font-size: 40px; margin-bottom: 10px; display: block; }
+
     select, button { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 10px; font-size: 16px; box-sizing: border-box; }
     button.primary { background: var(--p); color: white; border: none; font-weight: bold; cursor: pointer; }
+    
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     label { font-size: 14px; font-weight: 800; color: var(--p); margin: 20px 0 10px; display: block; text-align: left; }
     .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
     .fix-label { background: #f1f5f9; padding: 12px; border-radius: 12px; flex: 1; font-weight: bold; font-size: 15px; }
     .day-badge { display: inline-block; background: #e0e7ff; color: var(--p); padding: 5px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
+
     .mission-item { background: white; border: 1px solid #e2e8f0; border-radius: 15px; padding: 15px; margin-bottom: 10px; text-align: left; position: relative; }
     .mission-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
     .mission-name { font-weight: bold; font-size: 16px; }
     .mission-lv { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
     
-    /* 버튼 스타일 */
     .btn-action { width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: 1px solid var(--p); background: white; color: var(--p); transition: 0.2s; }
     .btn-action.ing { background: #fff7ed; border: 2px solid orange; color: #d97706; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
     .btn-action.done { background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; cursor: not-allowed; }
-    /* 관리자용 완료 버튼 활성화 */
     .btn-action.done.admin-active { cursor: pointer; border: 1px dashed #94a3b8; background: #f8fafc; color: #64748b; }
     .btn-action:disabled { opacity: 0.6; cursor: not-allowed; background: #f8fafc; border-color: #cbd5e1; color: #94a3b8; }
+
     .live-timer { font-size: 24px; font-weight: 800; color: #d97706; text-align: center; margin: 10px 0; display: none; }
     
     #adminBtn { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; background: none; border: none; z-index: 99; }
     #adminPanel { background: #1e293b; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .admin-row { display: flex; gap: 5px; width: 100%; justify-content: center; }
+    
+    /* 모달 스타일 */
     #adminModalOverlay, #adminTimeModal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
     #adminModalContent { background: white; width: 100%; max-width: 400px; border-radius: 20px; padding: 30px; box-sizing: border-box; text-align: center; margin: 20px; }
+    
     .hidden { display: none !important; }
   </style>
 </head>
@@ -134,7 +143,7 @@
   </div>
 </div>
 
-<div id="adminTimeModal" class="hidden" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; display:none;">
+<div id="adminTimeModal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; display:none;">
   <div style="background:white; width:300px; padding:20px; border-radius:15px; text-align:center;">
     <h3>⏰ 시간 설정 (관리자)</h3>
     <label>시작 시간 ~ 종료 시간</label>
@@ -199,10 +208,7 @@ function exitAdmin() {
 }
 
 function checkUser(id, name) {
-  if(WEB_APP_URL.includes("여기에")) return alert("URL을 설정해주세요!");
-  
   curId = id; curName = name;
-  // [수정] 클릭 애니메이션 제거 (즉시 호출)
   fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "checkSchedule", id: id, date: getAppDateStr() }) })
   .then(res=>res.json()).then(res=>{
     if(res.hasSchedule) {
@@ -222,9 +228,7 @@ function checkUser(id, name) {
          document.getElementById('plan-thursday').classList.add('hidden');
       }
     }
-  }).catch(e => {
-    alert("오류 발생: 인터넷 연결이나 URL을 확인하세요.");
-  });
+  }).catch(e => { alert("오류가 발생했습니다. URL을 확인해주세요."); });
 }
 
 function savePlan() {
@@ -304,8 +308,6 @@ function renderItem(container, t) {
   const div = document.createElement('div');
   div.className = "mission-item";
   
-  // [수정] 휴강 표시 제거 (학생에게는 안 보임)
-  
   let btnClass = "";
   let btnText = "시작하기";
   let disabled = "";
@@ -333,15 +335,15 @@ function renderItem(container, t) {
 
 function handleMission(name, level) {
   const btn = document.getElementById(`btn-${name}`);
+  if(btn.disabled) return;
   const key = `${curId}_active_${getAppDateStr()}`;
   const active = localStorage.getItem(key);
   
-  // 완료된 미션 처리 (관리자만)
   const isDone = localStorage.getItem(`${curId}_${name}_${getAppDateStr()}_done`) === "yes";
   if (isDone) {
     if (isAdminMode) {
       curM = name; 
-      document.getElementById('adminTimeModal').style.display = 'flex';
+      document.getElementById('adminTimeModal').style.display = 'flex'; // [수정됨: 팝업 뜸]
       document.getElementById('admStart').value = "";
       document.getElementById('admEnd').value = "";
       return;
@@ -350,7 +352,6 @@ function handleMission(name, level) {
     }
   }
 
-  // 시작
   if(!active) {
     localStorage.setItem(key, name);
     localStorage.setItem(`${key}_start`, Date.now());
@@ -363,9 +364,7 @@ function handleMission(name, level) {
       note: `Start: ${new Date().toTimeString().slice(0,5)}`
     }) });
     startTimer(name);
-  } 
-  // 완료 (진행 중일 때) - [수정] 즉시 confirm 호출
-  else if(active === name) {
+  } else if(active === name) {
     if (isAdminMode) {
       curM = name; 
       document.getElementById('adminTimeModal').style.display = 'flex';
@@ -408,9 +407,7 @@ function finishAdminMission() {
 }
 
 function finishImmediate(name, level) {
-  // [수정] confirm 창 호출 보장
   if(!confirm("완료하시겠습니까?")) return;
-  
   const key = `${curId}_active_${getAppDateStr()}`;
   const st = parseInt(localStorage.getItem(`${key}_start`));
   const diff = Math.floor((Date.now()-st)/1000/60); 
