@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>다움학교 선생님</title>
   <style>
-    /* ... (기존 스타일 동일) ... */
+    /* 기존 스타일 유지 */
     :root { --p: #4f46e5; --bg: #f1f5f9; --ok: #10b981; --fail: #ef4444; --cancel: #9ca3af; }
     body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 20px; color:#333; }
     .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -99,12 +99,13 @@
         <label><input type="checkbox" class="life-chk"> 5. 전기 및 불 끄기</label>
       </div>
       <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
+      <p style="font-size:14px; font-weight:bold;">📸 증거 사진 (선택)</p>
       <input type="file" id="lifePhoto" accept="image/*">
-      <button class="btn" style="background:var(--ok);" onclick="uploadPhoto()">완료 승인</button>
+      <button class="btn" style="background:var(--ok);" onclick="handleLife('life_ok')">✅ 완료 승인 (사진 저장)</button>
       <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
       <div style="display:flex; gap:5px;">
-        <button class="btn" style="background:var(--fail);" onclick="sendCtrl('fail')">❌ 실패 (감점)</button>
-        <button class="btn" style="background:var(--cancel); color:white;" onclick="sendCtrl('cancel')">🚫 휴강 (면제)</button>
+        <button class="btn" style="background:var(--fail);" onclick="handleLife('fail')">❌ 실패</button>
+        <button class="btn" style="background:var(--cancel); color:white;" onclick="sendCtrl('cancel')">🚫 휴강</button>
       </div>
     </div>
 
@@ -140,7 +141,7 @@
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbysAu4f32G9Eo_gj6UlpTSepVACLyDSpo-c_Xr9FkM1Dn4slJK6sJ4bgsZMl2nSJQrwdQ/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwIcoWxmK66YswMR3FqTa6Xjsdymt9M8UvZkIHzXyQRHVpgY6dA-3Va1mhfVYuqtZK1EQ/exec"; 
 const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -214,10 +215,23 @@ function loadDaily() {
             if(ml.status=='start')c='ing'; if(ml.status=='end')c='done'; 
             if(ml.status=='fail')c='fail'; if(ml.status=='cancel')c='cancel';
           }
+          
           let tStr = parseTimeStr(ml);
           if(ml && ml.status=='cancel') tStr = "휴강됨";
+          
+          // [수정] 계획된 난이도(m.l)도 함께 전달하여 모달에서 쓸 수 있게 함
+          // 여기서 난이도(badge)를 일간 화면에도 보여주면 더 좋음
+          let diffHtml = "";
+          let currentDiff = (ml && ml.comment) ? ml.comment : (m.l || "NORMAL");
+          if(["EASY","NORMAL","HARD"].includes(currentDiff)) {
+             const dCls = currentDiff==='EASY'?'diff-EASY':(currentDiff==='HARD'?'diff-HARD':'diff-NORMAL');
+             diffHtml = `<span class="diff-badge ${dCls}">${currentDiff}</span>`;
+          }
 
-          col.innerHTML += `<div class="m-item ${c}" onclick="openModal('${sid}','${effectiveName}')"><div>${effectiveName} <small>${m.l||""}</small></div><small>${tStr}</small></div>`;
+          col.innerHTML += `<div class="m-item ${c}" onclick="openModal('${sid}','${effectiveName}', '${currentDiff}')">
+            <div>${effectiveName} ${diffHtml}</div>
+            <small>${tStr}</small>
+          </div>`;
         });
       }
       const btnTxt = isPaid ? "✅ 정산 완료" : "하루 기록 (정산)";
@@ -228,16 +242,24 @@ function loadDaily() {
   });
 }
 
-function openModal(sid, mid) {
+// [핵심 수정] 모달 열 때 현재 난이도(diff)를 받아서 세팅
+function openModal(sid, mid, diff) {
   document.getElementById('modal').style.display='flex';
   document.getElementById('mTitle').innerText = students[sid] + " - " + mid;
   document.getElementById('mSid').value = sid; document.getElementById('mMid').value = mid;
+  
+  // 초기화
+  document.getElementById('lifePhoto').value = ""; 
+  document.querySelectorAll('.life-chk').forEach(c => c.checked = false);
   
   document.getElementById('ui-life').style.display='none';
   document.getElementById('ui-normal').style.display='none';
   document.getElementById('ui-day').style.display='none';
   document.getElementById('ctrlMissionSelect').value = "";
-  document.getElementById('tComment').value = "NORMAL";
+  
+  // [중요] 받아온 난이도로 설정 (없으면 NORMAL)
+  document.getElementById('tComment').value = diff || "NORMAL";
+  
   document.getElementById('tStart').value = "";
   document.getElementById('tEnd').value = "";
 
@@ -246,42 +268,46 @@ function openModal(sid, mid) {
   else document.getElementById('ui-normal').style.display='block';
 }
 
-function uploadPhoto() {
+function handleLife(status) {
   const file = document.getElementById('lifePhoto').files[0];
-  if(!file) {
-    if(!confirm("사진 없이 완료 처리?")) return;
-    sendCtrl('life_ok'); return;
+  if(file) uploadPhoto(status);
+  else {
+    if(status === 'life_ok') { if(!confirm("사진 없이 완료 승인하시겠습니까?")) return; sendCtrl('life_ok'); }
+    else sendCtrl('fail');
   }
+}
+
+function uploadPhoto(status) {
+  const file = document.getElementById('lifePhoto').files[0];
   const reader = new FileReader();
   reader.onload = function(e) {
     const b64 = e.target.result.split(',')[1];
     const sid = document.getElementById('mSid').value;
-    const date = document.getElementById('dDate').value; // 날짜 포함
+    const date = document.getElementById('dDate').value;
     fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
       action:"uploadLifePhoto", base64:b64, mimeType:file.type, sid:sid, 
-      name:students[sid], date:date 
-    })}).then(r=>r.json()).then(()=>{ alert("완료"); document.getElementById('modal').style.display='none'; loadDaily(); });
+      name:students[sid], date:date, status:status
+    })}).then(r=>r.json()).then(()=>{ alert("처리 완료"); document.getElementById('modal').style.display='none'; loadDaily(); });
   };
   reader.readAsDataURL(file);
 }
 
 function sendCtrl(act) {
-  const date = document.getElementById('dDate').value; // [중요] 날짜 선택기 값 읽기
-  
-  if(act === 'life_ok') {
-     fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
-      action:"teacherControl", sid:document.getElementById('mSid').value, mid:"생활미션", act:"life_ok", note:"수동완료",
-      date: date // 날짜 전송
-    })}).then(()=>{ alert("완료됨"); document.getElementById('modal').style.display='none'; loadDaily(); });
-    return;
+  const date = document.getElementById('dDate').value;
+  if(act === 'life_ok' || act === 'fail' || act === 'cancel') {
+     if(document.getElementById('mMid').value === '생활미션') {
+        fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
+          action:"teacherControl", sid:document.getElementById('mSid').value, mid:"생활미션", act:act, note:"수동처리", date: date
+        })}).then(()=>{ alert("완료됨"); document.getElementById('modal').style.display='none'; loadDaily(); });
+        return;
+     }
   }
   const newName = document.getElementById('ctrlMissionSelect').value;
   fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
     action:"teacherControl", 
     sid:document.getElementById('mSid').value, mid:document.getElementById('mMid').value, 
     newMissionName: newName, act:act, comment:document.getElementById('tComment').value, 
-    startTime:document.getElementById('tStart').value, endTime:document.getElementById('tEnd').value,
-    date: date // 날짜 전송
+    startTime:document.getElementById('tStart').value, endTime:document.getElementById('tEnd').value, date: date
   })}).then(()=>{ alert("처리됨"); document.getElementById('modal').style.display='none'; loadDaily(); });
 }
 
