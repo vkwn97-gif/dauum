@@ -3,37 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>다움학교 학생앱</title>
+  <title>LDS 사원 앱</title>
   <style>
     :root { --p: #4f46e5; --bg: #f8fafc; --card: #ffffff; --ok: #10b981; --fail: #ef4444; }
     body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 15px; margin: 0; color:#333; }
-    
-    .view { display: none; }
-    .view.active { display: block; animation: fadeIn 0.3s; }
+    .view { display: none; } .view.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-
     .container { max-width: 500px; margin: 0 auto; position: relative; }
     .card { background: var(--card); border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; text-align: center; }
-    
-    .user-card { cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+    .user-card { cursor: pointer; transition: 0.2s; border: 1px solid transparent; display: flex; align-items: center; justify-content: flex-start; gap: 15px; padding: 20px; }
     .user-card:active { transform: scale(0.98); border-color: var(--p); }
-    .avatar { font-size: 40px; margin-bottom: 10px; display: block; }
+    .avatar { font-size: 24px; background: #e0e7ff; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+    .user-info { text-align: left; }
+    .user-name { font-size: 18px; font-weight: bold; margin: 0; color: #1e293b; }
+    .user-role { font-size: 12px; color: #64748b; margin: 0; }
+    
+    .lds-header { text-align: center; margin: 40px 0 30px; }
+    .lds-logo-text { font-size: 12px; font-weight: 900; color: #94a3b8; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
+    .lds-main-title { font-size: 26px; font-weight: 800; color: #1e293b; margin: 0; }
+    .lds-date { color: #64748b; margin-top: 8px; font-size: 14px; font-weight: 500; }
 
     select, button { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 10px; font-size: 16px; box-sizing: border-box; }
     button.primary { background: var(--p); color: white; border: none; font-weight: bold; cursor: pointer; }
-    
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     label { font-size: 14px; font-weight: 800; color: var(--p); margin: 20px 0 10px; display: block; text-align: left; }
     .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
     .fix-label { background: #f1f5f9; padding: 12px; border-radius: 12px; flex: 1; font-weight: bold; font-size: 15px; }
     .day-badge { display: inline-block; background: #e0e7ff; color: var(--p); padding: 5px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
-
     .mission-item { background: white; border: 1px solid #e2e8f0; border-radius: 15px; padding: 15px; margin-bottom: 10px; text-align: left; position: relative; }
     .mission-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
     .mission-name { font-weight: bold; font-size: 16px; }
     .mission-lv { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
-    
-    /* 버튼 */
     .btn-action { width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: 1px solid var(--p); background: white; color: var(--p); transition: 0.2s; }
     .btn-action.ing { background: #fff7ed; border: 2px solid orange; color: #d97706; animation: pulse 1.5s infinite; }
     .btn-action.done { background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; cursor: not-allowed; }
@@ -41,11 +41,9 @@
     .btn-action:disabled { opacity: 0.6; cursor: not-allowed; background: #f8fafc; border-color: #cbd5e1; color: #94a3b8; }
     .live-timer { font-size: 24px; font-weight: 800; color: #d97706; text-align: center; margin: 10px 0; display: none; }
     
-    /* 관리자 패널 */
-    #adminBtn { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; background: none; border: none; z-index: 99; }
+    #adminBtn { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; background: none; border: none; z-index: 99; color: #cbd5e1; }
     #adminPanel { background: #1e293b; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .admin-row { display: flex; gap: 5px; width: 100%; justify-content: center; }
-    
     #adminModalOverlay, #adminTimeModal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
     #adminModalContent { background: white; width: 100%; max-width: 400px; border-radius: 20px; padding: 30px; box-sizing: border-box; text-align: center; margin: 20px; }
     .hidden { display: none !important; }
@@ -63,65 +61,62 @@
     </div>
     <button onclick="exitAdmin()" style="background:#ef4444; color:white; border:none; padding:8px; border-radius:8px; width:100%; font-size:12px; margin:0;">관리자 모드 종료</button>
   </div>
-  <div style="text-align:center; margin: 30px 0;">
-    <h1 style="color:var(--p); margin:0;">다움학교</h1>
-    <p id="todayDate" style="color:#64748b; margin:5px; font-weight:bold;"></p>
+  
+  <div class="lds-header">
+    <div class="lds-logo-text">LIFE DESIGN STUDIO</div>
+    <h1 class="lds-main-title">LDS 사원 앱</h1>
+    <p id="todayDate" class="lds-date"></p>
   </div>
-  <div class="card user-card" onclick="checkUser('S01','강태윤')"><span class="avatar">👤</span><h2>강태윤</h2></div>
-  <div class="card user-card" onclick="checkUser('S02','김대중')"><span class="avatar">👤</span><h2>김대중</h2></div>
-  <div class="card user-card" onclick="checkUser('S03','최원준')"><span class="avatar">👤</span><h2>최원준</h2></div>
+
+  <div class="card user-card" onclick="checkUser('S01','강태윤')">
+    <div class="avatar">👨‍💼</div>
+    <div class="user-info"><h2 class="user-name">강태윤</h2><p class="user-role">LDS 사원 (S01)</p></div>
+  </div>
+  <div class="card user-card" onclick="checkUser('S02','김대중')">
+    <div class="avatar">👨‍💼</div>
+    <div class="user-info"><h2 class="user-name">김대중</h2><p class="user-role">LDS 사원 (S02)</p></div>
+  </div>
+  <div class="card user-card" onclick="checkUser('S03','최원준')">
+    <div class="avatar">👨‍💼</div>
+    <div class="user-info"><h2 class="user-name">최원준</h2><p class="user-role">LDS 사원 (S03)</p></div>
+  </div>
 </div>
 
 <div id="view-plan" class="view container">
   <div class="card">
     <div class="day-badge" id="planDayBadge">요일</div>
-    <h2 id="planTitle"></h2>
-    
+    <h2 id="planTitle" style="color:#1e293b;">업무 계획 수립</h2>
     <div id="plan-normal" class="hidden">
       <label>🕰️ 09:30 ~ 11:00 아이브러리</label>
       <div class="row"><div class="fix-label">글쓰기</div><select id="m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
       <div class="row"><div class="fix-label">독서</div><select id="m2_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
       <div class="row"><div class="fix-label">자서전</div><select id="m3_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-      <label>🕰️ 11:00 ~ 12:00 선택 수업 (2개)</label>
-      <div class="grid">
-        <select id="c1_a"><option>컴퓨터</option><option>운동</option><option>글씨 연습</option><option>영어회화</option></select>
-        <select id="c1_a_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select>
-      </div>
-      <div class="grid">
-        <select id="c1_b"><option selected>운동</option><option>컴퓨터</option><option>글씨 연습</option><option>영어회화</option></select>
-        <select id="c1_b_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select>
-      </div>
+      <label>🕰️ 11:00 ~ 12:00 선택 수업</label>
+      <div class="grid"><select id="c1_a"><option>컴퓨터</option><option>운동</option><option>글씨 연습</option><option>영어회화</option></select><select id="c1_a_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+      <div class="grid"><select id="c1_b"><option selected>운동</option><option>컴퓨터</option><option>글씨 연습</option><option>영어회화</option></select><select id="c1_b_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
       <label>🕰️ 13:00 ~ 15:00 오후 활동</label>
       <select id="c2"><option>검정고시</option><option>음악</option><option>SCL책력</option><option>심화공부</option><option>운동</option></select>
     </div>
-
     <div id="plan-thursday" class="hidden">
-      <p style="color:#64748b; font-size:13px; margin:10px 0;">😴 오전 수업 없음</p>
+      <p style="color:#64748b; font-size:13px; margin:10px 0;">😴 오전 업무 없음</p>
       <label>🕰️ 13:00 ~ 15:00 오후 활동</label>
       <select id="th_c2"><option>검정고시</option><option>교류수업</option><option>음악</option><option>심화수업</option><option>SCL책력</option></select>
       <label>🕰️ 15:00 ~ 17:00 아이브러리</label>
       <div class="row"><div class="fix-label">글쓰기 기초</div><select id="th_m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
       <div class="row"><div class="fix-label">독서</div><select id="th_m2_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
       <div class="row"><div class="fix-label">자서전</div><select id="th_m3_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-      <label>➕ 선택 활동 (2개)</label>
-      <div class="grid">
-        <select id="th_c1_a"><option>컴퓨터</option><option>영어</option><option>글씨 연습</option><option>운동</option></select>
-        <select id="th_c1_a_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select>
-      </div>
-      <div class="grid">
-        <select id="th_c1_b"><option selected>운동</option><option>컴퓨터</option><option>영어</option><option>글씨 연습</option></select>
-        <select id="th_c1_b_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select>
-      </div>
+      <label>➕ 선택 활동</label>
+      <div class="grid"><select id="th_c1_a"><option>컴퓨터</option><option>영어</option><option>글씨 연습</option><option>운동</option></select><select id="th_c1_a_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+      <div class="grid"><select id="th_c1_b"><option selected>운동</option><option>컴퓨터</option><option>영어</option><option>글씨 연습</option></select><select id="th_c1_b_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
     </div>
-
-    <button class="primary" onclick="savePlan()" style="margin-top:20px;">스케줄 저장 완료</button>
+    <button class="primary" onclick="savePlan()" style="margin-top:20px;">업무 스케줄 제출</button>
     <button onclick="goHome()" style="background:white; color:#64748b; margin-top:5px;">취소</button>
   </div>
 </div>
 
 <div id="view-mission" class="view container">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:0 5px;">
-    <h2 id="missionTitle" style="font-size:20px;"></h2>
+    <h2 id="missionTitle" style="font-size:18px; color:#1e293b;"></h2>
     <div style="display:flex; gap:8px;">
       <button onclick="editPlan()" style="background:white; color:var(--p); border:1px solid var(--p); padding:6px 12px; width:auto; border-radius:8px; font-size:13px; margin:0;">✏️ 수정</button>
       <button onclick="goHome()" style="background:#f1f5f9; color:#64748b; border:none; padding:6px 12px; width:auto; border-radius:8px; font-size:13px; margin:0;">나가기</button>
@@ -142,17 +137,16 @@
 <div id="adminTimeModal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; display:none;">
   <div style="background:white; width:300px; padding:20px; border-radius:15px; text-align:center;">
     <h3>⏰ 시간 설정 (관리자)</h3>
-    <label>시작 시간 ~ 종료 시간</label>
-    <div style="display:flex; gap:5px; margin:10px 0;">
-      <input type="time" id="admStart"> ~ <input type="time" id="admEnd">
-    </div>
+    <div style="display:flex; gap:5px; margin:10px 0;"><input type="time" id="admStart"> ~ <input type="time" id="admEnd"></div>
     <button onclick="finishAdminMission()" style="background:var(--p); color:white; width:100%;">완료 처리</button>
     <button onclick="document.getElementById('adminTimeModal').style.display='none'" style="background:#eee; color:#333; width:100%; margin-top:5px;">취소</button>
   </div>
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmsvx5xVkJvVhLsVvLsLtHdhdX5OwEma7Ipzr6HU0cR-7JMa5uQyipwGIWZB1nxVJudw/exec"; 
+// ▼▼▼▼▼ 주소 변경 필수 ▼▼▼▼▼
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyFwglSWgxNlWq5KLKmUq4nx1Ina3AoNSJPbDRK6YaX6W5knQATBalYLTYiVIwuShd6KQ/exec"; 
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 let appDate = new Date();
 let curId, curName, curM;
@@ -165,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => { renderDate(); });
 function renderDate() {
   const days = ['일','월','화','수','목','금','토'];
   document.getElementById('todayDate').innerText = `${appDate.toLocaleDateString()} (${days[appDate.getDay()]})`;
-  document.getElementById('planDayBadge').innerText = `${days[appDate.getDay()]}요일 스케줄`;
+  document.getElementById('planDayBadge').innerText = `${days[appDate.getDay()]}요일 업무`;
 }
 function getAppDateStr() {
   const offset = appDate.getTimezoneOffset() * 60000;
@@ -205,225 +199,115 @@ function exitAdmin() {
 function checkUser(id, name) {
   curId = id; curName = name;
   fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "checkSchedule", id: id, date: getAppDateStr() }) })
-  .then(res=>res.json()).then(res=>{
-    if(res.hasSchedule) {
-      currentScheduleData = res.data;
-      renderMissions(res.data);
-      showView('view-mission');
-      document.getElementById('missionTitle').innerText = `${name} (${getAppDateStr()})`;
-      restoreMissionState();
-    } else {
-      currentScheduleData = null;
-      showView('view-plan');
-      if(appDate.getDay()===4) { 
-         document.getElementById('plan-normal').classList.add('hidden'); 
-         document.getElementById('plan-thursday').classList.remove('hidden'); 
+  .then(r => r.json()).then(scheduleRes => {
+      if(scheduleRes.hasSchedule) {
+          currentScheduleData = scheduleRes.data;
+          renderMissions(scheduleRes.data);
+          showView('view-mission');
+          document.getElementById('missionTitle').innerText = `${name} 사원 (${getAppDateStr()})`;
+          restoreMissionState();
       } else {
-         document.getElementById('plan-normal').classList.remove('hidden'); 
-         document.getElementById('plan-thursday').classList.add('hidden');
+          showView('view-plan');
+          const saveBtn = document.querySelector('#view-plan button.primary');
+          // 잠금 로직 없이 항상 활성화
+          saveBtn.disabled = false;
+          saveBtn.innerText = "업무 스케줄 제출";
+          saveBtn.style.background = "var(--p)";
+          saveBtn.style.cursor = "pointer";
+          
+          if(appDate.getDay()===4) { 
+             document.getElementById('plan-normal').classList.add('hidden'); 
+             document.getElementById('plan-thursday').classList.remove('hidden'); 
+          } else {
+             document.getElementById('plan-normal').classList.remove('hidden'); 
+             document.getElementById('plan-thursday').classList.add('hidden');
+          }
       }
-    }
-  }).catch(e => { alert("오류가 발생했습니다."); });
+  });
 }
 
 function savePlan() {
   let data = { action: "saveSchedule", id: curId, date: getAppDateStr(), dayStr: (appDate.getDay()===4?"목":"평일") };
   if (appDate.getDay() === 4) {
-    data.c2n = document.getElementById('th_c2').value;
-    data.m1l = document.getElementById('th_m1_lv').value;
-    data.m2l = document.getElementById('th_m2_lv').value;
-    data.m3l = document.getElementById('th_m3_lv').value;
-    data.c1an = document.getElementById('th_c1_a').value;
-    data.c1al = document.getElementById('th_c1_a_lv').value;
-    data.c1bn = document.getElementById('th_c1_b').value;
-    data.c1bl = document.getElementById('th_c1_b_lv').value;
+    data.c2n = document.getElementById('th_c2').value; data.m1l = document.getElementById('th_m1_lv').value; data.m2l = document.getElementById('th_m2_lv').value; data.m3l = document.getElementById('th_m3_lv').value;
+    data.c1an = document.getElementById('th_c1_a').value; data.c1al = document.getElementById('th_c1_a_lv').value; data.c1bn = document.getElementById('th_c1_b').value; data.c1bl = document.getElementById('th_c1_b_lv').value;
   } else {
-    data.m1l = document.getElementById('m1_lv').value;
-    data.m2l = document.getElementById('m2_lv').value;
-    data.m3l = document.getElementById('m3_lv').value;
-    data.c1an = document.getElementById('c1_a').value;
-    data.c1al = document.getElementById('c1_a_lv').value;
-    data.c1bn = document.getElementById('c1_b').value;
-    data.c1bl = document.getElementById('c1_b_lv').value;
-    data.c2n = document.getElementById('c2').value;
+    data.m1l = document.getElementById('m1_lv').value; data.m2l = document.getElementById('m2_lv').value; data.m3l = document.getElementById('m3_lv').value;
+    data.c1an = document.getElementById('c1_a').value; data.c1al = document.getElementById('c1_a_lv').value; data.c1bn = document.getElementById('c1_b').value; data.c1bl = document.getElementById('c1_b_lv').value; data.c2n = document.getElementById('c2').value;
   }
-  fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(data) }).then(()=>{ alert("저장됨"); checkUser(curId, curName); });
+  fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(data) }).then(()=>{ alert("업무 계획이 제출되었습니다."); checkUser(curId, curName); });
 }
 function editPlan() { 
   showView('view-plan'); 
   const d = currentScheduleData;
   if(d) {
     if (appDate.getDay() === 4) {
-      document.getElementById('plan-normal').classList.add('hidden'); 
-      document.getElementById('plan-thursday').classList.remove('hidden'); 
-      document.getElementById('th_c2').value = d.c2.n;
-      document.getElementById('th_m1_lv').value = d.m1.l;
-      document.getElementById('th_m2_lv').value = d.m2.l;
-      document.getElementById('th_m3_lv').value = d.m3.l;
-      document.getElementById('th_c1_a').value = d.c1a.n;
-      document.getElementById('th_c1_a_lv').value = d.c1a.l;
-      document.getElementById('th_c1_b').value = d.c1b.n;
-      document.getElementById('th_c1_b_lv').value = d.c1b.l;
+      document.getElementById('plan-normal').classList.add('hidden'); document.getElementById('plan-thursday').classList.remove('hidden'); 
+      document.getElementById('th_c2').value = d.c2.n; document.getElementById('th_m1_lv').value = d.m1.l; document.getElementById('th_m2_lv').value = d.m2.l; document.getElementById('th_m3_lv').value = d.m3.l;
+      document.getElementById('th_c1_a').value = d.c1a.n; document.getElementById('th_c1_a_lv').value = d.c1a.l; document.getElementById('th_c1_b').value = d.c1b.n; document.getElementById('th_c1_b_lv').value = d.c1b.l;
     } else {
-      document.getElementById('plan-normal').classList.remove('hidden'); 
-      document.getElementById('plan-thursday').classList.add('hidden');
-      document.getElementById('m1_lv').value = d.m1.l;
-      document.getElementById('m2_lv').value = d.m2.l;
-      document.getElementById('m3_lv').value = d.m3.l;
-      document.getElementById('c1_a').value = d.c1a.n;
-      document.getElementById('c1_a_lv').value = d.c1a.l;
-      document.getElementById('c1_b').value = d.c1b.n;
-      document.getElementById('c1_b_lv').value = d.c1b.l;
-      document.getElementById('c2').value = d.c2.n;
+      document.getElementById('plan-normal').classList.remove('hidden'); document.getElementById('plan-thursday').classList.add('hidden');
+      document.getElementById('m1_lv').value = d.m1.l; document.getElementById('m2_lv').value = d.m2.l; document.getElementById('m3_lv').value = d.m3.l;
+      document.getElementById('c1_a').value = d.c1a.n; document.getElementById('c1_a_lv').value = d.c1a.l; document.getElementById('c1_b').value = d.c1b.n; document.getElementById('c1_b_lv').value = d.c1b.l; document.getElementById('c2').value = d.c2.n;
     }
   }
 }
-
 function renderMissions(d) {
-  const list = document.getElementById('missionList');
-  list.innerHTML = "";
+  const list = document.getElementById('missionList'); list.innerHTML = "";
   if (d.day === "목") {
-    list.innerHTML += `<div style="font-size:12px; color:#888; margin:10px 0;">🕐 13:00 ~ 15:00</div>`;
-    renderItem(list, d.c2);
-    list.innerHTML += `<div style="font-size:12px; color:#888; margin:20px 0 10px;">🕒 15:00 ~ 17:00</div>`;
-    [d.m1, d.m2, d.m3, d.c1a, d.c1b].forEach(t => renderItem(list, t));
+    list.innerHTML += `<div style="font-size:12px; color:#888; margin:10px 0;">🕐 13:00 ~ 15:00</div>`; renderItem(list, d.c2);
+    list.innerHTML += `<div style="font-size:12px; color:#888; margin:20px 0 10px;">🕒 15:00 ~ 17:00</div>`; [d.m1, d.m2, d.m3, d.c1a, d.c1b].forEach(t => renderItem(list, t));
   } else {
-    list.innerHTML += `<div style="font-size:12px; color:#888; margin:10px 0;">🕤 09:30 ~ 11:00</div>`;
-    [d.m1, d.m2, d.m3].forEach(t => renderItem(list, t));
-    list.innerHTML += `<div style="font-size:12px; color:#888; margin:20px 0 10px;">🕚 11:00 ~ 12:00</div>`;
-    [d.c1a, d.c1b].forEach(t => renderItem(list, t));
-    list.innerHTML += `<div style="font-size:12px; color:#888; margin:20px 0 10px;">🕐 13:00 ~ 15:00</div>`;
-    renderItem(list, d.c2);
+    list.innerHTML += `<div style="font-size:12px; color:#888; margin:10px 0;">🕤 09:30 ~ 11:00</div>`; [d.m1, d.m2, d.m3].forEach(t => renderItem(list, t));
+    list.innerHTML += `<div style="font-size:12px; color:#888; margin:20px 0 10px;">🕚 11:00 ~ 12:00</div>`; [d.c1a, d.c1b].forEach(t => renderItem(list, t));
+    list.innerHTML += `<div style="font-size:12px; color:#888; margin:20px 0 10px;">🕐 13:00 ~ 15:00</div>`; renderItem(list, d.c2);
   }
 }
-
 function renderItem(container, t) {
   if(!t || !t.n) return;
   const isDone = localStorage.getItem(`${curId}_${t.n}_${getAppDateStr()}_done`) === "yes";
-  const div = document.createElement('div');
-  div.className = "mission-item";
-  
-  let btnClass = "";
-  let btnText = "시작하기";
-  let disabled = "";
-
+  const div = document.createElement('div'); div.className = "mission-item";
+  let btnClass = "", btnText = "업무 시작", disabled = "";
   if(isDone) {
-    if(isAdminMode) {
-      btnClass = "done admin-active"; 
-      btnText = "✅ 완료 (수정)";
-      disabled = ""; 
-    } else {
-      btnClass = "done";
-      btnText = "✅ 완료 (잠김)";
-      disabled = "disabled"; 
-    }
+    if(isAdminMode) { btnClass = "done admin-active"; btnText = "✅ 완료 (수정)"; disabled = ""; } else { btnClass = "done"; btnText = "✅ 완료됨"; disabled = "disabled"; }
   }
-
-  div.innerHTML = `
-    <div class="mission-header"><span class="mission-name">${t.n}</span><span class="mission-lv">${t.l||"-"}</span></div>
-    <div class="live-timer" id="timer-${t.n}">00:00:00</div>
-    <button class="btn-action ${btnClass}" id="btn-${t.n}" onclick="handleMission('${t.n}','${t.l}')" ${disabled}>
-      ${btnText}
-    </button>`;
+  div.innerHTML = `<div class="mission-header"><span class="mission-name">${t.n}</span><span class="mission-lv">${t.l||"-"}</span></div><div class="live-timer" id="timer-${t.n}">00:00:00</div><button class="btn-action ${btnClass}" id="btn-${t.n}" onclick="handleMission('${t.n}','${t.l}')" ${disabled}>${btnText}</button>`;
   container.appendChild(div);
 }
-
 function handleMission(name, level) {
-  const btn = document.getElementById(`btn-${name}`);
-  if(btn.disabled) return;
-  const key = `${curId}_active_${getAppDateStr()}`;
-  const active = localStorage.getItem(key);
-  
+  const btn = document.getElementById(`btn-${name}`); if(btn.disabled) return;
+  const key = `${curId}_active_${getAppDateStr()}`; const active = localStorage.getItem(key);
   const isDone = localStorage.getItem(`${curId}_${name}_${getAppDateStr()}_done`) === "yes";
-  if (isDone) {
-    if (isAdminMode) {
-      curM = name; 
-      document.getElementById('adminTimeModal').style.display = 'flex';
-      document.getElementById('admStart').value = "";
-      document.getElementById('admEnd').value = "";
-      return;
-    } else {
-      return;
-    }
-  }
-
+  if (isDone) { if (isAdminMode) { curM = name; document.getElementById('adminTimeModal').style.display = 'flex'; document.getElementById('admStart').value = ""; document.getElementById('admEnd').value = ""; return; } else { return; } }
   if(!active) {
-    localStorage.setItem(key, name);
-    localStorage.setItem(`${key}_start`, Date.now());
-    btn.classList.add('ing'); btn.innerText = "🔥 진행 중 (완료하기)";
-    document.getElementById(`timer-${name}`).style.display='block';
-    
-    fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
-      action:"saveLog", subAction:"start", student_id:curId, mission_id:name,
-      date: getAppDateStr(), 
-      note: `Start: ${new Date().toTimeString().slice(0,5)}`
-    }) });
+    localStorage.setItem(key, name); localStorage.setItem(`${key}_start`, Date.now());
+    btn.classList.add('ing'); btn.innerText = "🔥 업무 진행 중 (완료)"; document.getElementById(`timer-${name}`).style.display='block';
+    fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"saveLog", subAction:"start", student_id:curId, mission_id:name, date: getAppDateStr(), note: `Start: ${new Date().toTimeString().slice(0,5)}`}) });
     startTimer(name);
   } else if(active === name) {
-    if (isAdminMode) {
-      curM = name; 
-      document.getElementById('adminTimeModal').style.display = 'flex';
-      document.getElementById('admStart').value = "";
-      document.getElementById('admEnd').value = "";
-    } else {
-      finishImmediate(name, level);
-    }
-  } else {
-    alert("다른 미션 진행 중!");
-  }
+    if (isAdminMode) { curM = name; document.getElementById('adminTimeModal').style.display = 'flex'; document.getElementById('admStart').value = ""; document.getElementById('admEnd').value = ""; } else { finishImmediate(name, level); }
+  } else { alert("현재 진행 중인 다른 업무가 있습니다!"); }
 }
-
 function finishAdminMission() {
-  const s = document.getElementById('admStart').value;
-  const e = document.getElementById('admEnd').value;
+  const s = document.getElementById('admStart').value; const e = document.getElementById('admEnd').value;
   if(!s || !e) return alert("시간을 입력하세요");
-  
-  const startD = new Date(`2000-01-01T${s}:00`);
-  const endD = new Date(`2000-01-01T${e}:00`);
-  let diff = (endD - startD) / 60000;
-  if(diff < 0) diff += 1440; 
-  
-  const noteStr = `${s}~${e} (${diff}분)`; 
-  const name = curM;
-  const key = `${curId}_active_${getAppDateStr()}`;
-  
-  localStorage.removeItem(key);
-  localStorage.setItem(`${curId}_${name}_${getAppDateStr()}_done`, "yes");
-  
-  fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
-    action:"saveLog", subAction:"end", student_id:curId, mission_id:name,
-    date: getAppDateStr(), 
-    difficulty: "NORMAL", note: noteStr 
-  })}).then(()=>{
-    alert("관리자 권한으로 완료됨");
-    document.getElementById('adminTimeModal').style.display='none';
-    checkUser(curId, curName); 
-  });
+  const startD = new Date(`2000-01-01T${s}:00`); const endD = new Date(`2000-01-01T${e}:00`);
+  let diff = (endD - startD) / 60000; if(diff < 0) diff += 1440; 
+  const noteStr = `${s}~${e} (${diff}분)`; const name = curM; const key = `${curId}_active_${getAppDateStr()}`;
+  localStorage.removeItem(key); localStorage.setItem(`${curId}_${name}_${getAppDateStr()}_done`, "yes");
+  fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"saveLog", subAction:"end", student_id:curId, mission_id:name, date: getAppDateStr(), difficulty: "NORMAL", note: noteStr})})
+  .then(()=>{ alert("관리자 권한으로 처리되었습니다."); document.getElementById('adminTimeModal').style.display='none'; checkUser(curId, curName); });
 }
-
 function finishImmediate(name, level) {
-  if(!confirm("완료하시겠습니까?")) return;
-  const key = `${curId}_active_${getAppDateStr()}`;
-  const st = parseInt(localStorage.getItem(`${key}_start`));
-  const diff = Math.floor((Date.now()-st)/1000/60); 
-  const noteStr = `${diff}분 소요`;
-
-  localStorage.removeItem(key);
-  localStorage.setItem(`${curId}_${name}_${getAppDateStr()}_done`, "yes");
-  
-  fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({
-    action:"saveLog", subAction:"end", student_id:curId, mission_id:name,
-    date: getAppDateStr(), 
-    difficulty: level, note: noteStr
-  })}).then(()=>{
-    alert("완료되었습니다.");
-    checkUser(curId, curName);
-  });
+  if(!confirm("업무를 완료하시겠습니까?")) return;
+  const key = `${curId}_active_${getAppDateStr()}`; const st = parseInt(localStorage.getItem(`${key}_start`));
+  const diff = Math.floor((Date.now()-st)/1000/60); const noteStr = `${diff}분 소요`;
+  localStorage.removeItem(key); localStorage.setItem(`${curId}_${name}_${getAppDateStr()}_done`, "yes");
+  fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"saveLog", subAction:"end", student_id:curId, mission_id:name, date: getAppDateStr(), difficulty: level, note: noteStr})})
+  .then(()=>{ alert("업무가 완료되었습니다."); checkUser(curId, curName); });
 }
-
 function startTimer(name) {
-  const key = `${curId}_active_${getAppDateStr()}`;
-  const st = parseInt(localStorage.getItem(`${key}_start`));
+  const key = `${curId}_active_${getAppDateStr()}`; const st = parseInt(localStorage.getItem(`${key}_start`));
   const display = document.getElementById(`timer-${name}`);
   if (timerInterval) clearInterval(timerInterval);
   timerInterval = setInterval(() => {
@@ -434,19 +318,14 @@ function startTimer(name) {
     display.innerText = `${h}:${m}:${s}`;
   }, 1000);
 }
-
 function restoreMissionState() {
-  const key = `${curId}_active_${getAppDateStr()}`;
-  const active = localStorage.getItem(key);
+  const key = `${curId}_active_${getAppDateStr()}`; const active = localStorage.getItem(key);
   if (active) {
     const btn = document.getElementById(`btn-${active}`);
     if (btn) {
-      btn.classList.add('ing'); btn.innerText = "🔥 진행 중 (완료하기)";
-      document.getElementById(`timer-${active}`).style.display='block';
-      startTimer(active);
-      document.querySelectorAll('.btn-action').forEach(b => {
-        if(b.id !== `btn-${active}` && !b.classList.contains('done')) { b.disabled=true; b.innerText="⛔ 대기중"; }
-      });
+      btn.classList.add('ing'); btn.innerText = "🔥 업무 진행 중 (완료)";
+      document.getElementById(`timer-${active}`).style.display='block'; startTimer(active);
+      document.querySelectorAll('.btn-action').forEach(b => { if(b.id !== `btn-${active}` && !b.classList.contains('done')) { b.disabled=true; b.innerText="⛔ 대기중"; } });
     }
   }
 }
