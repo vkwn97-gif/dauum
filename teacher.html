@@ -42,8 +42,6 @@
     .st-ing { background: #fff7ed; color: #9a3412; }
     .st-cancel { background: #e5e7eb; color: #6b7280; text-decoration: line-through; }
     .cell-detail { font-size: 10px; color: #64748b; line-height: 1.3; margin-top: 2px; font-family: monospace; }
-    
-    /* [NEW] 미션별 금액 스타일 */
     .cell-price { font-size: 11px; font-weight: 800; margin-top: 4px; }
     .price-plus { color: #059669; }
     .price-zero { color: #9ca3af; }
@@ -53,15 +51,31 @@
     .diff-EASY { color: #10b981; background: #ecfdf5; border: 1px solid #10b981; }
     .diff-NORMAL { color: #3b82f6; background: #eff6ff; border: 1px solid #3b82f6; }
     .diff-HARD { color: #ef4444; background: #fef2f2; border: 1px solid #ef4444; }
+    
+    .total-box { text-align: right; }
+    .total-label { font-size: 13px; color: #666; }
+    .total-amount { font-size: 24px; font-weight: 800; color: var(--p); }
+    .penalty-info { font-size: 12px; color: var(--fail); font-weight: bold; margin-top: 5px; }
 
-    /* 급여 명세서 스타일 */
-    .pay-card { background: white; border-radius: 20px; padding: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    .pay-total-label { font-size: 16px; color: #64748b; margin-bottom: 5px; font-weight: bold; }
-    .pay-total-amount { font-size: 40px; font-weight: 900; color: var(--p); margin: 0; }
-    .daily-pay-row { display: flex; gap: 15px; margin-top: 20px; }
-    .daily-pay-item { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 15px; padding: 20px 10px; text-align: center; }
-    .daily-pay-day { font-size: 14px; font-weight: bold; color: #64748b; margin-bottom: 8px; display: block; }
-    .daily-pay-val { font-size: 20px; font-weight: 800; color: #333; }
+    /* [NEW] 급여 명세서 스타일 (표 형태) */
+    .pay-container { max-width: 600px; margin: 0 auto; }
+    .pay-statement { background: white; border: 1px solid #cbd5e1; border-radius: 15px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+    
+    .pay-header-line { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+    .pay-title { font-size: 22px; font-weight: bold; color: #1e293b; margin: 0; }
+    .pay-date-range { font-size: 14px; color: #64748b; margin-top: 5px; }
+    
+    .pay-big-total { font-size: 48px; font-weight: 900; color: var(--p); margin: 20px 0; letter-spacing: -1px; }
+    
+    .pay-table-view { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .pay-table-view th { background: #f1f5f9; padding: 12px; text-align: left; color: #64748b; font-size: 14px; border-bottom: 1px solid #e2e8f0; }
+    .pay-table-view td { padding: 15px 12px; border-bottom: 1px solid #e2e8f0; font-size: 16px; font-weight: 600; color: #333; }
+    .pay-table-view td.money-col { text-align: right; font-family: monospace; font-size: 18px; }
+    
+    .pay-row-day { display: flex; align-items: center; gap: 10px; }
+    .day-circle { width: 30px; height: 30px; background: #e0e7ff; color: var(--p); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; }
+    
+    .pay-footer { margin-top: 30px; font-size: 12px; color: #94a3b8; }
 
     /* 모달 */
     #modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index: 1000; }
@@ -108,23 +122,36 @@
 </div>
 
 <div id="pay" class="view">
-  <div style="margin-bottom: 15px; display: flex; gap: 10px;">
-    <select id="pStudent" onchange="loadPay()" style="padding:10px; font-weight:bold; width: auto;">
+  <div style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
+    <select id="pStudent" onchange="loadPay()" style="padding:10px; font-weight:bold; width: auto; border-radius:8px;">
       <option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option>
     </select>
-    <select id="pWeekSelect" onchange="loadPay()" style="padding:10px; width: auto;"></select>
+    <select id="pWeekSelect" onchange="loadPay()" style="padding:10px; width: auto; border-radius:8px;"></select>
   </div>
 
-  <div class="pay-card">
-    <div class="pay-total-label">이번 주 총 급여</div>
-    <h1 class="pay-total-amount" id="payTotalAmount">₩0</h1>
-    
-    <div class="daily-pay-row">
-      <div class="daily-pay-item"><span class="daily-pay-day">월요일</span><div class="daily-pay-val" id="pay0">0</div></div>
-      <div class="daily-pay-item"><span class="daily-pay-day">화요일</span><div class="daily-pay-val" id="pay1">0</div></div>
-      <div class="daily-pay-item"><span class="daily-pay-day">수요일</span><div class="daily-pay-val" id="pay2">0</div></div>
-      <div class="daily-pay-item"><span class="daily-pay-day">목요일</span><div class="daily-pay-val" id="pay3">0</div></div>
-      <div class="daily-pay-item"><span class="daily-pay-day">금요일</span><div class="daily-pay-val" id="pay4">0</div></div>
+  <div class="pay-container">
+    <div class="pay-statement">
+      <div class="pay-header-line">
+        <h2 class="pay-title" id="payStatementTitle">OOO의 이번 주 급여 명세서</h2>
+        <div class="pay-date-range" id="payDateRange">2026.01.12 ~ 2026.01.16</div>
+      </div>
+
+      <div class="pay-big-total" id="payStatementTotal">₩0</div>
+
+      <table class="pay-table-view">
+        <thead>
+          <tr>
+            <th>요일</th>
+            <th style="text-align:right;">지급액</th>
+          </tr>
+        </thead>
+        <tbody id="payTableBody">
+          </tbody>
+      </table>
+
+      <div class="pay-footer">
+        * 본 명세서는 다움학교 생활 및 학습 미션 수행 결과에 따라 산출되었습니다.
+      </div>
     </div>
   </div>
 </div>
@@ -233,15 +260,57 @@ function initWeekSelector() {
   }
 }
 
+// 💰 급여 명세서 로드 (디자인 개선됨)
 function loadPay() {
   const sid = document.getElementById('pStudent').value;
   const date = document.getElementById('pWeekSelect').value || new Date().toISOString().slice(0,10);
+  const sName = students[sid]; // 학생 이름
+
   fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"getWeeklyData", sid:sid, date:date}) })
   .then(r=>r.json()).then(res => {
-    document.getElementById('payTotalAmount').innerText = "₩" + res.total.toLocaleString();
+    // 1. 제목 및 날짜 업데이트
+    document.getElementById('payStatementTitle').innerText = `${sName}의 이번 주 급여 명세서`;
+    
+    // 날짜 범위 계산 (월~금)
+    const startDate = new Date(res.days[0].date);
+    const endDate = new Date(res.days[4].date);
+    const startStr = startDate.toLocaleDateString();
+    const endStr = endDate.toLocaleDateString();
+    document.getElementById('payDateRange').innerText = `${startStr} ~ ${endStr}`;
+
+    // 2. 총액 업데이트
+    document.getElementById('payStatementTotal').innerText = "₩" + res.total.toLocaleString();
+
+    // 3. 표 내용 생성
+    const tbody = document.getElementById('payTableBody');
+    tbody.innerHTML = "";
+    
+    const dayNames = ["월요일", "화요일", "수요일", "목요일", "금요일"];
+    
     for(let i=0; i<5; i++) {
-      document.getElementById(`pay${i}`).innerText = "₩" + res.days[i].money.toLocaleString();
+      const money = res.days[i].money;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div class="pay-row-day">
+            <div class="day-circle">${dayNames[i][0]}</div>
+            <span>${dayNames[i]}</span>
+          </div>
+        </td>
+        <td class="money-col">₩${money.toLocaleString()}</td>
+      `;
+      tbody.appendChild(tr);
     }
+    
+    // 합계 행 추가
+    const totalTr = document.createElement('tr');
+    totalTr.style.background = "#f8fafc";
+    totalTr.style.borderTop = "2px solid #333";
+    totalTr.innerHTML = `
+      <td style="font-weight:bold; padding:15px 12px;">합계</td>
+      <td class="money-col" style="font-weight:900; color:var(--p);">₩${res.total.toLocaleString()}</td>
+    `;
+    tbody.appendChild(totalTr);
   });
 }
 
@@ -406,7 +475,6 @@ function loadWeekly() {
              if(l["생활미션"].status === 'fail') content += "<br>❌ 실패";
              if(l["생활미션"].status === 'cancel') content += "<br>⛔ 휴강";
              
-             // [NEW] 금액 표시
              const money = l["생활미션"].money || 0;
              let mClass = money > 0 ? "price-plus" : (money < 0 ? "price-minus" : "price-zero");
              content += `<div class="cell-price ${mClass}">₩${money.toLocaleString()}</div>`;
@@ -478,7 +546,6 @@ function getMList(s, keys, l) {
       else if(ml.status=='fail') { stClass='st-fail'; stTxt='실패'; }
       else if(ml.status=='cancel') { stClass='st-cancel'; stTxt='휴강'; }
       
-      // [NEW] 개별 금액 표시
       if (ml.money !== undefined) {
          let mClass = ml.money > 0 ? "price-plus" : (ml.money < 0 ? "price-minus" : "price-zero");
          moneyHtml = `<div class="cell-price ${mClass}">₩${ml.money.toLocaleString()}</div>`;
