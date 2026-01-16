@@ -5,14 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>다움학교 선생님</title>
   <style>
-    /* 기존 스타일 유지 */
     :root { --p: #4f46e5; --bg: #f1f5f9; --ok: #10b981; --fail: #ef4444; --cancel: #9ca3af; }
     body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 20px; color:#333; }
+    
     .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
     .tab { padding: 12px 24px; border-radius: 10px; background: #cbd5e1; cursor: pointer; font-weight: bold; color: #475569; transition:0.2s; }
     .tab.active { background: var(--p); color: white; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
-    .view { display: none; } .view.active { display: block; animation: fadeIn 0.3s; }
+    
+    .view { display: none; } 
+    .view.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    
+    /* 일간/주간 스타일 */
     .daily-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
     .student-col { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     .col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
@@ -23,12 +27,10 @@
     .m-item.ing { border-left: 5px solid orange; background: #fff7ed; }
     .m-item.fail { border-left: 5px solid var(--fail); background: #fef2f2; opacity: 0.8; }
     .m-item.cancel { border-left: 5px solid var(--cancel); background: #f3f4f6; color: #6b7280; }
+    
+    /* 주간 리포트 스타일 */
     .weekly-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     .weekly-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .total-box { text-align: right; }
-    .total-label { font-size: 13px; color: #666; }
-    .total-amount { font-size: 24px; font-weight: 800; color: var(--p); }
-    .penalty-info { font-size: 12px; color: var(--fail); font-weight: bold; margin-top: 5px; }
     .weekly-table { width: 100%; border-collapse: collapse; overflow: hidden; }
     .weekly-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 14px; border-bottom: 2px solid #e2e8f0; }
     .weekly-table td { border: 1px solid #e2e8f0; padding: 8px; vertical-align: top; text-align: center; min-height: 60px; }
@@ -43,11 +45,22 @@
     .diff-EASY { color: #10b981; background: #ecfdf5; border: 1px solid #10b981; }
     .diff-NORMAL { color: #3b82f6; background: #eff6ff; border: 1px solid #3b82f6; }
     .diff-HARD { color: #ef4444; background: #fef2f2; border: 1px solid #ef4444; }
+
+    /* 급여 명세서 스타일 */
+    .pay-card { background: white; border-radius: 20px; padding: 30px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .pay-total-label { font-size: 16px; color: #64748b; margin-bottom: 5px; font-weight: bold; }
+    .pay-total-amount { font-size: 40px; font-weight: 900; color: var(--p); margin: 0; }
+    .daily-pay-row { display: flex; gap: 15px; margin-top: 20px; }
+    .daily-pay-item { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 15px; padding: 20px 10px; text-align: center; }
+    .daily-pay-day { font-size: 14px; font-weight: bold; color: #64748b; margin-bottom: 8px; display: block; }
+    .daily-pay-val { font-size: 20px; font-weight: 800; color: #333; }
+
+    /* 모달 */
     #modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index: 1000; }
     .modal-box { background: white; padding: 25px; border-radius: 15px; width: 400px; max-height: 90vh; overflow-y: auto; }
     input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
     .btn { padding: 10px; width: 100%; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; margin-top: 5px; }
-    .chk-group label { display: block; margin-bottom: 8px; cursor: pointer; }
+    .chk-group label { display: block; margin-bottom: 8px; cursor: pointer; font-size: 14px; }
     .section-label { font-size:12px; font-weight:bold; color:#666; margin-top:10px; display:block; }
   </style>
 </head>
@@ -56,6 +69,7 @@
 <div class="tabs">
   <div class="tab active" onclick="goTab('daily')">📅 일간 관리</div>
   <div class="tab" onclick="goTab('weekly')">📊 주간 리포트</div>
+  <div class="tab" onclick="goTab('pay')">💰 급여 명세서</div>
 </div>
 
 <div id="daily" class="view active">
@@ -75,13 +89,30 @@
         </select>
         <select id="wWeekSelect" onchange="loadWeekly()" style="padding:10px;"></select>
       </div>
-      <div class="total-box">
-        <div class="total-label">이번 주 총 수입</div>
-        <div class="total-amount" id="totalWeekMoney">0원</div>
-        <div class="penalty-info" id="penaltyMsg"></div>
-      </div>
     </div>
     <div id="weeklyBoard"></div>
+  </div>
+</div>
+
+<div id="pay" class="view">
+  <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+    <select id="pStudent" onchange="loadPay()" style="padding:10px; font-weight:bold; width: auto;">
+      <option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option>
+    </select>
+    <select id="pWeekSelect" onchange="loadPay()" style="padding:10px; width: auto;"></select>
+  </div>
+
+  <div class="pay-card">
+    <div class="pay-total-label">이번 주 총 급여</div>
+    <h1 class="pay-total-amount" id="payTotalAmount">₩0</h1>
+    
+    <div class="daily-pay-row">
+      <div class="daily-pay-item"><span class="daily-pay-day">월요일</span><div class="daily-pay-val" id="pay0">0</div></div>
+      <div class="daily-pay-item"><span class="daily-pay-day">화요일</span><div class="daily-pay-val" id="pay1">0</div></div>
+      <div class="daily-pay-item"><span class="daily-pay-day">수요일</span><div class="daily-pay-val" id="pay2">0</div></div>
+      <div class="daily-pay-item"><span class="daily-pay-day">목요일</span><div class="daily-pay-val" id="pay3">0</div></div>
+      <div class="daily-pay-item"><span class="daily-pay-day">금요일</span><div class="daily-pay-val" id="pay4">0</div></div>
+    </div>
   </div>
 </div>
 
@@ -92,20 +123,25 @@
     
     <div id="ui-life" style="display:none;">
       <div class="chk-group">
-        <label><input type="checkbox" class="life-chk"> 1. 방 청결도 확인</label>
-        <label><input type="checkbox" class="life-chk"> 2. 침구류 정리 정돈</label>
-        <label><input type="checkbox" class="life-chk"> 3. 개인 위생</label>
-        <label><input type="checkbox" class="life-chk"> 4. 출석체크</label>
-        <label><input type="checkbox" class="life-chk"> 5. 전기 및 불 끄기</label>
+        <label><input type="checkbox" class="life-chk"> 1. 개인 위생</label>
+        <label><input type="checkbox" class="life-chk"> 2. 침구 정리</label>
+        <label><input type="checkbox" class="life-chk"> 3. 빨래 정리</label>
+        <label><input type="checkbox" class="life-chk"> 4. 의복 정리</label>
+        <label><input type="checkbox" class="life-chk"> 5. 신발 정리</label>
+        <label><input type="checkbox" class="life-chk"> 6. 쓰레기 정리</label>
+        <label><input type="checkbox" class="life-chk"> 7. 물건 정리</label>
+        <label><input type="checkbox" class="life-chk"> 8. 안전 확인</label>
+        <label><input type="checkbox" class="life-chk"> 9. 출석체크</label>
+        <label><input type="checkbox" class="life-chk"> 10. 정시 등교</label>
       </div>
       <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
       <p style="font-size:14px; font-weight:bold;">📸 증거 사진 (선택)</p>
       <input type="file" id="lifePhoto" accept="image/*">
-      <button class="btn" style="background:var(--ok);" onclick="handleLife('life_ok')">✅ 완료 승인 (사진 저장)</button>
+      <button class="btn" style="background:var(--ok);" onclick="handleLife('life_ok')">✅ 완료 승인</button>
       <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
       <div style="display:flex; gap:5px;">
-        <button class="btn" style="background:var(--fail);" onclick="handleLife('fail')">❌ 실패 (사진 있으면 저장)</button>
-        <button class="btn" style="background:var(--cancel); color:white;" onclick="sendCtrl('cancel')">🚫 휴강 (면제)</button>
+        <button class="btn" style="background:var(--fail);" onclick="handleLife('fail')">❌ 실패</button>
+        <button class="btn" style="background:var(--cancel); color:white;" onclick="sendCtrl('cancel')">🚫 휴강</button>
       </div>
     </div>
 
@@ -117,10 +153,14 @@
         <optgroup label="선택"><option>컴퓨터</option><option>운동</option><option>영어회화</option><option>글씨 연습</option></optgroup>
         <optgroup label="오후"><option>검정고시</option><option>음악</option><option>SCL책력</option><option>심화공부</option><option>교류수업</option><option>축구</option><option>예배</option></optgroup>
       </select>
-      <label class="section-label">난이도</label>
-      <select id="tComment">
-        <option value="NORMAL">NORMAL</option><option value="EASY">EASY</option><option value="HARD">HARD</option>
-      </select>
+      
+      <div id="diffSection">
+        <label class="section-label">난이도</label>
+        <select id="tComment">
+          <option value="NORMAL">NORMAL</option><option value="EASY">EASY</option><option value="HARD">HARD</option>
+        </select>
+      </div>
+
       <label class="section-label">시간</label>
       <div style="display:flex; gap:10px;"><input type="time" id="tStart">~<input type="time" id="tEnd"></div>
       
@@ -141,12 +181,14 @@
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbykIZT--EyXXtVYET_1U-Zy5tFUtiMwtlhYWjqvnJHCUhlONsMyzK-vU0oKhJVAxLLyTg/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmsvx5xVkJvVhLsVvLsLtHdhdX5OwEma7Ipzr6HU0cR-7JMa5uQyipwGIWZB1nxVJudw/exec"; 
 const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
+const noDiffMissions = ["교류수업", "SCL책력", "검정고시", "음악", "심화공부", "오후활동", "맞춤학습", "예배", "축구"];
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('dDate').value = new Date().toISOString().slice(0,10);
-  initWeekSelector(); loadDaily();
+  initWeekSelector(); 
+  loadDaily();
 });
 
 function goTab(id) {
@@ -154,12 +196,17 @@ function goTab(id) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   event.target.classList.add('active');
-  if(id === 'daily') loadDaily(); else loadWeekly();
+  if(id === 'daily') loadDaily();
+  else if(id === 'weekly') loadWeekly();
+  else loadPay();
 }
 
 function initWeekSelector() {
-  const sel = document.getElementById('wWeekSelect');
   const today = new Date();
+  // 주간 셀렉터
+  const wSel = document.getElementById('wWeekSelect');
+  const pSel = document.getElementById('pWeekSelect');
+  
   for (let i = 0; i < 5; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() - (i * 7));
@@ -167,11 +214,24 @@ function initWeekSelector() {
     const diff = d.getDate() - day + (day == 0 ? -6 : 1);
     const monday = new Date(d.setDate(diff));
     const val = monday.toISOString().slice(0,10);
-    const opt = document.createElement('option');
-    opt.value = val;
-    opt.innerText = `${monday.getMonth()+1}월 ${Math.ceil(monday.getDate()/7)}주차 (${val}~)`;
-    sel.appendChild(opt);
+    const txt = `${monday.getMonth()+1}월 ${Math.ceil(monday.getDate()/7)}주차 (${val}~)`;
+    
+    const opt1 = document.createElement('option'); opt1.value=val; opt1.innerText=txt; wSel.appendChild(opt1);
+    const opt2 = document.createElement('option'); opt2.value=val; opt2.innerText=txt; pSel.appendChild(opt2);
   }
+}
+
+// 💰 급여 명세서 로드 함수
+function loadPay() {
+  const sid = document.getElementById('pStudent').value;
+  const date = document.getElementById('pWeekSelect').value || new Date().toISOString().slice(0,10);
+  fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"getWeeklyData", sid:sid, date:date}) })
+  .then(r=>r.json()).then(res => {
+    document.getElementById('payTotalAmount').innerText = "₩" + res.total.toLocaleString();
+    for(let i=0; i<5; i++) {
+      document.getElementById(`pay${i}`).innerText = "₩" + res.days[i].money.toLocaleString();
+    }
+  });
 }
 
 function loadDaily() {
@@ -215,17 +275,20 @@ function loadDaily() {
             if(ml.status=='start')c='ing'; if(ml.status=='end')c='done'; 
             if(ml.status=='fail')c='fail'; if(ml.status=='cancel')c='cancel';
           }
+          
           let tStr = parseTimeStr(ml);
           if(ml && ml.status=='cancel') tStr = "휴강됨";
           
           let diffHtml = "";
-          let currentDiff = (ml && ml.comment) ? ml.comment : (m.l || "NORMAL");
-          if(["EASY","NORMAL","HARD"].includes(currentDiff)) {
-             const dCls = currentDiff==='EASY'?'diff-EASY':(currentDiff==='HARD'?'diff-HARD':'diff-NORMAL');
-             diffHtml = `<span class="diff-badge ${dCls}">${currentDiff}</span>`;
+          if(!noDiffMissions.includes(effectiveName)) {
+             let currentDiff = (ml && ml.comment) ? ml.comment : (m.l || "NORMAL");
+             if(["EASY","NORMAL","HARD"].includes(currentDiff)) {
+                const dCls = currentDiff==='EASY'?'diff-EASY':(currentDiff==='HARD'?'diff-HARD':'diff-NORMAL');
+                diffHtml = `<span class="diff-badge ${dCls}">${currentDiff}</span>`;
+             }
           }
 
-          col.innerHTML += `<div class="m-item ${c}" onclick="openModal('${sid}','${effectiveName}', '${currentDiff}')">
+          col.innerHTML += `<div class="m-item ${c}" onclick="openModal('${sid}','${effectiveName}', '${(ml && ml.comment) ? ml.comment : (m.l || "NORMAL")}')">
             <div>${effectiveName} ${diffHtml}</div>
             <small>${tStr}</small>
           </div>`;
@@ -257,7 +320,11 @@ function openModal(sid, mid, diff) {
 
   if(mid==='생활미션') document.getElementById('ui-life').style.display='block';
   else if(mid==='하루 기록') document.getElementById('ui-day').style.display='block';
-  else document.getElementById('ui-normal').style.display='block';
+  else {
+    document.getElementById('ui-normal').style.display='block';
+    if(noDiffMissions.includes(mid)) document.getElementById('diffSection').style.display = 'none';
+    else document.getElementById('diffSection').style.display = 'block';
+  }
 }
 
 function handleLife(status) {
@@ -354,14 +421,7 @@ function loadWeekly() {
       }
       h+=`</tr>`;
     });
-    h+=`<tr><td style="font-weight:bold;">일일 수입</td>`;
-    for(let i=0; i<5; i++) h+=`<td style="font-weight:bold;">₩${res.days[i].money.toLocaleString()}</td>`;
-    h+=`</tr></tbody></table>`;
     document.getElementById('weeklyBoard').innerHTML = h;
-    document.getElementById('totalWeekMoney').innerText = res.total.toLocaleString();
-    
-    // [수정] 페널티 문구 제거 (필요시 부활 가능)
-    document.getElementById('penaltyMsg').innerText = ""; 
   });
 }
 
@@ -382,10 +442,11 @@ function getMList(s, keys, l) {
     let stClass = "", stTxt = "", detailTxt = "", diffHtml = "";
     if(ml){ 
       const d = ml.comment;
-      if(d && ["EASY","NORMAL","HARD"].includes(d)) {
+      if(!noDiffMissions.includes(mName) && ["EASY","NORMAL","HARD"].includes(d)) {
         const dCls = d==='EASY'?'diff-EASY':(d==='HARD'?'diff-HARD':'diff-NORMAL');
         diffHtml = `<span class="diff-badge ${dCls}">${d}</span>`;
-      } else if (s[k].l && ["EASY","NORMAL","HARD"].includes(s[k].l)) {
+      } 
+      else if (!noDiffMissions.includes(mName) && s[k].l && ["EASY","NORMAL","HARD"].includes(s[k].l)) {
         const d2 = s[k].l;
         const dCls2 = d2==='EASY'?'diff-EASY':(d2==='HARD'?'diff-HARD':'diff-NORMAL');
         diffHtml = `<span class="diff-badge ${dCls2}">${d2}</span>`;
@@ -402,7 +463,8 @@ function getMList(s, keys, l) {
       
       return `<div class="cell-mission">${mName}${diffHtml}<span class="cell-status ${stClass}">${stTxt}</span><div class="cell-detail">${detailTxt}</div></div>`;
     }
-    if (s[k].l && ["EASY","NORMAL","HARD"].includes(s[k].l)) {
+    
+    if (!noDiffMissions.includes(mName) && s[k].l && ["EASY","NORMAL","HARD"].includes(s[k].l)) {
        const d2 = s[k].l;
        const dCls2 = d2==='EASY'?'diff-EASY':(d2==='HARD'?'diff-HARD':'diff-NORMAL');
        diffHtml = `<span class="diff-badge ${dCls2}">${d2}</span>`;

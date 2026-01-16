@@ -33,23 +33,21 @@
     .mission-name { font-weight: bold; font-size: 16px; }
     .mission-lv { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
     
+    /* 버튼 */
     .btn-action { width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: 1px solid var(--p); background: white; color: var(--p); transition: 0.2s; }
     .btn-action.ing { background: #fff7ed; border: 2px solid orange; color: #d97706; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
     .btn-action.done { background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; cursor: not-allowed; }
     .btn-action.done.admin-active { cursor: pointer; border: 1px dashed #94a3b8; background: #f8fafc; color: #64748b; }
     .btn-action:disabled { opacity: 0.6; cursor: not-allowed; background: #f8fafc; border-color: #cbd5e1; color: #94a3b8; }
-
     .live-timer { font-size: 24px; font-weight: 800; color: #d97706; text-align: center; margin: 10px 0; display: none; }
     
+    /* 관리자 패널 */
     #adminBtn { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; background: none; border: none; z-index: 99; }
     #adminPanel { background: #1e293b; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .admin-row { display: flex; gap: 5px; width: 100%; justify-content: center; }
     
-    /* 모달 스타일 */
     #adminModalOverlay, #adminTimeModal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
     #adminModalContent { background: white; width: 100%; max-width: 400px; border-radius: 20px; padding: 30px; box-sizing: border-box; text-align: center; margin: 20px; }
-    
     .hidden { display: none !important; }
   </style>
 </head>
@@ -57,7 +55,6 @@
 
 <div id="view-dashboard" class="view active container">
   <button id="adminBtn" onclick="openAdminModal()">⚙️</button>
-  
   <div id="adminPanel" class="hidden">
     <div style="font-weight:bold; color:#fbbf24;">🔧 관리자 타임머신 모드</div>
     <div class="admin-row">
@@ -66,7 +63,6 @@
     </div>
     <button onclick="exitAdmin()" style="background:#ef4444; color:white; border:none; padding:8px; border-radius:8px; width:100%; font-size:12px; margin:0;">관리자 모드 종료</button>
   </div>
-
   <div style="text-align:center; margin: 30px 0;">
     <h1 style="color:var(--p); margin:0;">다움학교</h1>
     <p id="todayDate" style="color:#64748b; margin:5px; font-weight:bold;"></p>
@@ -156,8 +152,7 @@
 </div>
 
 <script>
-// [필수] 배포된 URL 입력
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbykIZT--EyXXtVYET_1U-Zy5tFUtiMwtlhYWjqvnJHCUhlONsMyzK-vU0oKhJVAxLLyTg/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmsvx5xVkJvVhLsVvLsLtHdhdX5OwEma7Ipzr6HU0cR-7JMa5uQyipwGIWZB1nxVJudw/exec"; 
 
 let appDate = new Date();
 let curId, curName, curM;
@@ -228,7 +223,7 @@ function checkUser(id, name) {
          document.getElementById('plan-thursday').classList.add('hidden');
       }
     }
-  }).catch(e => { alert("오류가 발생했습니다. URL을 확인해주세요."); });
+  }).catch(e => { alert("오류가 발생했습니다."); });
 }
 
 function savePlan() {
@@ -343,7 +338,7 @@ function handleMission(name, level) {
   if (isDone) {
     if (isAdminMode) {
       curM = name; 
-      document.getElementById('adminTimeModal').style.display = 'flex'; // [수정됨: 팝업 뜸]
+      document.getElementById('adminTimeModal').style.display = 'flex';
       document.getElementById('admStart').value = "";
       document.getElementById('admEnd').value = "";
       return;
