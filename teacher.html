@@ -16,7 +16,7 @@
     .view.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
     
-    /* 일간/주간 스타일 */
+    /* 일간 관리 스타일 */
     .daily-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
     .student-col { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     .col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
@@ -34,6 +34,7 @@
     .weekly-table { width: 100%; border-collapse: collapse; overflow: hidden; }
     .weekly-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 14px; border-bottom: 2px solid #e2e8f0; }
     .weekly-table td { border: 1px solid #e2e8f0; padding: 8px; vertical-align: top; text-align: center; min-height: 60px; }
+    
     .cell-mission { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
     .cell-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; }
     .st-done { background: #dcfce7; color: #166534; }
@@ -41,6 +42,13 @@
     .st-ing { background: #fff7ed; color: #9a3412; }
     .st-cancel { background: #e5e7eb; color: #6b7280; text-decoration: line-through; }
     .cell-detail { font-size: 10px; color: #64748b; line-height: 1.3; margin-top: 2px; font-family: monospace; }
+    
+    /* [NEW] 미션별 금액 스타일 */
+    .cell-price { font-size: 11px; font-weight: 800; margin-top: 4px; }
+    .price-plus { color: #059669; }
+    .price-zero { color: #9ca3af; }
+    .price-minus { color: #ef4444; }
+
     .diff-badge { font-size: 10px; font-weight: 800; padding: 1px 4px; border-radius: 3px; margin-left: 3px; }
     .diff-EASY { color: #10b981; background: #ecfdf5; border: 1px solid #10b981; }
     .diff-NORMAL { color: #3b82f6; background: #eff6ff; border: 1px solid #3b82f6; }
@@ -88,6 +96,11 @@
           <option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option>
         </select>
         <select id="wWeekSelect" onchange="loadWeekly()" style="padding:10px;"></select>
+      </div>
+      <div class="total-box">
+        <div class="total-label">이번 주 총 수입</div>
+        <div class="total-amount" id="totalWeekMoney">0원</div>
+        <div class="penalty-info" id="penaltyMsg"></div>
       </div>
     </div>
     <div id="weeklyBoard"></div>
@@ -203,7 +216,6 @@ function goTab(id) {
 
 function initWeekSelector() {
   const today = new Date();
-  // 주간 셀렉터
   const wSel = document.getElementById('wWeekSelect');
   const pSel = document.getElementById('pWeekSelect');
   
@@ -221,7 +233,6 @@ function initWeekSelector() {
   }
 }
 
-// 💰 급여 명세서 로드 함수
 function loadPay() {
   const sid = document.getElementById('pStudent').value;
   const date = document.getElementById('pWeekSelect').value || new Date().toISOString().slice(0,10);
@@ -394,6 +405,11 @@ function loadWeekly() {
              if(l["생활미션"].status === 'life_ok') content += "<br>✅ 성공";
              if(l["생활미션"].status === 'fail') content += "<br>❌ 실패";
              if(l["생활미션"].status === 'cancel') content += "<br>⛔ 휴강";
+             
+             // [NEW] 금액 표시
+             const money = l["생활미션"].money || 0;
+             let mClass = money > 0 ? "price-plus" : (money < 0 ? "price-minus" : "price-zero");
+             content += `<div class="cell-price ${mClass}">₩${money.toLocaleString()}</div>`;
            }
         }
         else if(slot.k==='lunch') content = "<span style='color:#ccc'>🍽️ 점심</span>";
@@ -421,7 +437,12 @@ function loadWeekly() {
       }
       h+=`</tr>`;
     });
+    h+=`<tr><td style="font-weight:bold;">일일 수입</td>`;
+    for(let i=0; i<5; i++) h+=`<td style="font-weight:bold; color:var(--p);">₩${res.days[i].money.toLocaleString()}</td>`;
+    h+=`</tr></tbody></table>`;
     document.getElementById('weeklyBoard').innerHTML = h;
+    document.getElementById('totalWeekMoney').innerText = res.total.toLocaleString();
+    document.getElementById('penaltyMsg').innerText = ""; 
   });
 }
 
@@ -439,7 +460,7 @@ function getMList(s, keys, l) {
       if (overrideName) { mName = overrideName; ml = l[overrideName]; }
     }
 
-    let stClass = "", stTxt = "", detailTxt = "", diffHtml = "";
+    let stClass = "", stTxt = "", detailTxt = "", diffHtml = "", moneyHtml = "";
     if(ml){ 
       const d = ml.comment;
       if(!noDiffMissions.includes(mName) && ["EASY","NORMAL","HARD"].includes(d)) {
@@ -452,16 +473,18 @@ function getMList(s, keys, l) {
         diffHtml = `<span class="diff-badge ${dCls2}">${d2}</span>`;
       }
 
-      if(ml.status=='end') { 
-        stClass='st-done'; stTxt='완료'; detailTxt = parseTimeStr(ml);
-      }
-      else if(ml.status=='start') { 
-        stClass='st-ing'; stTxt='진행중'; detailTxt = parseTimeStr(ml);
-      }
+      if(ml.status=='end') { stClass='st-done'; stTxt='완료'; detailTxt = parseTimeStr(ml); }
+      else if(ml.status=='start') { stClass='st-ing'; stTxt='진행중'; detailTxt = parseTimeStr(ml); }
       else if(ml.status=='fail') { stClass='st-fail'; stTxt='실패'; }
       else if(ml.status=='cancel') { stClass='st-cancel'; stTxt='휴강'; }
       
-      return `<div class="cell-mission">${mName}${diffHtml}<span class="cell-status ${stClass}">${stTxt}</span><div class="cell-detail">${detailTxt}</div></div>`;
+      // [NEW] 개별 금액 표시
+      if (ml.money !== undefined) {
+         let mClass = ml.money > 0 ? "price-plus" : (ml.money < 0 ? "price-minus" : "price-zero");
+         moneyHtml = `<div class="cell-price ${mClass}">₩${ml.money.toLocaleString()}</div>`;
+      }
+      
+      return `<div class="cell-mission">${mName}${diffHtml}<span class="cell-status ${stClass}">${stTxt}</span><div class="cell-detail">${detailTxt}</div>${moneyHtml}</div>`;
     }
     
     if (!noDiffMissions.includes(mName) && s[k].l && ["EASY","NORMAL","HARD"].includes(s[k].l)) {
