@@ -17,11 +17,12 @@
     .view { display: none; } .view.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
     
-    /* 그리드/테이블 등 기존 스타일 */
+    /* 일간/주간/급여 스타일 (기존 유지) */
     .daily-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
     .student-col { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     .col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
     .student-name { font-size: 18px; font-weight: bold; margin: 0; }
+    .qr-btn { font-size: 11px; background: #334155; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
     .money-badge { background: #fff7ed; color: #d97706; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
     .m-item { border: 1px solid #eee; padding: 10px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
     .m-item.done { border-left: 5px solid var(--ok); background: #f0fdf4; }
@@ -33,46 +34,84 @@
     .diff-EASY { color: #10b981; background: #ecfdf5; border: 1px solid #10b981; }
     .diff-NORMAL { color: #3b82f6; background: #eff6ff; border: 1px solid #3b82f6; }
     .diff-HARD { color: #ef4444; background: #fef2f2; border: 1px solid #ef4444; }
-    
-    /* 용모 관리 & 달력 스타일 */
+    .weekly-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
+    .weekly-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .weekly-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    .weekly-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 14px; border-bottom: 2px solid #e2e8f0; }
+    .weekly-table td { border: 1px solid #e2e8f0; padding: 8px; vertical-align: top; text-align: center; min-height: 60px; }
+    .cell-mission { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .cell-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; }
+    .st-done { background: #dcfce7; color: #166534; }
+    .st-fail { background: #fee2e2; color: #991b1b; }
+    .st-ing { background: #fff7ed; color: #9a3412; }
+    .st-cancel { background: #e5e7eb; color: #6b7280; text-decoration: line-through; }
+    .cell-price { font-size: 11px; font-weight: 800; margin-top: 4px; }
+    .price-plus { color: #059669; } .price-zero { color: #9ca3af; } .price-minus { color: #ef4444; }
+    .total-box { text-align: right; }
+    .total-label { font-size: 13px; color: #666; }
+    .total-amount { font-size: 24px; font-weight: 800; color: var(--p); }
+    .pay-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+    .pay-left { flex: 1; min-width: 350px; }
+    .pay-statement { background: white; border: 2px solid #1e293b; border-radius: 10px; padding: 30px; text-align: center; position: relative; }
+    .pay-logo { font-size: 14px; font-weight: 900; color: #1e293b; margin-bottom: 20px; letter-spacing: 2px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
+    .pay-title { font-size: 24px; font-weight: bold; color: #1e293b; margin: 0; }
+    .pay-date-range { font-size: 14px; color: #64748b; margin-top: 5px; margin-bottom: 20px; }
+    .pay-big-total { font-size: 42px; font-weight: 900; color: var(--p); margin: 20px 0; }
+    .pay-table-view { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .pay-table-view th { background: #f8fafc; padding: 10px; text-align: left; color: #64748b; font-size: 13px; border-bottom: 1px solid #e2e8f0; }
+    .pay-table-view td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 15px; font-weight: 600; color: #333; }
+    .pay-table-view td.money-col { text-align: right; font-family: monospace; font-size: 16px; }
+    .pay-footer { margin-top: 30px; font-size: 11px; color: #94a3b8; font-style: italic; }
+    .btn-download { margin-top: 15px; width: 100%; background: #1e293b; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .pay-right { flex: 1.5; background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-width: 300px; }
+    .chart-container { position: relative; height: 350px; width: 100%; }
+    .chart-controls { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 10px; flex-wrap: wrap; }
+    .chk-label { font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+
+    /* 용모 관리 스타일 */
     .appearance-layout { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     .app-controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
     .app-btn { padding: 10px 20px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; }
     .app-btn.active { background: var(--p); color: white; border-color: var(--p); }
+    
     .calendar-container { margin-top: 20px; }
+    /* [NEW] 달력 네비게이션 스타일 */
     .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; font-size: 18px; }
+    .cal-nav-btn { background:none; border:none; font-size:18px; cursor:pointer; padding:5px 10px; }
+    
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
     .cal-day-name { text-align: center; padding: 5px; font-weight: bold; color: #64748b; background: #f1f5f9; border-radius: 5px; }
-    .cal-cell { background: white; border: 1px solid #e2e8f0; border-radius: 5px; min-height: 100px; padding: 5px; display: flex; flex-direction: column; align-items: flex-start; position: relative; }
+    .cal-cell { 
+      background: white; border: 1px solid #e2e8f0; border-radius: 5px; 
+      min-height: 100px; padding: 5px; 
+      display: flex; flex-direction: column; align-items: flex-start; 
+      position: relative; 
+    }
     .cal-date { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #333; }
     .cal-today { border: 2px solid var(--p); background: #e0e7ff; }
-    .cal-img { width: 100%; height: 80px; object-fit: contain; background: #f8fafc; border-radius: 4px; cursor: pointer; border: 1px solid #eee; }
+    .cal-img { 
+      width: 100%; height: 80px; 
+      object-fit: contain; 
+      background: #f8fafc; 
+      border-radius: 4px; cursor: pointer; border: 1px solid #eee;
+    }
+    
     .app-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
     .app-table th { background: #f1f5f9; padding: 10px; border: 1px solid #e2e8f0; }
     .app-table td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; vertical-align: top; }
     .app-thumb { width: 100%; height: 120px; object-fit: contain; background: #f8fafc; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; }
     .no-photo { color: #ccc; font-size: 12px; padding: 40px 0; }
 
-    /* 급여 & 기타 스타일 (기존 유지) */
-    .weekly-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
-    .weekly-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-    .weekly-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-    .weekly-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 14px; border-bottom: 2px solid #e2e8f0; }
-    .weekly-table td { border: 1px solid #e2e8f0; padding: 8px; vertical-align: top; text-align: center; min-height: 60px; }
-    .pay-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
-    .pay-left { flex: 1; min-width: 350px; }
-    .pay-statement { background: white; border: 2px solid #1e293b; border-radius: 10px; padding: 30px; text-align: center; position: relative; }
-    .pay-big-total { font-size: 42px; font-weight: 900; color: var(--p); margin: 20px 0; }
-    .pay-table-view { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .pay-table-view th { background: #f8fafc; padding: 10px; text-align: left; color: #64748b; font-size: 13px; border-bottom: 1px solid #e2e8f0; }
-    .pay-table-view td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 15px; font-weight: 600; color: #333; }
-    .pay-right { flex: 1.5; background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-width: 300px; }
-    .chart-container { position: relative; height: 350px; width: 100%; }
-    
-    #modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index: 1000; }
+    /* 모달 */
+    #modal, #qrModal, #imgModal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index: 1000; }
     .modal-box { background: white; padding: 25px; border-radius: 15px; width: 400px; max-height: 90vh; overflow-y: auto; }
     
-    input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+    /* [NEW] 이미지 확대 모달 */
+    #imgModalContent { max-width: 90%; max-height: 80vh; object-fit: contain; background: black; }
+    #imgModalBox { background: transparent; text-align: center; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .img-modal-btn { background: white; color: #333; padding: 10px 20px; border-radius: 20px; font-weight: bold; border: none; cursor: pointer; margin: 10px; }
+
+    input, select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
     .btn { padding: 10px; width: 100%; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; margin-top: 5px; }
     .chk-group label { display: block; margin-bottom: 8px; cursor: pointer; font-size: 14px; }
   </style>
@@ -113,12 +152,15 @@
       <button class="app-btn active" id="btnAppIndividual" onclick="switchAppMode('individual')">👤 개인별 (달력)</button>
       <button class="app-btn" id="btnAppWeekly" onclick="switchAppMode('weekly')">👥 전체 (주간)</button>
     </div>
+
     <div id="appIndividualView">
       <div style="background:#f8fafc; padding:15px; border-radius:10px; margin-bottom:20px;">
         <h3 style="margin-top:0;">📸 용모 체크 업로드</h3>
         <div style="margin-bottom:10px;">
           <label style="font-size:12px; font-weight:bold; color:#666;">학생 선택</label>
-          <select id="appStudent" onchange="loadAppearanceMonthly()"><option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option></select>
+          <select id="appStudent" onchange="loadAppearanceMonthly()">
+            <option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option>
+          </select>
         </div>
         <div style="margin-bottom:10px;">
           <label style="font-size:12px; font-weight:bold; color:#666;">날짜 (과거 기록 가능)</label>
@@ -127,16 +169,25 @@
         <input type="file" id="appPhotoInput" accept="image/*">
         <button class="btn" style="background:var(--p);" onclick="uploadAppearancePhoto()">업로드 및 저장</button>
       </div>
+      
       <div class="calendar-container">
-        <div class="calendar-header" id="calMonthTitle"></div>
+        <div class="calendar-header">
+          <button class="cal-nav-btn" onclick="changeMonth(-1)">◀</button>
+          <span id="calMonthTitle"></span>
+          <button class="cal-nav-btn" onclick="changeMonth(1)">▶</button>
+        </div>
         <div class="calendar-grid" id="calendarGrid"></div>
       </div>
     </div>
+
     <div id="appWeeklyView" style="display:none;">
       <div style="text-align:center; margin-bottom:15px;">
         <select id="appWeekSelect" onchange="loadAppearanceWeekly()" style="width:auto; padding:8px;"></select>
       </div>
-      <table class="app-table"><thead><tr id="appTableHead"><th>이름</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr></thead><tbody id="appTableBody"></tbody></table>
+      <table class="app-table">
+        <thead><tr id="appTableHead"><th>이름</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr></thead>
+        <tbody id="appTableBody"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -177,16 +228,7 @@
     
     <div id="ui-life" style="display:none;">
       <div class="chk-group" style="margin-bottom:10px;">
-        <label><input type="checkbox" class="life-chk"> 1. 개인 위생</label>
-        <label><input type="checkbox" class="life-chk"> 2. 침구 정리</label>
-        <label><input type="checkbox" class="life-chk"> 3. 빨래 정리</label>
-        <label><input type="checkbox" class="life-chk"> 4. 의복 정리</label>
-        <label><input type="checkbox" class="life-chk"> 5. 신발 정리</label>
-        <label><input type="checkbox" class="life-chk"> 6. 쓰레기 정리</label>
-        <label><input type="checkbox" class="life-chk"> 7. 물건 정리</label>
-        <label><input type="checkbox" class="life-chk"> 8. 안전 확인</label>
-        <label><input type="checkbox" class="life-chk"> 9. 출석체크</label>
-        <label><input type="checkbox" class="life-chk"> 10. 정시 등교</label>
+        <label><input type="checkbox" class="life-chk"> 1. 개인 위생</label><label><input type="checkbox" class="life-chk"> 2. 침구 정리</label><label><input type="checkbox" class="life-chk"> 3. 빨래 정리</label><label><input type="checkbox" class="life-chk"> 4. 의복 정리</label><label><input type="checkbox" class="life-chk"> 5. 신발 정리</label><label><input type="checkbox" class="life-chk"> 6. 쓰레기 정리</label><label><input type="checkbox" class="life-chk"> 7. 물건 정리</label><label><input type="checkbox" class="life-chk"> 8. 안전 확인</label><label><input type="checkbox" class="life-chk"> 9. 출석체크</label><label><input type="checkbox" class="life-chk"> 10. 정시 등교</label>
       </div>
       <textarea id="lifeMsg" placeholder="학생에게 보낼 코멘트 (예: 침구 정리가 완벽해요!)" style="width:100%; height:60px; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:8px;"></textarea>
       <input type="file" id="lifePhoto" accept="image/*">
@@ -210,22 +252,37 @@
   </div>
 </div>
 
+<div id="imgModal">
+  <div id="imgModalBox">
+    <img id="imgModalContent" src="">
+    <div style="display:flex; gap:10px;">
+      <button class="img-modal-btn" onclick="downloadExpandedImg()">💾 JPG 저장</button>
+      <button class="img-modal-btn" onclick="closeImgModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ▼▼▼▼▼ [필수] 배포 주소 입력 ▼▼▼▼▼
+// ▼▼▼▼▼ [필수] 선생님 배포 URL을 여기에 꼭 넣어주세요! ▼▼▼▼▼
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwrT8GcMjX10gs_2sUcl1Zm31-R4seFIfJkFUwjV4pKVYtfQS6xQNqqhMUyNbx_ReDBAg/exec"; 
-// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
 const noDiffMissions = ["교류수업", "SCL책력", "검정고시", "음악", "심화공부", "오후활동", "맞춤학습", "예배", "축구"];
 let globalChart = null; 
 let historyData = null; 
+let currentCalDate = new Date(); // 달력 현재 보여지는 날짜 (월 이동용)
+let loadedMonthlyData = {}; // 월간 데이터 캐시
 
 document.addEventListener("DOMContentLoaded", () => {
   const offset = 1000 * 60 * 60 * 9; 
   const today = new Date(new Date().getTime() + offset).toISOString().slice(0,10);
+  
   if(document.getElementById('dDate')) document.getElementById('dDate').value = today;
   if(document.getElementById('appUploadDate')) document.getElementById('appUploadDate').value = today;
   
+  currentCalDate = new Date(today); // 달력 기준일 초기화
+
   initWeekSelector(); 
   loadDaily(); 
   loadHistoryData(); 
@@ -250,9 +307,10 @@ function goTab(id) {
   }
 }
 
-// 용모 관리 업로드 (리사이징 적용)
+// --- 용모 관리 ---
+
 function uploadAppearancePhoto() {
-  if (!WEB_APP_URL || WEB_APP_URL.includes("여기에")) return alert("스크립트 상단의 WEB_APP_URL을 먼저 설정해주세요!");
+  if (!WEB_APP_URL || WEB_APP_URL.includes("여기에")) return alert("WEB_APP_URL을 설정해주세요!");
   const file = document.getElementById('appPhotoInput').files[0];
   const date = document.getElementById('appUploadDate').value; 
   if(!file) return alert("사진을 선택해주세요!");
@@ -269,80 +327,56 @@ function uploadAppearancePhoto() {
     }).then(r=>r.json()).then(res => { 
         if(res.ok) { alert(`${date} 날짜로 저장되었습니다.`); document.getElementById('appPhotoInput').value = ""; loadAppearanceMonthly(); } 
         else { alert("실패: " + res.error); }
-    }).catch(err => alert("전송 오류: " + err)).finally(() => { btn.innerText = "업로드 및 저장"; btn.disabled = false; });
+    }).catch(err => alert("오류: " + err)).finally(() => { btn.innerText = "업로드 및 저장"; btn.disabled = false; });
   });
-}
-
-// 생활미션 처리 (코멘트 포함)
-function handleLife(s){ 
-  const f=document.getElementById('lifePhoto').files[0]; 
-  const msg=document.getElementById('lifeMsg').value;
-  if(f) {
-    resizeImage(f, 800, 800, function(resizedBase64) {
-      const rawBase64 = resizedBase64.split(',')[1];
-      const sid=document.getElementById('mSid').value; 
-      const d=document.getElementById('dDate').value; 
-      fetch(WEB_APP_URL,{method:"POST", body:JSON.stringify({action:"uploadLifePhoto", base64:rawBase64, mimeType:"image/jpeg", sid:sid, name:students[sid], date:d, status:s, message: msg})})
-      .then(r=>r.json()).then(()=>{ alert("처리 완료"); document.getElementById('modal').style.display='none'; loadDaily(); });
-    });
-  } else { 
-    if(s==='life_ok'){ if(!confirm("사진 없이 완료 승인하시겠습니까?")) return; sendCtrl('life_ok', msg); } 
-    else sendCtrl('fail', msg); 
-  } 
-}
-
-function resizeImage(file, maxWidth, maxHeight, callback) {
-  const reader = new FileReader(); reader.readAsDataURL(file);
-  reader.onload = function (event) {
-    const img = new Image(); img.src = event.target.result;
-    img.onload = function () {
-      let width = img.width; let height = img.height;
-      if (width > height) { if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; } } 
-      else { if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; } }
-      const canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height;
-      const ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0, width, height);
-      callback(canvas.toDataURL("image/jpeg", 0.7));
-    };
-  };
-}
-
-function sendCtrl(a, msg){ 
-  const d=document.getElementById('dDate').value; 
-  if(a==='life_ok'||a==='fail'||a==='cancel'){ 
-    if(document.getElementById('mMid').value==='생활미션'){ 
-      fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"teacherControl",sid:document.getElementById('mSid').value,mid:"생활미션",act:a,message:msg,date:d})}).then(()=>{alert("완료됨"); document.getElementById('modal').style.display='none'; loadDaily();}); return; 
-    } 
-  } 
-  const n=document.getElementById('ctrlMissionSelect').value; 
-  fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"teacherControl",sid:document.getElementById('mSid').value,mid:document.getElementById('mMid').value,newMissionName:n,act:a,comment:document.getElementById('tComment').value,startTime:document.getElementById('tStart').value,endTime:document.getElementById('tEnd').value,date:d})}).then(()=>{alert("처리됨"); document.getElementById('modal').style.display='none'; loadDaily();}); 
 }
 
 function loadAppearanceMonthly() {
   const sid = document.getElementById('appStudent').value;
-  const selectedDate = document.getElementById('appUploadDate').value || new Date().toISOString().slice(0,10);
   fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"getAppearanceData", mode:"monthly", sid:sid}) })
   .then(r=>r.json()).then(res => {
-    const photoMap = {};
-    if(res.data && res.data.monthly) { res.data.monthly.forEach(item => { photoMap[item.date] = item.url; }); }
-    renderCalendar(selectedDate, photoMap);
+    loadedMonthlyData = {};
+    if(res.data && res.data.monthly) { res.data.monthly.forEach(item => { loadedMonthlyData[item.date] = item.url; }); }
+    renderCalendar(); // 현재 currentCalDate 기준으로 그리기
   });
 }
 
-function renderCalendar(dateStr, photoMap) {
-  const d = new Date(dateStr); const year = d.getFullYear(); const month = d.getMonth();
+function changeMonth(offset) {
+  currentCalDate.setMonth(currentCalDate.getMonth() + offset);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const year = currentCalDate.getFullYear();
+  const month = currentCalDate.getMonth();
+  
   document.getElementById('calMonthTitle').innerText = `${year}년 ${month+1}월`;
-  const firstDay = new Date(year, month, 1); const lastDay = new Date(year, month+1, 0);
-  const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; const totalDays = lastDay.getDate();
-  let html = ""; const days = ["월","화","수","목","금","토","일"];
+  
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month+1, 0);
+  const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; 
+  const totalDays = lastDay.getDate();
+  
+  let html = "";
+  const days = ["월","화","수","목","금","토","일"];
   days.forEach(day => html += `<div class="cal-day-name">${day}</div>`);
+  
   for(let i=0; i<startDay; i++) html += `<div></div>`;
+  
   for(let i=1; i<=totalDays; i++) {
     const currentYMD = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-    const photoUrl = photoMap[currentYMD];
+    const photoUrl = loadedMonthlyData[currentYMD];
     const offset = 1000 * 60 * 60 * 9;
     const todayYMD = new Date(new Date().getTime() + offset).toISOString().slice(0,10);
     const isToday = currentYMD === todayYMD;
-    html += `<div class="cal-cell ${isToday ? 'cal-today' : ''}"><div class="cal-date">${i}</div>${photoUrl ? `<img src="${photoUrl}" class="cal-img" onclick="window.open(this.src)">` : ''}</div>`;
+    
+    // [수정] 클릭 시 openImageModal 호출
+    html += `
+      <div class="cal-cell ${isToday ? 'cal-today' : ''}">
+        <div class="cal-date">${i}</div>
+        ${photoUrl ? `<img src="${photoUrl}" class="cal-img" onclick="openImageModal(this.src)">` : ''}
+      </div>
+    `;
   }
   document.getElementById('calendarGrid').innerHTML = html;
 }
@@ -360,11 +394,30 @@ function loadAppearanceWeekly() {
       let row = `<tr><td style="font-weight:bold; vertical-align:middle;">${students[sid]}</td>`;
       dates.forEach(d => {
         const url = (data[sid] && data[sid][d]) ? data[sid][d] : null;
-        if(url) row += `<td><img src="${url}" class="app-thumb" onclick="window.open(this.src)"></td>`; else row += `<td><div class="no-photo">미제출</div></td>`;
+        if(url) row += `<td><img src="${url}" class="app-thumb" onclick="openImageModal(this.src)"></td>`; 
+        else row += `<td><div class="no-photo">미제출</div></td>`;
       });
       row += "</tr>"; tbody.innerHTML += row;
     });
   });
+}
+
+// [NEW] 이미지 확대 모달 관련 함수
+function openImageModal(src) {
+  document.getElementById('imgModal').style.display = 'flex';
+  document.getElementById('imgModalContent').src = src;
+}
+function closeImgModal() {
+  document.getElementById('imgModal').style.display = 'none';
+}
+function downloadExpandedImg() {
+  const src = document.getElementById('imgModalContent').src;
+  const link = document.createElement('a');
+  link.href = src;
+  link.download = `LDS_Photo_${Date.now()}.jpg`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 function switchAppMode(mode) {
@@ -379,6 +432,22 @@ function switchAppMode(mode) {
   }
 }
 
+// --- 공통 및 기존 함수들 ---
+function resizeImage(file, maxWidth, maxHeight, callback) {
+  const reader = new FileReader(); reader.readAsDataURL(file);
+  reader.onload = function (event) {
+    const img = new Image(); img.src = event.target.result;
+    img.onload = function () {
+      let width = img.width; let height = img.height;
+      if (width > height) { if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; } } 
+      else { if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; } }
+      const canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0, width, height);
+      callback(canvas.toDataURL("image/jpeg", 0.7));
+    };
+  };
+}
+
 function initWeekSelector() {
   const today = new Date(); const wSel = document.getElementById('wWeekSelect'); const pSel = document.getElementById('pWeekSelect'); const aSel = document.getElementById('appWeekSelect'); 
   for (let i = 0; i < 5; i++) {
@@ -389,7 +458,7 @@ function initWeekSelector() {
   }
 }
 
-function loadDaily(){ const date=document.getElementById('dDate').value; fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"getDailyData",date:date})}).then(res=>res.json()).then(data=>{ const board=document.getElementById('dailyBoard'); board.innerHTML=""; Object.keys(students).forEach(sid=>{ const col=document.createElement('div'); col.className='student-col'; const l=data.logs[sid]||{}; const s=data.schedules[sid]; const isPaid=l["하루 기록"]&&l["하루 기록"].status==='end'; let rawMoney=0; Object.values(l).forEach(item=>{if(item.money)rawMoney+=item.money;}); col.innerHTML=`<div class="col-header"><h3 class="student-name">${students[sid]}</h3><span class="money-badge" style="display:${isPaid?'block':'none'}">원금: ₩${rawMoney.toLocaleString()}</span></div>`; const life=l["생활미션"]; let lifeCls="",lifeTxt="미완료"; if(life){ if(life.status==='life_ok'){lifeCls='life-ok';lifeTxt='성공';} if(life.status==='fail'){lifeCls='fail';lifeTxt='실패';} if(life.status==='cancel'){lifeCls='cancel';lifeTxt='휴강';} } col.innerHTML+=`<div class="m-item ${lifeCls}" onclick="openModal('${sid}','생활미션')"><b>🌞 생활미션</b> <span>${lifeTxt}</span></div>`; if(s){ const schedKeys=[s.m1.n,s.m2.n,s.m3.n,s.c1a.n,s.c1b.n,s.c2.n]; const allLogKeys=Object.keys(l).filter(k=>k!=="생활미션"&&k!=="하루 기록"); const extraMissions=allLogKeys.filter(k=>!schedKeys.includes(k)); [s.m1,s.m2,s.m3,s.c1a,s.c1b,s.c2].forEach(m=>{ if(!m.n)return; let effectiveName=m.n; let ml=l[m.n]; if(!ml&&(m.n.includes("선택")||m.n==="미정"||m.n==="오후활동")&&extraMissions.length>0){ effectiveName=extraMissions.shift(); ml=l[effectiveName]; } let c=""; if(ml){ if(ml.status=='start')c='ing'; if(ml.status=='end')c='done'; if(ml.status=='fail')c='fail'; if(ml.status=='cancel')c='cancel'; } let tStr=parseTimeStr(ml); if(ml&&ml.status=='cancel')tStr="휴강됨"; let diffHtml=""; if(!noDiffMissions.includes(effectiveName)){ let currentDiff=(ml&&ml.comment)?ml.comment:(m.l||"NORMAL"); if(["EASY","NORMAL","HARD"].includes(currentDiff)){ const dCls=currentDiff==='EASY'?'diff-EASY':(currentDiff==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls}">${currentDiff}</span>`; } } col.innerHTML+=`<div class="m-item ${c}" onclick="openModal('${sid}','${effectiveName}', '${(ml&&ml.comment)?ml.comment:(m.l||"NORMAL")}')"><div>${effectiveName} ${diffHtml}</div><small>${tStr}</small></div>`; }); } const btnTxt=isPaid?"✅ 정산 완료":"하루 기록 (정산)"; const btnCls=isPaid?"background:#94a3b8":"background:#3b82f6; animation:pulse 2s infinite;"; col.innerHTML+=`<button class="btn" style="${btnCls}; margin-top:10px;" onclick="openModal('${sid}','하루 기록')">${btnTxt}</button>`; board.appendChild(col); }); }); }
+function loadDaily(){ const date=document.getElementById('dDate').value; fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"getDailyData",date:date})}).then(res=>res.json()).then(data=>{ const board=document.getElementById('dailyBoard'); board.innerHTML=""; Object.keys(students).forEach(sid=>{ const col=document.createElement('div'); col.className='student-col'; const l=data.logs[sid]||{}; const s=data.schedules[sid]; const isPaid=l["하루 기록"]&&l["하루 기록"].status==='end'; let rawMoney=0; Object.values(l).forEach(item=>{if(item.money)rawMoney+=item.money;}); col.innerHTML=`<div class="col-header"><h3 class="student-name">${students[sid]}</h3><span class="money-badge" style="display:${isPaid?'block':'none'}">원금: ₩${rawMoney.toLocaleString()}</span><button class="qr-btn" onclick="alert('QR 기능은 비활성화되었습니다.')" style="display:none">🪪 QR</button></div>`; const life=l["생활미션"]; let lifeCls="",lifeTxt="미완료"; if(life){ if(life.status==='life_ok'){lifeCls='life-ok';lifeTxt='성공';} if(life.status==='fail'){lifeCls='fail';lifeTxt='실패';} if(life.status==='cancel'){lifeCls='cancel';lifeTxt='휴강';} } col.innerHTML+=`<div class="m-item ${lifeCls}" onclick="openModal('${sid}','생활미션')"><b>🌞 생활미션</b> <span>${lifeTxt}</span></div>`; if(s){ const schedKeys=[s.m1.n,s.m2.n,s.m3.n,s.c1a.n,s.c1b.n,s.c2.n]; const allLogKeys=Object.keys(l).filter(k=>k!=="생활미션"&&k!=="하루 기록"); const extraMissions=allLogKeys.filter(k=>!schedKeys.includes(k)); [s.m1,s.m2,s.m3,s.c1a,s.c1b,s.c2].forEach(m=>{ if(!m.n)return; let effectiveName=m.n; let ml=l[m.n]; if(!ml&&(m.n.includes("선택")||m.n==="미정"||m.n==="오후활동")&&extraMissions.length>0){ effectiveName=extraMissions.shift(); ml=l[effectiveName]; } let c=""; if(ml){ if(ml.status=='start')c='ing'; if(ml.status=='end')c='done'; if(ml.status=='fail')c='fail'; if(ml.status=='cancel')c='cancel'; } let tStr=parseTimeStr(ml); if(ml&&ml.status=='cancel')tStr="휴강됨"; let diffHtml=""; if(!noDiffMissions.includes(effectiveName)){ let currentDiff=(ml&&ml.comment)?ml.comment:(m.l||"NORMAL"); if(["EASY","NORMAL","HARD"].includes(currentDiff)){ const dCls=currentDiff==='EASY'?'diff-EASY':(currentDiff==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls}">${currentDiff}</span>`; } } col.innerHTML+=`<div class="m-item ${c}" onclick="openModal('${sid}','${effectiveName}', '${(ml&&ml.comment)?ml.comment:(m.l||"NORMAL")}')"><div>${effectiveName} ${diffHtml}</div><small>${tStr}</small></div>`; }); } const btnTxt=isPaid?"✅ 정산 완료":"하루 기록 (정산)"; const btnCls=isPaid?"background:#94a3b8":"background:#3b82f6; animation:pulse 2s infinite;"; col.innerHTML+=`<button class="btn" style="${btnCls}; margin-top:10px;" onclick="openModal('${sid}','하루 기록')">${btnTxt}</button>`; board.appendChild(col); }); }); }
 function loadWeekly(){ const sid=document.getElementById('wStudent').value; const date=document.getElementById('wWeekSelect').value||new Date().toISOString().slice(0,10); fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"getWeeklyData",sid:sid,date:date})}).then(r=>r.json()).then(res=>{ let h=`<table class="weekly-table"><thead><tr><th>시간</th>`; ["월","화","수","목","금"].forEach(d=>h+=`<th>${d}</th>`); h+=`</tr></thead><tbody>`; const slots=[{t:"09:00",k:"life"},{t:"09:30",k:"am"},{t:"11:00",k:"sel1"},{t:"12:00",k:"lunch"},{t:"13:00",k:"pm"},{t:"15:00",k:"late"},{t:"17:00",k:"end"}]; slots.forEach(slot=>{ h+=`<tr><td>${slot.t}</td>`; for(let i=0;i<5;i++){ const d=res.days[i].data; const s=d.schedules[sid]; const l=d.logs[sid]||{}; let content=""; if(slot.k==='life'){ content="생활미션"; if(l["생활미션"]){ if(l["생활미션"].status==='life_ok')content+="<br>✅ 성공"; if(l["생활미션"].status==='fail')content+="<br>❌ 실패"; if(l["생활미션"].status==='cancel')content+="<br>⛔ 휴강"; const money=l["생활미션"].money||0; let mClass=money>0?"price-plus":(money<0?"price-minus":"price-zero"); content+=`<div class="cell-price ${mClass}">₩${money.toLocaleString()}</div>`; } } else if(slot.k==='lunch')content="<span style='color:#ccc'>🍽️ 점심</span>"; else if(i<=2){ if(slot.k==='am')content=getMList(s,['m1','m2','m3'],l); if(slot.k==='sel1')content=getMList(s,['c1a','c1b'],l); if(slot.k==='pm')content=getMList(s,['c2'],l); if(slot.k==='late')content="하루 정리"; if(slot.k==='end')content="-"; } else if(i===3){ if(slot.k==='am'||slot.k==='sel1')content="⚽ 축구"; if(slot.k==='pm')content=getMList(s,['c2'],l); if(slot.k==='late')content=getMList(s,['m1','m2','m3','c1a','c1b'],l); if(slot.k==='end')content="하루 정리"; } else if(i===4){ if(slot.k==='am')content=getMList(s,['m1','m2','m3'],l); if(slot.k==='sel1')content=getMList(s,['c1a','c1b'],l); if(slot.k==='pm')content="🙏 예배"; if(slot.k==='late')content=""; if(slot.k==='end')content="하루 정리"; } h+=`<td>${content}</td>`; } h+=`</tr>`; }); h+=`<tr><td style="font-weight:bold;">일일 수입</td>`; for(let i=0;i<5;i++)h+=`<td style="font-weight:bold; color:var(--p);">₩${res.days[i].money.toLocaleString()}</td>`; h+=`</tr></tbody></table>`; document.getElementById('weeklyBoard').innerHTML=h; document.getElementById('totalWeekMoney').innerText=res.total.toLocaleString(); }); }
 function getMList(s,keys,l){ if(!s)return"-"; const allLogKeys=Object.keys(l).filter(k=>k!=="생활미션"&&k!=="하루 기록"); const schedKeys=keys.map(k=>s[k]?s[k].n:""); return keys.map(k=>{ if(!s[k]||!s[k].n)return""; let mName=s[k].n; let ml=l[mName]; if(!ml&&(mName.includes("선택")||mName==="미정"||mName==="오후활동")){ const overrideName=allLogKeys.find(key=>!schedKeys.includes(key)); if(overrideName){mName=overrideName;ml=l[overrideName];} } let stClass="",stTxt="",detailTxt="",diffHtml="",moneyHtml=""; if(ml){ const d=ml.comment; if(!noDiffMissions.includes(mName)&&["EASY","NORMAL","HARD"].includes(d)){ const dCls=d==='EASY'?'diff-EASY':(d==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls}">${d}</span>`; } else if(!noDiffMissions.includes(mName)&&s[k].l&&["EASY","NORMAL","HARD"].includes(s[k].l)){ const d2=s[k].l; const dCls2=d2==='EASY'?'diff-EASY':(d2==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls2}">${d2}</span>`; } if(ml.status=='end'){stClass='st-done';stTxt='완료';detailTxt=parseTimeStr(ml);} else if(ml.status=='start'){stClass='st-ing';stTxt='진행중';detailTxt=parseTimeStr(ml);} else if(ml.status=='fail'){stClass='st-fail';stTxt='실패';} else if(ml.status=='cancel'){stClass='st-cancel';stTxt='휴강';} if(ml.money!==undefined){ let mClass=ml.money>0?"price-plus":(ml.money<0?"price-minus":"price-zero"); moneyHtml=`<div class="cell-price ${mClass}">₩${ml.money.toLocaleString()}</div>`; } return`<div class="cell-mission">${mName}${diffHtml}<span class="cell-status ${stClass}">${stTxt}</span><div class="cell-detail">${detailTxt}</div>${moneyHtml}</div>`; } if(!noDiffMissions.includes(mName)&&s[k].l&&["EASY","NORMAL","HARD"].includes(s[k].l)){ const d2=s[k].l; const dCls2=d2==='EASY'?'diff-EASY':(d2==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls2}">${d2}</span>`; } return`<div class="cell-mission">${mName}${diffHtml}</div>`; }).join(""); }
 function parseTimeStr(ml){ if(!ml||!ml.note)return"-"; let txt=ml.note; if(txt.includes("duration:")){ try{ const parts=txt.split('|'); const durPart=parts.find(p=>p.startsWith("duration:")); if(durPart){ const seconds=parseInt(durPart.split(':')[1]); if(!isNaN(seconds)){ const m=Math.floor(seconds/60); const s=seconds%60; return`${m}분 ${s}초 소요`; } } }catch(e){return"시간 정보 오류";} } if(txt.includes("Start"))return txt.replace("Start:","시작:"); if(txt.includes("NaN"))return"-"; return txt; }
