@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LDS 사원 앱</title>
   <style>
+    /* ... (기존 CSS) ... */
     :root { --p: #4f46e5; --bg: #f8fafc; --card: #ffffff; --ok: #10b981; --fail: #ef4444; }
     body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 15px; margin: 0; color:#333; }
     .view { display: none; } .view.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
     .container { max-width: 500px; margin: 0 auto; position: relative; }
     .card { background: var(--card); border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; text-align: center; }
+    
     .user-card { cursor: pointer; transition: 0.2s; border: 1px solid transparent; display: flex; align-items: center; justify-content: flex-start; gap: 15px; padding: 20px; }
     .user-card:active { transform: scale(0.98); border-color: var(--p); }
     .avatar { font-size: 24px; background: #e0e7ff; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
@@ -30,16 +32,22 @@
     .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
     .fix-label { background: #f1f5f9; padding: 12px; border-radius: 12px; flex: 1; font-weight: bold; font-size: 15px; }
     .day-badge { display: inline-block; background: #e0e7ff; color: var(--p); padding: 5px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
+    
     .mission-item { background: white; border: 1px solid #e2e8f0; border-radius: 15px; padding: 15px; margin-bottom: 10px; text-align: left; position: relative; }
     .mission-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
     .mission-name { font-weight: bold; font-size: 16px; }
     .mission-lv { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+    
     .btn-action { width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: 1px solid var(--p); background: white; color: var(--p); transition: 0.2s; }
     .btn-action.ing { background: #fff7ed; border: 2px solid orange; color: #d97706; animation: pulse 1.5s infinite; }
     .btn-action.done { background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; cursor: not-allowed; }
     .btn-action.done.admin-active { cursor: pointer; border: 1px dashed #94a3b8; background: #f8fafc; color: #64748b; }
     .btn-action:disabled { opacity: 0.6; cursor: not-allowed; background: #f8fafc; border-color: #cbd5e1; color: #94a3b8; }
     .live-timer { font-size: 24px; font-weight: 800; color: #d97706; text-align: center; margin: 10px 0; display: none; }
+    
+    /* [NEW] 사진 및 코멘트 스타일 */
+    .proof-photo { width: 100%; max-height: 200px; object-fit: contain; border-radius: 10px; margin-top: 10px; border: 2px solid #e2e8f0; display: block; cursor: pointer; background: #000; }
+    .teacher-msg { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 14px; font-weight: bold; line-height: 1.4; }
     
     #adminBtn { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; background: none; border: none; z-index: 99; color: #cbd5e1; }
     #adminPanel { background: #1e293b; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
@@ -144,13 +152,14 @@
 </div>
 
 <script>
-// ▼▼▼▼▼ 주소 변경 필수 ▼▼▼▼▼
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyFwglSWgxNlWq5KLKmUq4nx1Ina3AoNSJPbDRK6YaX6W5knQATBalYLTYiVIwuShd6KQ/exec"; 
-// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+// ▼▼▼▼▼ [필수] 선생님 배포 URL로 변경하세요! ▼▼▼▼▼
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwrT8GcMjX10gs_2sUcl1Zm31-R4seFIfJkFUwjV4pKVYtfQS6xQNqqhMUyNbx_ReDBAg/exec"; 
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 let appDate = new Date();
 let curId, curName, curM;
 let currentScheduleData = null;
+let currentLogs = {}; 
 let timerInterval = null; 
 let isAdminMode = false;
 
@@ -199,18 +208,18 @@ function exitAdmin() {
 function checkUser(id, name) {
   curId = id; curName = name;
   fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "checkSchedule", id: id, date: getAppDateStr() }) })
-  .then(r => r.json()).then(scheduleRes => {
-      if(scheduleRes.hasSchedule) {
-          currentScheduleData = scheduleRes.data;
-          renderMissions(scheduleRes.data);
+  .then(r => r.json()).then(res => {
+      currentLogs = res.logs || {}; 
+      if(res.hasSchedule) {
+          currentScheduleData = res.data;
+          renderMissions(res.data);
           showView('view-mission');
           document.getElementById('missionTitle').innerText = `${name} 사원 (${getAppDateStr()})`;
           restoreMissionState();
       } else {
           showView('view-plan');
           const saveBtn = document.querySelector('#view-plan button.primary');
-          // 잠금 로직 없이 항상 활성화
-          saveBtn.disabled = false;
+          saveBtn.disabled = false; // 항상 활성화
           saveBtn.innerText = "업무 스케줄 제출";
           saveBtn.style.background = "var(--p)";
           saveBtn.style.cursor = "pointer";
@@ -254,6 +263,24 @@ function editPlan() {
 }
 function renderMissions(d) {
   const list = document.getElementById('missionList'); list.innerHTML = "";
+  
+  // 생활미션 카드 (코멘트 표시 포함)
+  const lifeLog = currentLogs["생활미션"];
+  let lifeStatus = "미완료", lifeImgHtml = "", lifeMsgHtml = "";
+  if(lifeLog) {
+      if(lifeLog.status === 'life_ok') lifeStatus = "✅ 확인됨";
+      else if(lifeLog.status === 'fail') lifeStatus = "❌ 실패";
+      else if(lifeLog.status === 'cancel') lifeStatus = "⛔ 휴강";
+      if(lifeLog.photo) {
+          lifeImgHtml = `<img src="${lifeLog.photo}" class="proof-photo" onclick="window.open(this.src)">`;
+      }
+      // 선생님 코멘트 표시
+      if(lifeLog.message && lifeLog.message.trim() !== "") {
+          lifeMsgHtml = `<div class="teacher-msg">📢 선생님 말씀:<br>${lifeLog.message}</div>`;
+      }
+  }
+  list.innerHTML += `<div class="mission-item" style="border-left:5px solid #f59e0b; background:#fffbeb;"><div class="mission-header"><span class="mission-name">🌞 생활미션</span><span class="mission-lv">${lifeStatus}</span></div><div style="font-size:12px; color:#666;">선생님 확인이 필요합니다.</div>${lifeImgHtml}${lifeMsgHtml}</div>`;
+
   if (d.day === "목") {
     list.innerHTML += `<div style="font-size:12px; color:#888; margin:10px 0;">🕐 13:00 ~ 15:00</div>`; renderItem(list, d.c2);
     list.innerHTML += `<div style="font-size:12px; color:#888; margin:20px 0 10px;">🕒 15:00 ~ 17:00</div>`; [d.m1, d.m2, d.m3, d.c1a, d.c1b].forEach(t => renderItem(list, t));
