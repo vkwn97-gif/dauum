@@ -5,80 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LDS 관리자</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
     :root { --p: #4f46e5; --bg: #f1f5f9; --ok: #10b981; --fail: #ef4444; --cancel: #9ca3af; }
     body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 20px; color:#333; margin:0; }
-    
     .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
     .tab { padding: 12px 24px; border-radius: 10px; background: #cbd5e1; cursor: pointer; font-weight: bold; color: #475569; transition:0.2s; }
     .tab.active { background: var(--p); color: white; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
-    
     .view { display: none; } .view.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    
-    /* 일간 그리드 */
     .daily-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
     .student-col { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     .col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
     .student-name { font-size: 18px; font-weight: bold; margin: 0; }
     .qr-btn { font-size: 11px; background: #334155; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
     .money-badge { background: #fff7ed; color: #d97706; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
-
     .m-item { border: 1px solid #eee; padding: 10px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
     .m-item.done { border-left: 5px solid var(--ok); background: #f0fdf4; }
     .m-item.life-ok { border-left: 5px solid var(--ok); background: #dcfce7; }
     .m-item.ing { border-left: 5px solid orange; background: #fff7ed; }
     .m-item.fail { border-left: 5px solid var(--fail); background: #fef2f2; opacity: 0.8; }
     .m-item.cancel { border-left: 5px solid var(--cancel); background: #f3f4f6; color: #6b7280; }
-    
     .diff-badge { font-size: 10px; font-weight: 800; padding: 1px 4px; border-radius: 3px; margin-left: 3px; }
     .diff-EASY { color: #10b981; background: #ecfdf5; border: 1px solid #10b981; }
     .diff-NORMAL { color: #3b82f6; background: #eff6ff; border: 1px solid #3b82f6; }
     .diff-HARD { color: #ef4444; background: #fef2f2; border: 1px solid #ef4444; }
+    .report-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; position:relative; }
+    .report-header { font-size: 20px; font-weight: 900; color: #1e293b; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; display:flex; justify-content:space-between; }
+    
+    /* 성과 리포트 스타일 */
+    .weekly-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .chart-box { background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; display:flex; flex-direction:column; align-items:center; }
+    .chart-title { font-size: 14px; font-weight: bold; color: #475569; margin-bottom: 10px; }
+    .chart-wrapper { width: 120px; height: 120px; position: relative; display: flex; justify-content: center; align-items: center; }
+    .chart-comment { font-size: 12px; color: #1e293b; margin-top: 10px; background: white; padding: 8px; border-radius: 8px; width: 100%; border: 1px solid #e2e8f0; font-weight: 600; line-height: 1.4; box-sizing: border-box; }
+    .chart-value-text { font-size: 20px; font-weight: 900; color: #333; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .report-sub { font-size: 14px; font-weight: 800; color: #475569; margin: 15px 0 8px; border-left: 4px solid var(--p); padding-left: 8px; }
+    
+    /* 성과 분석 가이드 */
+    .report-guide { background: #fff7ed; border: 1px solid #fdba74; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; color: #9a3412; line-height: 1.6; }
+    .guide-title { font-weight: 900; margin-bottom: 8px; display: block; color: #c2410c; font-size: 14px; }
+    .guide-item { margin-bottom: 4px; display:flex; align-items:flex-start; }
+    .guide-icon { margin-right: 6px; }
 
-    /* 용모 관리 & 달력 */
-    .appearance-layout { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    .app-controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
-    .app-btn { padding: 10px 20px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; }
-    .app-btn.active { background: var(--p); color: white; border-color: var(--p); }
-    
-    .calendar-container { margin-top: 20px; }
-    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; font-size: 18px; }
-    .cal-nav-btn { background:none; border:none; font-size:18px; cursor:pointer; padding:5px 10px; }
-    
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-    .cal-day-name { text-align: center; padding: 5px; font-weight: bold; color: #64748b; background: #f1f5f9; border-radius: 5px; }
-    .cal-cell { 
-      background: white; border: 1px solid #e2e8f0; border-radius: 5px; 
-      min-height: 100px; padding: 5px; 
-      display: flex; flex-direction: column; align-items: flex-start; 
-      position: relative; 
-    }
-    .cal-date { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #333; }
-    .cal-today { border: 2px solid var(--p); background: #e0e7ff; }
-    .cal-img { 
-      width: 100%; height: 80px; 
-      object-fit: contain; 
-      background: #f8fafc; 
-      border-radius: 4px; cursor: pointer; border: 1px solid #eee;
-    }
-    
-    .app-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
-    .app-table th { background: #f1f5f9; padding: 10px; border: 1px solid #e2e8f0; }
-    .app-table td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; vertical-align: top; }
-    .app-thumb { width: 100%; height: 120px; object-fit: contain; background: #f8fafc; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; }
-    .no-photo { color: #ccc; font-size: 12px; padding: 40px 0; }
-
-    /* 급여 */
-    .weekly-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
-    .weekly-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-    .weekly-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-    .weekly-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 14px; border-bottom: 2px solid #e2e8f0; }
-    .weekly-table td { border: 1px solid #e2e8f0; padding: 8px; vertical-align: top; text-align: center; min-height: 60px; }
-    .pay-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
-    .pay-left { flex: 1; min-width: 350px; }
-    .pay-statement { background: white; border: 2px solid #1e293b; border-radius: 10px; padding: 30px; text-align: center; position: relative; }
+    /* 급여 명세서 스타일 */
+    .pay-statement { background: white; border: 2px solid #1e293b; border-radius: 10px; padding: 30px; text-align: center; position: relative; margin-top:30px; }
     .pay-logo { font-size: 14px; font-weight: 900; color: #1e293b; margin-bottom: 20px; letter-spacing: 2px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
     .pay-title { font-size: 24px; font-weight: bold; color: #1e293b; margin: 0; }
     .pay-date-range { font-size: 14px; color: #64748b; margin-top: 5px; margin-bottom: 20px; }
@@ -88,24 +60,55 @@
     .pay-table-view td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 15px; font-weight: 600; color: #333; }
     .pay-table-view td.money-col { text-align: right; font-family: monospace; font-size: 16px; }
     .pay-footer { margin-top: 30px; font-size: 11px; color: #94a3b8; font-style: italic; }
-    .btn-download { margin-top: 15px; width: 100%; background: #1e293b; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .pay-right { flex: 1.5; background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-width: 300px; }
-    .chart-container { position: relative; height: 350px; width: 100%; }
-    .chart-controls { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 10px; flex-wrap: wrap; }
-    .chk-label { font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer; }
 
-    /* 모달 */
+    .weekly-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    .weekly-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 14px; border-bottom: 2px solid #e2e8f0; }
+    .weekly-table td { border: 1px solid #e2e8f0; padding: 8px; vertical-align: top; text-align: center; min-height: 60px; }
+    .cell-mission { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .cell-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; }
+    .st-done { background: #dcfce7; color: #166534; }
+    .st-fail { background: #fee2e2; color: #991b1b; }
+    .st-ing { background: #fff7ed; color: #9a3412; }
+    .st-cancel { background: #e5e7eb; color: #6b7280; text-decoration: line-through; }
+    .cell-price { font-size: 11px; font-weight: 800; margin-top: 4px; }
+    .price-plus { color: #059669; } .price-zero { color: #9ca3af; } .price-minus { color: #ef4444; }
+
+    .appearance-layout { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .app-controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+    .app-btn { padding: 10px 20px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; }
+    .app-btn.active { background: var(--p); color: white; border-color: var(--p); }
+    .calendar-container { margin-top: 20px; }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; font-size: 18px; }
+    .cal-nav-btn { background:none; border:none; font-size:18px; cursor:pointer; padding:5px 10px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .cal-day-name { text-align: center; padding: 5px; font-weight: bold; color: #64748b; background: #f1f5f9; border-radius: 5px; }
+    .cal-day-name:first-child { color: #ef4444; } .cal-day-name:last-child { color: #3b82f6; }
+    .cal-cell { background: white; border: 1px solid #e2e8f0; border-radius: 5px; min-height: 100px; padding: 5px; display: flex; flex-direction: column; align-items: flex-start; position: relative; }
+    .cal-date { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #333; }
+    .cal-today { border: 2px solid var(--p); background: #e0e7ff; }
+    .cal-img { width: 100%; height: 80px; object-fit: contain; background: #f8fafc; border-radius: 4px; cursor: pointer; border: 1px solid #eee; }
+    .app-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+    .app-table th { background: #f1f5f9; padding: 10px; border: 1px solid #e2e8f0; }
+    .app-table td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; vertical-align: top; }
+    .app-thumb { width: 100%; height: 120px; object-fit: contain; background: #f8fafc; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; }
+    .no-photo { color: #ccc; font-size: 12px; padding: 40px 0; }
     #modal, #qrModal, #imgModal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index: 1000; }
     .modal-box { background: white; padding: 25px; border-radius: 15px; width: 400px; max-height: 90vh; overflow-y: auto; }
-    
     #imgModalContent { max-width: 90%; max-height: 80vh; object-fit: contain; background: black; }
     #imgModalBox { background: transparent; text-align: center; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
     .img-modal-btn { background: white; color: #333; padding: 10px 20px; border-radius: 20px; font-weight: bold; border: none; cursor: pointer; margin: 10px; }
-
+    #qrCard { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
+    #qrImage { margin: 20px auto; padding:10px; border:1px solid #eee; display: flex; justify-content: center; background: white; }
     input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
     .btn { padding: 10px; width: 100%; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; margin-top: 5px; }
     .chk-group label { display: block; margin-bottom: 8px; cursor: pointer; font-size: 14px; }
-    .section-label { font-size:12px; font-weight:bold; color:#666; margin-top:10px; display:block; }
+    .btn-download { margin-top: 15px; width: 100%; background: #1e293b; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .total-box { text-align: right; }
+    .total-label { font-size: 13px; color: #666; }
+    .total-amount { font-size: 24px; font-weight: 800; color: var(--p); }
+    .time-wrapper { text-align: right; font-size: 12px; color: #333; margin-top: 2px; }
+    .time-range { display: block; font-weight: bold; color: #333; }
+    .time-duration { display: block; }
   </style>
 </head>
 <body>
@@ -114,7 +117,6 @@
   <div class="tab active" id="tab-daily" onclick="goTab('daily')">📅 일간 관리</div>
   <div class="tab" id="tab-weekly" onclick="goTab('weekly')">📊 주간 리포트</div>
   <div class="tab" id="tab-appearance" onclick="goTab('appearance')">👔 용모 관리</div>
-  <div class="tab" id="tab-pay" onclick="goTab('pay')">💰 LDS 급여 명세서</div>
 </div>
 
 <div id="daily" class="view active">
@@ -126,16 +128,47 @@
 </div>
 
 <div id="weekly" class="view">
-  <div class="weekly-card">
-    <div class="weekly-header">
-      <div style="display:flex; gap:10px;">
-        <select id="wStudent" onchange="loadWeekly()" style="padding:10px; font-weight:bold;"><option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option></select>
-        <select id="wWeekSelect" onchange="loadWeekly()" style="padding:10px;"></select>
-      </div>
-      <div class="total-box"><div class="total-label">이번 주 총 수입</div><div class="total-amount" id="totalWeekMoney">0원</div></div>
-    </div>
-    <div id="weeklyBoard"></div>
+  <div style="text-align: center; margin-bottom: 20px;">
+    <select id="wStudent" onchange="loadWeekly()" style="padding:10px; font-weight:bold; width: auto; border-radius:8px;"><option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option></select>
+    <select id="wWeekSelect" onchange="loadWeekly()" style="padding:10px; width:auto; border-radius:8px;"></select>
   </div>
+  
+  <div class="report-card" id="weeklyReportContainer">
+    <div class="report-header">
+      <span id="wReportTitle">주간 성과 리포트</span>
+      <span style="font-size:14px; color:#666; font-weight:normal;" id="wDateRange">-</span>
+    </div>
+    
+    <div class="weekly-charts">
+      <div class="chart-box"><div class="chart-title">① 자기 관리</div><div class="chart-wrapper"><canvas id="wcSelf"></canvas><div class="chart-value-text" id="wtSelf">-</div></div><div class="chart-comment" id="wcSelfMsg">분석 중...</div></div>
+      <div class="chart-box"><div class="chart-title">② 도전 성향</div><div class="chart-wrapper"><canvas id="wcChal"></canvas><div class="chart-value-text" id="wtChal" style="top:70%;">-</div></div><div class="chart-comment" id="wcChalMsg">분석 중...</div></div>
+      <div class="chart-box"><div class="chart-title">④ 생산성 (평균 대비)</div><div class="chart-wrapper" style="width:100%;"><canvas id="wcProd" style="height:80px;"></canvas></div><div class="chart-comment" id="wcProdMsg">분석 중...</div></div>
+      <div class="chart-box"><div class="chart-title">⑤ 마감 준수</div><div class="chart-wrapper"><canvas id="wcComp"></canvas><div class="chart-value-text" id="wtComp">-</div></div><div class="chart-comment" id="wcCompMsg">분석 중...</div></div>
+    </div>
+
+    <div class="report-guide">
+      <span class="guide-title">📢 성과 분석 가이드</span>
+      <div class="guide-item"><span class="guide-icon">✅</span><b>자기 관리:</b> 생활 미션(기상, 정리정돈 등) 성공률</div>
+      <div class="guide-item"><span class="guide-icon">🔥</span><b>도전 성향:</b> 선택한 미션의 난이도 평균 (Hard=3점, Easy=1점)</div>
+      <div class="guide-item"><span class="guide-icon">💰</span><b>생산성:</b> 전체 사원 평균 소득 대비 나의 소득 비율</div>
+      <div class="guide-item"><span class="guide-icon">⏰</span><b>마감 준수:</b> 계획된 미션 중 정해진 시간 내에 완료한 비율</div>
+    </div>
+
+    <div class="report-sub">주간 업무 수행 기록</div>
+    <div style="overflow-x:auto;" id="weeklyBoard"></div>
+    
+    <div class="pay-statement" id="captureArea">
+        <div class="pay-logo">LIFE DESIGN STUDIO</div>
+        <h2 class="pay-title" id="payStatementTitle">OOO 급여 명세서</h2>
+        <div class="pay-date-range" id="payDateRange">-</div>
+        <div class="pay-big-total" id="payStatementTotal">₩0</div>
+        <table class="pay-table-view"><thead><tr><th>항목 (요일)</th><th style="text-align:right;">지급액</th></tr></thead><tbody id="payTableBody"></tbody></table>
+        <div class="pay-footer">위 금액을 정히 영수함. <br> Powered by LDS System</div>
+    </div>
+
+  </div>
+
+  <button class="btn-download" onclick="downloadWeeklyJPG()">📸 리포트 및 명세서 저장 (JPG)</button>
 </div>
 
 <div id="appearance" class="view">
@@ -176,45 +209,16 @@
   </div>
 </div>
 
-<div id="pay" class="view">
-  <div style="margin-bottom: 20px; text-align: center;">
-    <select id="pStudent" onchange="loadPay()" style="padding:10px; font-weight:bold; width: auto; border-radius:8px;"><option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option></select>
-    <select id="pWeekSelect" onchange="loadPay()" style="padding:10px; width: auto; border-radius:8px;"></select>
-  </div>
-  <div class="pay-layout">
-    <div class="pay-left">
-      <div class="pay-statement" id="captureArea">
-        <div class="pay-logo">LIFE DESIGN STUDIO</div>
-        <h2 class="pay-title" id="payStatementTitle">OOO 급여 명세서</h2>
-        <div class="pay-date-range" id="payDateRange">-</div>
-        <div class="pay-big-total" id="payStatementTotal">₩0</div>
-        <table class="pay-table-view"><thead><tr><th>항목 (요일)</th><th style="text-align:right;">지급액</th></tr></thead><tbody id="payTableBody"></tbody></table>
-        <div class="pay-footer">위 금액을 정히 영수함. <br> Powered by LDS System</div>
-      </div>
-      <button class="btn-download" onclick="downloadJPG()">📸 이미지로 저장 (JPG)</button>
-    </div>
-    <div class="pay-right">
-      <h3 style="margin-top:0;">📈 급여 변동 추이</h3>
-      <div class="chart-controls">
-        <label class="chk-label"><input type="checkbox" id="chkS01" checked onchange="updateChart()"> 강태윤</label>
-        <label class="chk-label"><input type="checkbox" id="chkS02" onchange="updateChart()"> 김대중</label>
-        <label class="chk-label"><input type="checkbox" id="chkS03" onchange="updateChart()"> 최원준</label>
-      </div>
-      <div class="chart-container"><canvas id="salaryChart"></canvas></div>
-    </div>
-  </div>
-</div>
-
 <div id="modal">
   <div class="modal-box">
     <h3 id="mTitle" style="margin-top:0; color:var(--p);"></h3>
     <input type="hidden" id="mSid"><input type="hidden" id="mMid">
     <div id="ui-life" style="display:none;">
       <div class="chk-group" style="margin-bottom:10px;"><label><input type="checkbox" class="life-chk"> 1. 개인 위생</label><label><input type="checkbox" class="life-chk"> 2. 침구 정리</label><label><input type="checkbox" class="life-chk"> 3. 빨래 정리</label><label><input type="checkbox" class="life-chk"> 4. 의복 정리</label><label><input type="checkbox" class="life-chk"> 5. 신발 정리</label><label><input type="checkbox" class="life-chk"> 6. 쓰레기 정리</label><label><input type="checkbox" class="life-chk"> 7. 물건 정리</label><label><input type="checkbox" class="life-chk"> 8. 안전 확인</label><label><input type="checkbox" class="life-chk"> 9. 출석체크</label><label><input type="checkbox" class="life-chk"> 10. 정시 등교</label></div>
-      <textarea id="lifeMsg" placeholder="학생에게 보낼 코멘트 (예: 침구 정리가 완벽해요!)" style="width:100%; height:60px; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:8px;"></textarea>
+      <textarea id="lifeMsg" placeholder="학생에게 보낼 코멘트" style="width:100%; height:60px; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:8px;"></textarea>
       <input type="file" id="lifePhoto" accept="image/*">
       <button class="btn" style="background:var(--ok); margin-top:10px;" onclick="handleLife('life_ok')">✅ 완료 승인</button>
-      <div style="display:flex; gap:5px; margin-top:5px;"><button class="btn" style="background:var(--fail);" onclick="handleLife('fail')">❌ 실패 (코멘트 전송)</button><button class="btn" style="background:var(--cancel); color:white;" onclick="sendCtrl('cancel')">🚫 휴강</button></div>
+      <div style="display:flex; gap:5px; margin-top:5px;"><button class="btn" style="background:var(--fail);" onclick="handleLife('fail')">❌ 실패</button><button class="btn" style="background:var(--cancel); color:white;" onclick="sendCtrl('cancel')">🚫 휴강</button></div>
     </div>
     <div id="ui-normal">
       <select id="ctrlMissionSelect"><option value="">(유지)</option><optgroup label="오전"><option>글쓰기</option><option>독서</option><option>자서전</option></optgroup><optgroup label="선택"><option>컴퓨터</option><option>운동</option><option>영어회화</option><option>글씨 연습</option></optgroup><optgroup label="오후"><option>검정고시</option><option>음악</option><option>SCL책력</option><option>심화공부</option><option>교류수업</option><option>축구</option><option>예배</option></optgroup></select>
@@ -227,335 +231,217 @@
     <button class="btn" style="background:white; color:#333; border:1px solid #ddd; margin-top:15px;" onclick="document.getElementById('modal').style.display='none'">닫기</button>
   </div>
 </div>
-
 <div id="qrModal" style="display:none;">
-  <div id="qrCard">
-    <h2 style="margin:0; color:#1e293b;">LIFE DESIGN STUDIO</h2>
-    <p style="color:#64748b; font-size:12px; margin-bottom:20px;">OFFICIAL EMPLOYEE ID</p>
-    <div id="qrImage"></div>
-    <h3 id="qrName" style="margin:10px 0;"></h3>
-    <button onclick="downloadQR()" style="background:var(--p); color:white; width:100%; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:5px;">💾 JPG 저장</button>
-    <button onclick="document.getElementById('qrModal').style.display='none'" style="background:#94a3b8; color:white; width:100%; padding:10px; border:none; border-radius:8px; cursor:pointer;">닫기</button>
-  </div>
+  <div id="qrCard"><h2 style="margin:0; color:#1e293b;">LIFE DESIGN STUDIO</h2><p style="color:#64748b; font-size:12px; margin-bottom:20px;">OFFICIAL EMPLOYEE ID</p><div id="qrImage"></div><h3 id="qrName" style="margin:10px 0;"></h3><button onclick="downloadQR()" style="background:var(--p); color:white; width:100%; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:5px;">💾 JPG 저장</button><button onclick="document.getElementById('qrModal').style.display='none'" style="background:#94a3b8; color:white; width:100%; padding:10px; border:none; border-radius:8px; cursor:pointer;">닫기</button></div>
 </div>
-
-<div id="imgModal">
-  <div id="imgModalBox">
-    <img id="imgModalContent" src="">
-    <div style="display:flex; gap:10px;">
-      <button class="img-modal-btn" onclick="downloadExpandedImg()">💾 JPG 저장</button>
-      <button class="img-modal-btn" onclick="closeImgModal()">닫기</button>
-    </div>
-  </div>
-</div>
+<div id="imgModal"><div id="imgModalBox"><img id="imgModalContent" src=""><div style="display:flex; gap:10px;"><button class="img-modal-btn" onclick="downloadExpandedImg()">💾 JPG 저장</button><button class="img-modal-btn" onclick="closeImgModal()">닫기</button></div></div></div>
 
 <script>
-// ▼▼▼▼▼ [필수] 선생님 배포 URL을 여기에 꼭 넣어주세요! ▼▼▼▼▼
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyCd7RyEGP84v7cvx0a2TmAI57oiKWdGo_Rs4evLXEzDU9VOksML3hHjRB1Iq-RBO8p1g/exec"; 
-// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+// ▼▼▼▼▼ [필수] 선생님 배포 URL 입력 ▼▼▼▼▼
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzim1Q2PTjlKqzASUIwRC-xyUVRmpX73_BuRlxuUa19TYz5eWrJchd9uBf85Os-szat5Q/exec"; 
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
 const noDiffMissions = ["교류수업", "SCL책력", "검정고시", "음악", "심화공부", "오후활동", "맞춤학습", "예배", "축구"];
 let globalChart = null; 
+let weeklyCharts = {}; 
 let historyData = null; 
 let currentCalDate = new Date(); 
 let loadedMonthlyData = {}; 
 
-document.addEventListener("DOMContentLoaded", () => {
-  // [1] 오늘 날짜 자동 설정
-  const offset = 1000 * 60 * 60 * 9; 
-  const today = new Date(new Date().getTime() + offset).toISOString().slice(0,10);
-  
-  if(document.getElementById('dDate')) document.getElementById('dDate').value = today;
-  if(document.getElementById('appUploadDate')) document.getElementById('appUploadDate').value = today;
-  
-  currentCalDate = new Date(today);
+Chart.register(ChartDataLabels);
 
-  // [2] 초기 데이터 로드
+document.addEventListener("DOMContentLoaded", () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  if(document.getElementById('dDate')) document.getElementById('dDate').value = todayStr;
+  if(document.getElementById('appUploadDate')) document.getElementById('appUploadDate').value = todayStr;
+  
+  currentCalDate = new Date(todayStr);
+  
   initWeekSelector(); 
   loadDaily(); 
-  loadHistoryData(); 
-  loadAppearanceMonthly(); 
+  loadAppearanceMonthly();
+  loadWeekly(); 
 });
 
 function goTab(id) {
-  // 탭 화면 전환
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  
-  // 탭 버튼 스타일
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   if(id==='daily') document.getElementById('tab-daily').classList.add('active');
   if(id==='weekly') document.getElementById('tab-weekly').classList.add('active');
   if(id==='appearance') document.getElementById('tab-appearance').classList.add('active');
-  if(id==='pay') document.getElementById('tab-pay').classList.add('active');
-
-  // 데이터 로드
+  
   if(id === 'daily') loadDaily();
   else if(id === 'weekly') loadWeekly();
-  else if(id === 'pay') loadPay();
   else if(id === 'appearance') {
       if(document.getElementById('btnAppIndividual').classList.contains('active')) loadAppearanceMonthly();
       else loadAppearanceWeekly();
   }
 }
 
-// [핵심] 정산 계산: 스케줄에 있는 것만! (유령 데이터 방지)
-function loadDaily() {
-  const date = document.getElementById('dDate').value;
-  fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getDailyData", date: date }) })
-    .then(res => res.json())
-    .then(data => {
-      const board = document.getElementById('dailyBoard');
-      board.innerHTML = "";
-      
-      Object.keys(students).forEach(sid => {
-        const col = document.createElement('div');
-        col.className = 'student-col';
-        
-        const l = data.logs[sid] || {};
-        const s = data.schedules[sid];
-        
-        // 정산 금액 계산 (보이는 항목만)
-        let currentTotal = 0;
-        const life = l["생활미션"];
-        if (life && life.money) currentTotal += life.money;
-        
-        if (s) {
-          const schedKeys = [s.m1.n, s.m2.n, s.m3.n, s.c1a.n, s.c1b.n, s.c2.n];
-          // [수정] 스케줄에 명시된 키만 순회
-          [s.m1, s.m2, s.m3, s.c1a, s.c1b, s.c2].forEach(m => {
-            if (!m.n) return;
-            // 미션 이름과 정확히 일치하는 로그만 찾음
-            let ml = l[m.n];
-            if (ml && ml.money) currentTotal += ml.money;
-          });
-        }
-
-        const isPaid = l["하루 기록"] && l["하루 기록"].status === 'end';
-        
-        col.innerHTML = `
-          <div class="col-header">
-            <h3 class="student-name">${students[sid]}</h3>
-            <span class="money-badge" style="display:${isPaid ? 'block' : 'none'}">원금: ₩${currentTotal.toLocaleString()}</span>
-            <button class="qr-btn" onclick="openQrModal('${sid}','${students[sid]}')">🪪 QR 보기</button>
-          </div>
-        `;
-        
-        let lifeCls = "", lifeTxt = "미완료";
-        if (life) {
-          if (life.status === 'life_ok') { lifeCls = 'life-ok'; lifeTxt = '성공'; }
-          if (life.status === 'fail') { lifeCls = 'fail'; lifeTxt = '실패'; }
-          if (life.status === 'cancel') { lifeCls = 'cancel'; lifeTxt = '휴강'; }
-        }
-        col.innerHTML += `<div class="m-item ${lifeCls}" onclick="openModal('${sid}','생활미션')"><b>🌞 생활미션</b> <span>${lifeTxt}</span></div>`;
-        
-        if (s) {
-          [s.m1, s.m2, s.m3, s.c1a, s.c1b, s.c2].forEach(m => {
-            if (!m.n) return;
-            // 엄격 모드: 스케줄 이름(m.n)과 로그 키가 정확히 일치해야 함
-            let ml = l[m.n];
-            
-            let c = "";
-            if (ml) {
-              if (ml.status == 'start') c = 'ing';
-              if (ml.status == 'end') c = 'done';
-              if (ml.status == 'fail') c = 'fail';
-              if (ml.status == 'cancel') c = 'cancel';
-            }
-            
-            let tStr = parseTimeStr(ml);
-            if (ml && ml.status == 'cancel') tStr = "휴강됨";
-            
-            let diffHtml = "";
-            if (!noDiffMissions.includes(m.n)) {
-              let currentDiff = (ml && ml.comment) ? ml.comment : (m.l || "NORMAL");
-              if (["EASY", "NORMAL", "HARD"].includes(currentDiff)) {
-                const dCls = currentDiff === 'EASY' ? 'diff-EASY' : (currentDiff === 'HARD' ? 'diff-HARD' : 'diff-NORMAL');
-                diffHtml = `<span class="diff-badge ${dCls}">${currentDiff}</span>`;
-              }
-            }
-            
-            col.innerHTML += `
-              <div class="m-item ${c}" onclick="openModal('${sid}','${m.n}', '${(ml && ml.comment) ? ml.comment : (m.l || "NORMAL")}')">
-                <div>${m.n} ${diffHtml}</div>
-                <small>${tStr}</small>
-              </div>
-            `;
-          });
-        }
-        
-        const btnTxt = isPaid ? "✅ 정산 완료" : "하루 기록 (정산)";
-        const btnCls = isPaid ? "background:#94a3b8" : "background:#3b82f6; animation:pulse 2s infinite;";
-        col.innerHTML += `<button class="btn" style="${btnCls}; margin-top:10px;" onclick="openModal('${sid}','하루 기록')">${btnTxt}</button>`;
-        board.appendChild(col);
-      });
-    });
+function loadDaily(){ 
+  const date=document.getElementById('dDate').value; 
+  fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"getDailyData",date:date})}).then(res=>res.json()).then(data=>{ 
+    const board=document.getElementById('dailyBoard'); 
+    board.innerHTML=""; 
+    Object.keys(students).forEach(sid=>{ 
+      const col=document.createElement('div'); col.className='student-col'; 
+      const l=data.logs[sid]||{}; const s=data.schedules[sid]; 
+      let currentTotal = 0; 
+      const life=l["생활미션"]; if(life && life.money) currentTotal += life.money; 
+      if(s) { 
+        [s.m1,s.m2,s.m3,s.c1a,s.c1b,s.c2].forEach(m=>{ 
+          if(!m.n)return; let effectiveName=m.n; let ml=l[m.n]; 
+          const schedKeys=[s.m1.n,s.m2.n,s.m3.n,s.c1a.n,s.c1b.n,s.c2.n]; const allLogKeys=Object.keys(l).filter(k=>k!=="생활미션"&&k!=="하루 기록"); const extraMissions=allLogKeys.filter(k=>!schedKeys.includes(k)); 
+          if(!ml&&(m.n.includes("선택")||m.n==="미정"||m.n==="오후활동")&&extraMissions.length>0){ effectiveName=extraMissions.shift(); ml=l[effectiveName]; } 
+          if(ml && ml.money) currentTotal += ml.money; 
+        }); 
+      } 
+      const isPaid=l["하루 기록"]&&l["하루 기록"].status==='end'; 
+      col.innerHTML=`<div class="col-header"><h3 class="student-name">${students[sid]}</h3><span class="money-badge" style="display:${isPaid?'block':'none'}">원금: ₩${currentTotal.toLocaleString()}</span><button class="qr-btn" onclick="openQrModal('${sid}','${students[sid]}')">🪪 QR 보기</button></div>`; 
+      let lifeCls="",lifeTxt="미완료"; 
+      if(life){ if(life.status==='life_ok'){lifeCls='life-ok';lifeTxt='성공';} if(life.status==='fail'){lifeCls='fail';lifeTxt='실패';} if(life.status==='cancel'){lifeCls='cancel';lifeTxt='휴강';} } 
+      col.innerHTML+=`<div class="m-item ${lifeCls}" onclick="openModal('${sid}','생활미션')"><b>🌞 생활미션</b> <span>${lifeTxt}</span></div>`; 
+      if(s){ 
+        [s.m1,s.m2,s.m3,s.c1a,s.c1b,s.c2].forEach(m=>{ 
+          if(!m.n)return; let effectiveName=m.n; let ml=l[m.n]; 
+          const schedKeys=[s.m1.n,s.m2.n,s.m3.n,s.c1a.n,s.c1b.n,s.c2.n]; const allLogKeys=Object.keys(l).filter(k=>k!=="생활미션"&&k!=="하루 기록"); const extraMissions=allLogKeys.filter(k=>!schedKeys.includes(k)); 
+          if(!ml&&(m.n.includes("선택")||m.n==="미정"||m.n==="오후활동")&&extraMissions.length>0){ effectiveName=extraMissions.shift(); ml=l[effectiveName]; } 
+          let c=""; if(ml){ if(ml.status=='start')c='ing'; if(ml.status=='end')c='done'; if(ml.status=='fail')c='fail'; if(ml.status=='cancel')c='cancel'; } 
+          
+          let tRange="-"; let tDur="-";
+          if(ml && ml.note) {
+            if(ml.note.includes("~")) {
+               const parts = ml.note.split(" (");
+               tRange = parts[0];
+               if(parts.length > 1) tDur = "(" + parts[1];
+            } else if(ml.note.startsWith("Start")) { tRange = "진행중"; }
+          }
+          if(ml && ml.status=='cancel') tRange = "휴강됨";
+          
+          let diffHtml=""; 
+          if(!noDiffMissions.includes(effectiveName)){ 
+            let currentDiff=(ml&&ml.comment)?ml.comment:(m.l||"NORMAL"); 
+            if(["EASY","NORMAL","HARD"].includes(currentDiff)){ const dCls=currentDiff==='EASY'?'diff-EASY':(currentDiff==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls}">${currentDiff}</span>`; } 
+          } 
+          col.innerHTML+=`
+            <div class="m-item ${c}" onclick="openModal('${sid}','${effectiveName}', '${(ml&&ml.comment)?ml.comment:(m.l||"NORMAL")}')">
+              <div style="display:flex;align-items:center;">${effectiveName} ${diffHtml}</div>
+              <div class="time-wrapper"><span class="time-range">${tRange}</span><span class="time-duration">${tDur}</span></div>
+            </div>`; 
+        }); 
+      } 
+      const btnTxt=isPaid?"✅ 정산 완료":"하루 기록 (정산)"; const btnCls=isPaid?"background:#94a3b8":"background:#3b82f6; animation:pulse 2s infinite;"; 
+      col.innerHTML+=`<button class="btn" style="${btnCls}; margin-top:10px;" onclick="openModal('${sid}','하루 기록')">${btnTxt}</button>`; 
+      board.appendChild(col); 
+    }); 
+  }); 
 }
 
-function uploadAppearancePhoto() {
-  if (!WEB_APP_URL || WEB_APP_URL.includes("여기에")) return alert("스크립트 상단의 WEB_APP_URL을 먼저 설정해주세요!");
-  const file = document.getElementById('appPhotoInput').files[0];
-  const date = document.getElementById('appUploadDate').value; 
-  if(!file) return alert("사진을 선택해주세요!");
-  if(!date) return alert("날짜를 선택해주세요!");
-
-  const btn = event.target; 
-  btn.innerText = "업로드 중..."; btn.disabled = true;
-
-  resizeImage(file, 800, 800, function(resizedBase64) {
-    const rawBase64 = resizedBase64.split(',')[1];
-    const sid = document.getElementById('appStudent').value;
-    fetch(WEB_APP_URL, { 
-      method:"POST", body:JSON.stringify({action:"uploadAppearance", base64:rawBase64, mimeType:"image/jpeg", sid:sid, name:students[sid], date:date})
-    }).then(r=>r.json()).then(res => { 
-        if(res.ok) { alert(`${date} 날짜로 저장되었습니다.`); document.getElementById('appPhotoInput').value = ""; loadAppearanceMonthly(); } 
-        else { alert("실패: " + res.error); }
-    }).catch(err => alert("전송 오류: " + err)).finally(() => { btn.innerText = "업로드 및 저장"; btn.disabled = false; });
-  });
-}
-
-function loadAppearanceMonthly() {
-  const sid = document.getElementById('appStudent').value;
-  const selectedDate = document.getElementById('appUploadDate').value || new Date().toISOString().slice(0,10);
-  fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"getAppearanceData", mode:"monthly", sid:sid}) })
-  .then(r=>r.json()).then(res => {
-    const photoMap = {};
-    if(res.data && res.data.monthly) { res.data.monthly.forEach(item => { photoMap[item.date] = item.url; }); }
-    renderCalendar(selectedDate, photoMap);
-  });
-}
-
-function changeMonth(offset) {
-  currentCalDate.setMonth(currentCalDate.getMonth() + offset);
-  renderCalendar();
-}
-
-function renderCalendar(dateStr, photoMap) {
-  // dateStr이 있으면 그 날짜 기준, 없으면 currentCalDate 기준
-  if(dateStr) currentCalDate = new Date(dateStr);
-  const year = currentCalDate.getFullYear();
-  const month = currentCalDate.getMonth();
-  
-  document.getElementById('calMonthTitle').innerText = `${year}년 ${month+1}월`;
-  
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month+1, 0);
-  const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; 
-  const totalDays = lastDay.getDate();
-  
-  // photoMap은 loadAppearanceMonthly에서 받아온 데이터 (없으면 빈 객체)
-  const map = photoMap || loadedMonthlyData || {};
-  
-  let html = "";
-  const days = ["월","화","수","목","금","토","일"];
-  days.forEach(day => html += `<div class="cal-day-name">${day}</div>`);
-  
-  for(let i=0; i<startDay; i++) html += `<div></div>`;
-  
-  for(let i=1; i<=totalDays; i++) {
-    const currentYMD = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-    const photoUrl = map[currentYMD];
+function loadWeekly(){ 
+  const sid = document.getElementById('wStudent').value; 
+  const date = document.getElementById('wWeekSelect').value;
+  if (!date) return;
+  fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"getWeeklyData",sid:sid,date:date})})
+  .then(r=>r.json()).then(res=>{ 
+    const s = res.scores; const days = res.days;
     
-    const offset = 1000 * 60 * 60 * 9;
-    const todayYMD = new Date(new Date().getTime() + offset).toISOString().slice(0,10);
-    const isToday = currentYMD === todayYMD;
+    // 1. 차트 그리기
+    drawWeeklyCharts(s);
+
+    // 2. 제목 업데이트
+    document.getElementById('wReportTitle').innerText = `${students[sid]}의 주간 성과 리포트`;
+    const startDate = new Date(days[0].date); const endDate = new Date(days[4].date);
+    document.getElementById('wDateRange').innerText = `${startDate.toLocaleDateString()} ~ ${endDate.toLocaleDateString()}`;
+
+    // 3. 스케줄표 그리기
+    let h=`<table class="weekly-table"><thead><tr><th>시간</th>`; ["월","화","수","목","금"].forEach(d=>h+=`<th>${d}</th>`); h+=`</tr></thead><tbody>`; 
+    const slots=[{t:"09:00",k:"life"},{t:"09:30",k:"am"},{t:"11:00",k:"sel1"},{t:"12:00",k:"lunch"},{t:"13:00",k:"pm"},{t:"15:00",k:"late"},{t:"17:00",k:"end"}]; 
+    slots.forEach(slot=>{ 
+      h+=`<tr><td>${slot.t}</td>`; 
+      for(let i=0;i<5;i++){ 
+        const d=days[i].data; const sched=d.schedules[sid]; const l=d.logs[sid]||{}; let content=""; 
+        if(slot.k==='life'){ content="생활미션"; if(l["생활미션"]){ if(l["생활미션"].status==='life_ok')content+="<br>✅ 성공"; if(l["생활미션"].status==='fail')content+="<br>❌ 실패"; if(l["생활미션"].status==='cancel')content+="<br>⛔ 휴강"; const money=l["생활미션"].money||0; let mClass=money>0?"price-plus":(money<0?"price-minus":"price-zero"); content+=`<div class="cell-price ${mClass}">₩${money.toLocaleString()}</div>`; } } 
+        else if(slot.k==='lunch')content="<span style='color:#ccc'>🍽️ 점심</span>"; 
+        else if(i<=2){ if(slot.k==='am')content=getMList(sched,['m1','m2','m3'],l); if(slot.k==='sel1')content=getMList(sched,['c1a','c1b'],l); if(slot.k==='pm')content=getMList(sched,['c2'],l); if(slot.k==='late')content="하루 정리"; if(slot.k==='end')content="-"; } 
+        else if(i===3){ if(slot.k==='am'||slot.k==='sel1')content="⚽ 축구"; if(slot.k==='pm')content=getMList(sched,['c2'],l); if(slot.k==='late')content=getMList(sched,['m1','m2','m3','c1a','c1b'],l); if(slot.k==='end')content="하루 정리"; } 
+        else if(i===4){ if(slot.k==='am')content=getMList(sched,['m1','m2','m3'],l); if(slot.k==='sel1')content=getMList(sched,['c1a','c1b'],l); if(slot.k==='pm')content="🙏 예배"; if(slot.k==='late')content=""; if(slot.k==='end')content="하루 정리"; } 
+        h+=`<td>${content}</td>`; 
+      } h+=`</tr>`; 
+    }); 
+    h+=`<tr><td style="font-weight:bold;">일일 수입</td>`; for(let i=0;i<5;i++)h+=`<td style="font-weight:bold; color:var(--p);">₩${days[i].money.toLocaleString()}</td>`; h+=`</tr></tbody></table>`; 
+    document.getElementById('weeklyBoard').innerHTML=h; 
     
-    html += `
-      <div class="cal-cell ${isToday ? 'cal-today' : ''}">
-        <div class="cal-date">${i}</div>
-        ${photoUrl ? `<img src="${photoUrl}" class="cal-img" onclick="openImageModal(this.src)">` : ''}
-      </div>
-    `;
-  }
-  document.getElementById('calendarGrid').innerHTML = html;
+    // 4. 급여 명세서 업데이트 (통합됨)
+    document.getElementById('payStatementTitle').innerText = `${students[sid]} 급여 명세서`;
+    document.getElementById('payDateRange').innerText = `${startDate.toLocaleDateString()} ~ ${endDate.toLocaleDateString()}`;
+    document.getElementById('payStatementTotal').innerText = "₩" + res.total.toLocaleString();
+    const tbody = document.getElementById('payTableBody'); tbody.innerHTML=""; 
+    const dayNames=["월요일","화요일","수요일","목요일","금요일"]; 
+    for(let i=0;i<5;i++){ const money=days[i].money; const tr=document.createElement('tr'); tr.innerHTML=`<td>${dayNames[i]}</td><td class="money-col">₩${money.toLocaleString()}</td>`; tbody.appendChild(tr); } 
+    const totalTr=document.createElement('tr'); totalTr.style.background="#f8fafc"; totalTr.style.borderTop="2px solid #333"; totalTr.innerHTML=`<td style="font-weight:bold;">합계</td><td class="money-col" style="font-weight:900; color:var(--p);">₩${res.total.toLocaleString()}</td>`; tbody.appendChild(totalTr);
+  }); 
 }
 
-function loadAppearanceWeekly() {
-  const date = document.getElementById('appWeekSelect').value || new Date().toISOString().slice(0,10);
-  fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"getAppearanceData", mode:"weekly", date:date}) })
-  .then(r=>r.json()).then(res => {
-    const dates = res.data.dates; const data = res.data.weekly;
-    let headHtml = "<th>이름</th>"; const days = ["(월)", "(화)", "(수)", "(목)", "(금)"];
-    dates.forEach((d, i) => { headHtml += `<th>${d.slice(5)} ${days[i]}</th>`; });
-    document.getElementById('appTableHead').innerHTML = headHtml;
-    const tbody = document.getElementById('appTableBody'); tbody.innerHTML = "";
-    Object.keys(students).forEach(sid => {
-      let row = `<tr><td style="font-weight:bold; vertical-align:middle;">${students[sid]}</td>`;
-      dates.forEach(d => {
-        const url = (data[sid] && data[sid][d]) ? data[sid][d] : null;
-        if(url) row += `<td><img src="${url}" class="app-thumb" onclick="openImageModal(this.src)"></td>`; 
-        else row += `<td><div class="no-photo">미제출</div></td>`;
-      });
-      row += "</tr>"; tbody.innerHTML += row;
-    });
+function downloadWeeklyJPG() {
+  const element = document.getElementById('weeklyReportContainer');
+  html2canvas(element).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `LDS_통합리포트.jpg`;
+    link.href = canvas.toDataURL("image/jpeg");
+    link.click();
   });
 }
 
-function openImageModal(src) { document.getElementById('imgModal').style.display = 'flex'; document.getElementById('imgModalContent').src = src; }
-function closeImgModal() { document.getElementById('imgModal').style.display = 'none'; }
-function downloadExpandedImg() {
-  const src = document.getElementById('imgModalContent').src;
-  const link = document.createElement('a'); link.href = src; link.download = `LDS_Photo_${Date.now()}.jpg`;
-  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+function drawWeeklyCharts(s) {
+  const ctxSelf = document.getElementById('wcSelf').getContext('2d');
+  if(weeklyCharts.self) weeklyCharts.self.destroy();
+  weeklyCharts.self = new Chart(ctxSelf, { type: 'doughnut', data: { labels: ['성공','미흡'], datasets: [{ data: [s.self, 100-s.self], backgroundColor: ['#10b981','#e2e8f0'] }] }, options: { cutout: '70%', plugins: { legend: { display: false }, datalabels: { display: false } } } });
+  document.getElementById('wtSelf').innerText = `${s.self}%`; document.getElementById('wcSelfMsg').innerText = getComment('self', s.self);
+  const ctxChal = document.getElementById('wcChal').getContext('2d');
+  if(weeklyCharts.chal) weeklyCharts.chal.destroy();
+  const chalPct = Math.max(0, Math.min(100, (s.challenge - 1) * 50));
+  weeklyCharts.chal = new Chart(ctxChal, { type: 'doughnut', data: { datasets: [{ data: [chalPct, 100-chalPct], backgroundColor: ['#f59e0b','#e2e8f0'], circumference: 180, rotation: 270 }] }, options: { cutout: '70%', plugins: { tooltip: { enabled: false }, datalabels: { display: false } } } });
+  document.getElementById('wtChal').innerText = s.challenge.toFixed(2); document.getElementById('wcChalMsg').innerText = getComment('chal', s.challenge);
+  const ctxProd = document.getElementById('wcProd').getContext('2d');
+  if(weeklyCharts.prod) weeklyCharts.prod.destroy();
+  const prodVal = s.productivity; const prodColor = prodVal >= 0 ? '#4f46e5' : '#ef4444';
+  weeklyCharts.prod = new Chart(ctxProd, { type: 'bar', data: { labels: [''], datasets: [{ label: '평균 대비', data: [prodVal], backgroundColor: prodColor, barThickness: 20 }] }, options: { indexAxis: 'y', scales: { x: { min: -50, max: 50, grid: { color: '#ccc', lineWidth: 1 } }, y: { display: false } }, plugins: { legend: { display: false }, datalabels: { color: prodColor, font: { weight: 'bold' }, anchor: prodVal>=0?'end':'start', align: prodVal>=0?'right':'left', formatter: v => v+'%' } } } });
+  document.getElementById('wcProdMsg').innerText = getComment('prod', prodVal);
+  const ctxComp = document.getElementById('wcComp').getContext('2d');
+  if(weeklyCharts.comp) weeklyCharts.comp.destroy();
+  weeklyCharts.comp = new Chart(ctxComp, { type: 'doughnut', data: { datasets: [{ data: [s.completion, 100-s.completion], backgroundColor: ['#3b82f6','#e2e8f0'] }] }, options: { cutout: '70%', plugins: { legend: { display: false }, datalabels: { display: false } } } });
+  document.getElementById('wtComp').innerText = `${s.completion}%`; document.getElementById('wcCompMsg').innerText = getComment('comp', s.completion);
 }
 
-function switchAppMode(mode) {
-  if(mode === 'individual') {
-    document.getElementById('btnAppIndividual').classList.add('active'); document.getElementById('btnAppWeekly').classList.remove('active');
-    document.getElementById('appIndividualView').style.display = 'block'; document.getElementById('appWeeklyView').style.display = 'none';
-    loadAppearanceMonthly();
-  } else {
-    document.getElementById('btnAppIndividual').classList.remove('active'); document.getElementById('btnAppWeekly').classList.add('active');
-    document.getElementById('appIndividualView').style.display = 'none'; document.getElementById('appWeeklyView').style.display = 'block';
-    loadAppearanceWeekly();
-  }
+function getComment(type, score) {
+  if(type === 'self') return score >= 90 ? "완벽한 자기관리! 👍" : (score >= 70 ? "좋은 습관입니다." : "조금 더 신경 써주세요.");
+  if(type === 'chal') return score >= 2.5 ? "도전 정신 최고! 🔥" : (score >= 1.8 ? "안정적인 도전." : "더 도전해볼까요?");
+  if(type === 'prod') return score >= 20 ? "탁월한 성과! 💰" : (score >= -10 ? "평균적인 성과." : "분발하세요!");
+  if(type === 'comp') return score >= 95 ? "약속의 아이콘!" : (score >= 80 ? "잘 마쳤습니다." : "시간 관리 집중!");
+  return "-";
 }
 
-function resizeImage(file, maxWidth, maxHeight, callback) {
-  const reader = new FileReader(); reader.readAsDataURL(file);
-  reader.onload = function (event) {
-    const img = new Image(); img.src = event.target.result;
-    img.onload = function () {
-      let width = img.width; let height = img.height;
-      if (width > height) { if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; } } 
-      else { if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; } }
-      const canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height;
-      const ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0, width, height);
-      callback(canvas.toDataURL("image/jpeg", 0.7));
-    };
-  };
-}
-
-function initWeekSelector() {
-  const today = new Date(); const wSel = document.getElementById('wWeekSelect'); const pSel = document.getElementById('pWeekSelect'); const aSel = document.getElementById('appWeekSelect'); 
-  for (let i = 0; i < 5; i++) {
-    const d = new Date(today); d.setDate(today.getDate() - (i * 7)); const day = d.getDay(); const diff = d.getDate() - day + (day == 0 ? -6 : 1); const monday = new Date(d.setDate(diff)); const val = monday.toISOString().slice(0,10); const txt = `${monday.getMonth()+1}월 ${Math.ceil(monday.getDate()/7)}주차 (${val}~)`;
-    const opt1 = document.createElement('option'); opt1.value=val; opt1.innerText=txt; wSel.appendChild(opt1);
-    const opt2 = document.createElement('option'); opt2.value=val; opt2.innerText=txt; pSel.appendChild(opt2);
-    const opt3 = document.createElement('option'); opt3.value=val; opt3.innerText=txt; aSel.appendChild(opt3); 
-  }
-}
-
-function loadWeekly(){ const sid=document.getElementById('wStudent').value; const date=document.getElementById('wWeekSelect').value||new Date().toISOString().slice(0,10); fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"getWeeklyData",sid:sid,date:date})}).then(r=>r.json()).then(res=>{ let h=`<table class="weekly-table"><thead><tr><th>시간</th>`; ["월","화","수","목","금"].forEach(d=>h+=`<th>${d}</th>`); h+=`</tr></thead><tbody>`; const slots=[{t:"09:00",k:"life"},{t:"09:30",k:"am"},{t:"11:00",k:"sel1"},{t:"12:00",k:"lunch"},{t:"13:00",k:"pm"},{t:"15:00",k:"late"},{t:"17:00",k:"end"}]; slots.forEach(slot=>{ h+=`<tr><td>${slot.t}</td>`; for(let i=0;i<5;i++){ const d=res.days[i].data; const s=d.schedules[sid]; const l=d.logs[sid]||{}; let content=""; if(slot.k==='life'){ content="생활미션"; if(l["생활미션"]){ if(l["생활미션"].status==='life_ok')content+="<br>✅ 성공"; if(l["생활미션"].status==='fail')content+="<br>❌ 실패"; if(l["생활미션"].status==='cancel')content+="<br>⛔ 휴강"; const money=l["생활미션"].money||0; let mClass=money>0?"price-plus":(money<0?"price-minus":"price-zero"); content+=`<div class="cell-price ${mClass}">₩${money.toLocaleString()}</div>`; } } else if(slot.k==='lunch')content="<span style='color:#ccc'>🍽️ 점심</span>"; else if(i<=2){ if(slot.k==='am')content=getMList(s,['m1','m2','m3'],l); if(slot.k==='sel1')content=getMList(s,['c1a','c1b'],l); if(slot.k==='pm')content=getMList(s,['c2'],l); if(slot.k==='late')content="하루 정리"; if(slot.k==='end')content="-"; } else if(i===3){ if(slot.k==='am'||slot.k==='sel1')content="⚽ 축구"; if(slot.k==='pm')content=getMList(s,['c2'],l); if(slot.k==='late')content=getMList(s,['m1','m2','m3','c1a','c1b'],l); if(slot.k==='end')content="하루 정리"; } else if(i===4){ if(slot.k==='am')content=getMList(s,['m1','m2','m3'],l); if(slot.k==='sel1')content=getMList(s,['c1a','c1b'],l); if(slot.k==='pm')content="🙏 예배"; if(slot.k==='late')content=""; if(slot.k==='end')content="하루 정리"; } h+=`<td>${content}</td>`; } h+=`</tr>`; }); h+=`<tr><td style="font-weight:bold;">일일 수입</td>`; for(let i=0;i<5;i++)h+=`<td style="font-weight:bold; color:var(--p);">₩${res.days[i].money.toLocaleString()}</td>`; h+=`</tr></tbody></table>`; document.getElementById('weeklyBoard').innerHTML=h; document.getElementById('totalWeekMoney').innerText=res.total.toLocaleString(); }); }
 function getMList(s,keys,l){ if(!s)return"-"; const allLogKeys=Object.keys(l).filter(k=>k!=="생활미션"&&k!=="하루 기록"); const schedKeys=keys.map(k=>s[k]?s[k].n:""); return keys.map(k=>{ if(!s[k]||!s[k].n)return""; let mName=s[k].n; let ml=l[mName]; if(!ml&&(mName.includes("선택")||mName==="미정"||mName==="오후활동")){ const overrideName=allLogKeys.find(key=>!schedKeys.includes(key)); if(overrideName){mName=overrideName;ml=l[overrideName];} } let stClass="",stTxt="",detailTxt="",diffHtml="",moneyHtml=""; if(ml){ const d=ml.comment; if(!noDiffMissions.includes(mName)&&["EASY","NORMAL","HARD"].includes(d)){ const dCls=d==='EASY'?'diff-EASY':(d==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls}">${d}</span>`; } else if(!noDiffMissions.includes(mName)&&s[k].l&&["EASY","NORMAL","HARD"].includes(s[k].l)){ const d2=s[k].l; const dCls2=d2==='EASY'?'diff-EASY':(d2==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls2}">${d2}</span>`; } if(ml.status=='end'){stClass='st-done';stTxt='완료';detailTxt=parseTimeStr(ml);} else if(ml.status=='start'){stClass='st-ing';stTxt='진행중';detailTxt=parseTimeStr(ml);} else if(ml.status=='fail'){stClass='st-fail';stTxt='실패';} else if(ml.status=='cancel'){stClass='st-cancel';stTxt='휴강';} if(ml.money!==undefined){ let mClass=ml.money>0?"price-plus":(ml.money<0?"price-minus":"price-zero"); moneyHtml=`<div class="cell-price ${mClass}">₩${ml.money.toLocaleString()}</div>`; } return`<div class="cell-mission">${mName}${diffHtml}<span class="cell-status ${stClass}">${stTxt}</span><div class="cell-detail">${detailTxt}</div>${moneyHtml}</div>`; } if(!noDiffMissions.includes(mName)&&s[k].l&&["EASY","NORMAL","HARD"].includes(s[k].l)){ const d2=s[k].l; const dCls2=d2==='EASY'?'diff-EASY':(d2==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls2}">${d2}</span>`; } return`<div class="cell-mission">${mName}${diffHtml}</div>`; }).join(""); }
 function parseTimeStr(ml){ if(!ml||!ml.note)return"-"; let txt=ml.note; if(txt.includes("duration:")){ try{ const parts=txt.split('|'); const durPart=parts.find(p=>p.startsWith("duration:")); if(durPart){ const seconds=parseInt(durPart.split(':')[1]); if(!isNaN(seconds)){ const m=Math.floor(seconds/60); const s=seconds%60; return`${m}분 ${s}초 소요`; } } }catch(e){return"시간 정보 오류";} } if(txt.includes("Start"))return txt.replace("Start:","시작:"); if(txt.includes("NaN"))return"-"; return txt; }
-function loadPay(){ const sid=document.getElementById('pStudent').value; const date=document.getElementById('pWeekSelect').value||new Date().toISOString().slice(0,10); const sName=students[sid]; fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"getWeeklyData",sid:sid,date:date})}).then(r=>r.json()).then(res=>{ document.getElementById('payStatementTitle').innerText=`${sName} LDS 급여 명세서`; const startDate=new Date(res.days[0].date); const endDate=new Date(res.days[4].date); document.getElementById('payDateRange').innerText=`${startDate.toLocaleDateString()} ~ ${endDate.toLocaleDateString()}`; document.getElementById('payStatementTotal').innerText="₩"+res.total.toLocaleString(); const tbody=document.getElementById('payTableBody'); tbody.innerHTML=""; const dayNames=["월요일","화요일","수요일","목요일","금요일"]; for(let i=0;i<5;i++){ const money=res.days[i].money; const tr=document.createElement('tr'); tr.innerHTML=`<td>${dayNames[i]}</td><td class="money-col">₩${money.toLocaleString()}</td>`; tbody.appendChild(tr); } const totalTr=document.createElement('tr'); totalTr.style.background="#f8fafc"; totalTr.style.borderTop="2px solid #333"; totalTr.innerHTML=`<td style="font-weight:bold;">합계</td><td class="money-col" style="font-weight:900; color:var(--p);">₩${res.total.toLocaleString()}</td>`; tbody.appendChild(totalTr); }); }
-function downloadJPG(){ const element=document.getElementById('captureArea'); html2canvas(element).then(canvas=>{ const link=document.createElement('a'); link.download='LDS_급여명세서.jpg'; link.href=canvas.toDataURL("image/jpeg"); link.click(); }); }
-function loadHistoryData(){ fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"getComparisonData"})}).then(r=>r.json()).then(res=>{ historyData=res; updateChart(); }); }
-function updateChart(){ if(!historyData)return; const ctx=document.getElementById('salaryChart').getContext('2d'); const datasets=[]; if(document.getElementById('chkS01').checked)datasets.push({label:'강태윤',data:historyData.history['S01'],borderColor:'#4f46e5',backgroundColor:'rgba(79, 70, 229, 0.2)',borderWidth:2,tension:0.3}); if(document.getElementById('chkS02').checked)datasets.push({label:'김대중',data:historyData.history['S02'],borderColor:'#10b981',backgroundColor:'rgba(16, 185, 129, 0.2)',borderWidth:2,tension:0.3}); if(document.getElementById('chkS03').checked)datasets.push({label:'최원준',data:historyData.history['S03'],borderColor:'#f59e0b',backgroundColor:'rgba(245, 158, 11, 0.2)',borderWidth:2,tension:0.3}); if(globalChart)globalChart.destroy(); globalChart=new Chart(ctx,{type:'line',data:{labels:historyData.labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},title:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'급여 (원)'}},x:{offset:true}}}}); }
-function openModal(sid,mid,diff){ document.getElementById('modal').style.display='flex'; document.getElementById('mTitle').innerText=students[sid]+" - "+mid; document.getElementById('mSid').value=sid; document.getElementById('mMid').value=mid; document.getElementById('lifePhoto').value=""; document.getElementById('lifeMsg').value=""; document.querySelectorAll('.life-chk').forEach(c=>c.checked=false); document.getElementById('ui-life').style.display='none'; document.getElementById('ui-normal').style.display='none'; document.getElementById('ui-day').style.display='none'; document.getElementById('ctrlMissionSelect').value=""; document.getElementById('tComment').value=diff||"NORMAL"; document.getElementById('tStart').value=""; document.getElementById('tEnd').value=""; if(mid==='생활미션')document.getElementById('ui-life').style.display='block'; else if(mid==='하루 기록')document.getElementById('ui-day').style.display='block'; else{ document.getElementById('ui-normal').style.display='block'; if(noDiffMissions.includes(mid))document.getElementById('diffSection').style.display='none'; else document.getElementById('diffSection').style.display='block'; } }
-function handleLife(s){ const f=document.getElementById('lifePhoto').files[0]; const msg=document.getElementById('lifeMsg').value; if(f)uploadPhoto(s, msg); else{ if(s==='life_ok'){if(!confirm("사진 없이 완료 승인하시겠습니까?"))return; sendCtrl('life_ok', msg);} else sendCtrl('fail', msg); } }
-function uploadPhoto(s, msg){ const f=document.getElementById('lifePhoto').files[0]; const reader=new FileReader(); reader.readAsDataURL(f); reader.onload=function(e){ const img=new Image(); img.src=e.target.result; img.onload=function(){ const canvas=document.createElement("canvas"); const ctx=canvas.getContext("2d"); const maxDim=800; let w=img.width,h=img.height; if(w>h){if(w>maxDim){h*=maxDim/w;w=maxDim;}}else{if(h>maxDim){w*=maxDim/h;h=maxDim;}} canvas.width=w; canvas.height=h; ctx.drawImage(img,0,0,w,h); const b64=canvas.toDataURL("image/jpeg",0.7).split(',')[1]; const sid=document.getElementById('mSid').value; const d=document.getElementById('dDate').value; fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"uploadLifePhoto",base64:b64,mimeType:"image/jpeg",sid:sid,name:students[sid],date:d,status:s,message:msg})}).then(r=>r.json()).then(()=>{alert("처리 완료"); document.getElementById('modal').style.display='none'; loadDaily();}); } } }
-function sendCtrl(a, msg){ const d=document.getElementById('dDate').value; if(a==='life_ok'||a==='fail'||a==='cancel'){ if(document.getElementById('mMid').value==='생활미션'){ fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"teacherControl",sid:document.getElementById('mSid').value,mid:"생활미션",act:a,message:msg,date:d})}).then(()=>{alert("완료됨"); document.getElementById('modal').style.display='none'; loadDaily();}); return; } } const n=document.getElementById('ctrlMissionSelect').value; fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"teacherControl",sid:document.getElementById('mSid').value,mid:document.getElementById('mMid').value,newMissionName:n,act:a,comment:document.getElementById('tComment').value,startTime:document.getElementById('tStart').value,endTime:document.getElementById('tEnd').value,date:d})}).then(()=>{alert("처리됨"); document.getElementById('modal').style.display='none'; loadDaily();}); }
-// [NEW] QR 생성 (QuickChart 사용)
-function openQrModal(sid, name) {
-  document.getElementById('qrModal').style.display = 'flex';
-  document.getElementById('qrName').innerText = name;
-  const qrContainer = document.getElementById('qrImage');
-  const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(sid + "," + name)}&size=200&margin=1`;
-  qrContainer.innerHTML = `<img src="${qrUrl}" style="width:150px; height:150px;">`;
-}
+function uploadAppearancePhoto() { if (!WEB_APP_URL || WEB_APP_URL.includes("여기에")) return alert("스크립트 상단의 WEB_APP_URL을 설정해주세요!"); const file = document.getElementById('appPhotoInput').files[0]; const date = document.getElementById('appUploadDate').value; if(!file) return alert("사진을 선택해주세요!"); if(!date) return alert("날짜를 선택해주세요!"); const btn = event.target; btn.innerText = "업로드 중..."; btn.disabled = true; resizeImage(file, 800, 800, function(resizedBase64) { const rawBase64 = resizedBase64.split(',')[1]; const sid = document.getElementById('appStudent').value; fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"uploadAppearance", base64:rawBase64, mimeType:"image/jpeg", sid:sid, name:students[sid], date:date}) }).then(r=>r.json()).then(res => { if(res.ok) { alert(`${date} 날짜로 저장되었습니다.`); document.getElementById('appPhotoInput').value = ""; loadAppearanceMonthly(); } else { alert("실패: " + res.error); } }).catch(err => alert("전송 오류: " + err)).finally(() => { btn.innerText = "업로드 및 저장"; btn.disabled = false; }); }); }
+function loadAppearanceMonthly() { const sid = document.getElementById('appStudent').value; const selectedDate = document.getElementById('appUploadDate').value || new Date().toISOString().slice(0,10); fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"getAppearanceData", mode:"monthly", sid:sid}) }).then(r=>r.json()).then(res => { loadedMonthlyData = {}; if(res.data && res.data.monthly) { res.data.monthly.forEach(item => { loadedMonthlyData[item.date] = item.url; }); } renderCalendar(); }); }
+function changeMonth(offset) { currentCalDate.setMonth(currentCalDate.getMonth() + offset); renderCalendar(); }
+function renderCalendar() { const year = currentCalDate.getFullYear(); const month = currentCalDate.getMonth(); document.getElementById('calMonthTitle').innerText = `${year}년 ${month+1}월`; const firstDay = new Date(year, month, 1); const lastDay = new Date(year, month+1, 0); const startDay = firstDay.getDay(); const totalDays = lastDay.getDate(); let html = ""; const days = ["일","월","화","수","목","금","토"]; days.forEach(day => html += `<div class="cal-day-name">${day}</div>`); for(let i=0; i<startDay; i++) html += `<div></div>`; for(let i=1; i<=totalDays; i++) { const currentYMD = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const photoUrl = loadedMonthlyData[currentYMD]; const offset = 1000 * 60 * 60 * 9; const todayYMD = new Date(new Date().getTime() + offset).toISOString().slice(0,10); const isToday = currentYMD === todayYMD; html += `<div class="cal-cell ${isToday ? 'cal-today' : ''}"><div class="cal-date">${i}</div>${photoUrl ? `<img src="${photoUrl}" class="cal-img" onclick="openImageModal(this.src)">` : ''}</div>`; } document.getElementById('calendarGrid').innerHTML = html; }
+function loadAppearanceWeekly() { const date = document.getElementById('appWeekSelect').value || new Date().toISOString().slice(0,10); fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"getAppearanceData", mode:"weekly", date:date}) }).then(r=>r.json()).then(res => { const dates = res.data.dates; const data = res.data.weekly; let headHtml = "<th>이름</th>"; const days = ["(월)", "(화)", "(수)", "(목)", "(금)"]; dates.forEach((d, i) => { headHtml += `<th>${d.slice(5)} ${days[i]}</th>`; }); document.getElementById('appTableHead').innerHTML = headHtml; const tbody = document.getElementById('appTableBody'); tbody.innerHTML = ""; Object.keys(students).forEach(sid => { let row = `<tr><td style="font-weight:bold; vertical-align:middle;">${students[sid]}</td>`; dates.forEach(d => { const url = (data[sid] && data[sid][d]) ? data[sid][d] : null; if(url) row += `<td><img src="${url}" class="app-thumb" onclick="openImageModal(this.src)"></td>`; else row += `<td><div class="no-photo">미제출</div></td>`; }); row += "</tr>"; tbody.innerHTML += row; }); }); }
+function openImageModal(src) { document.getElementById('imgModal').style.display = 'flex'; document.getElementById('imgModalContent').src = src; }
+function closeImgModal() { document.getElementById('imgModal').style.display = 'none'; }
+function downloadExpandedImg() { const src = document.getElementById('imgModalContent').src; const link = document.createElement('a'); link.href = src; link.download = `LDS_Photo_${Date.now()}.jpg`; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+function switchAppMode(mode) { if(mode === 'individual') { document.getElementById('btnAppIndividual').classList.add('active'); document.getElementById('btnAppWeekly').classList.remove('active'); document.getElementById('appIndividualView').style.display = 'block'; document.getElementById('appWeeklyView').style.display = 'none'; loadAppearanceMonthly(); } else { document.getElementById('btnAppIndividual').classList.remove('active'); document.getElementById('btnAppWeekly').classList.add('active'); document.getElementById('appIndividualView').style.display = 'none'; document.getElementById('appWeeklyView').style.display = 'block'; loadAppearanceWeekly(); } }
+function resizeImage(file, maxWidth, maxHeight, callback) { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = function (event) { const img = new Image(); img.src = event.target.result; img.onload = function () { let width = img.width; let height = img.height; if (width > height) { if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; } } else { if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; } } const canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height; const ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL("image/jpeg", 0.7)); }; }; }
+function initWeekSelector() { const today = new Date(); const wSel = document.getElementById('wWeekSelect'); const pSel = document.getElementById('pWeekSelect'); const aSel = document.getElementById('appWeekSelect'); for (let i = 0; i < 5; i++) { const d = new Date(today); d.setDate(today.getDate() - (i * 7)); const day = d.getDay(); const diff = d.getDate() - day + (day == 0 ? -6 : 1); const monday = new Date(d.setDate(diff)); const val = monday.toISOString().slice(0,10); const txt = `${monday.getMonth()+1}월 ${Math.ceil(monday.getDate()/7)}주차 (${val}~)`; const opt1 = document.createElement('option'); opt1.value=val; opt1.innerText=txt; wSel.appendChild(opt1); const opt2 = document.createElement('option'); opt2.value=val; opt2.innerText=txt; if(pSel) pSel.appendChild(opt2); const opt3 = document.createElement('option'); opt3.value=val; opt3.innerText=txt; if(aSel) aSel.appendChild(opt3); } }
+function openQrModal(sid, name) { document.getElementById('qrModal').style.display = 'flex'; document.getElementById('qrName').innerText = name; const qrContainer = document.getElementById('qrImage'); const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(sid + "," + name)}&size=200&margin=1`; qrContainer.innerHTML = `<img src="${qrUrl}" style="width:150px; height:150px;">`; }
 </script>
 </body>
 </html>
