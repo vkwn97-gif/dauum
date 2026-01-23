@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
+    /* 기존 스타일 유지 */
     :root { --p: #4f46e5; --bg: #f1f5f9; --ok: #10b981; --fail: #ef4444; --cancel: #9ca3af; }
     body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 20px; color:#333; margin:0; }
     .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -33,8 +34,6 @@
     .diff-HARD { color: #ef4444; background: #fef2f2; border: 1px solid #ef4444; }
     .report-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; position:relative; }
     .report-header { font-size: 20px; font-weight: 900; color: #1e293b; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; display:flex; justify-content:space-between; }
-    
-    /* 성과 리포트 스타일 */
     .weekly-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
     .chart-box { background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; display:flex; flex-direction:column; align-items:center; }
     .chart-title { font-size: 14px; font-weight: bold; color: #475569; margin-bottom: 10px; }
@@ -42,26 +41,11 @@
     .chart-comment { font-size: 12px; color: #1e293b; margin-top: 10px; background: white; padding: 8px; border-radius: 8px; width: 100%; border: 1px solid #e2e8f0; font-weight: 600; line-height: 1.4; box-sizing: border-box; }
     .chart-value-text { font-size: 20px; font-weight: 900; color: #333; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
     .report-sub { font-size: 14px; font-weight: 800; color: #475569; margin: 15px 0 8px; border-left: 4px solid var(--p); padding-left: 8px; }
-    
-    /* 성과 분석 가이드 */
     .report-guide { background: #fff7ed; border: 1px solid #fdba74; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; color: #9a3412; line-height: 1.6; }
     .guide-title { font-weight: 900; margin-bottom: 8px; display: block; color: #c2410c; font-size: 14px; }
     .guide-item { margin-bottom: 4px; display:flex; align-items:flex-start; }
     .guide-icon { margin-right: 6px; }
-
-    /* 급여 명세서 스타일 */
-    .pay-statement { background: white; border: 2px solid #1e293b; border-radius: 10px; padding: 30px; text-align: center; position: relative; margin-top:30px; }
-    .pay-logo { font-size: 14px; font-weight: 900; color: #1e293b; margin-bottom: 20px; letter-spacing: 2px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
-    .pay-title { font-size: 24px; font-weight: bold; color: #1e293b; margin: 0; }
-    .pay-date-range { font-size: 14px; color: #64748b; margin-top: 5px; margin-bottom: 20px; }
-    .pay-big-total { font-size: 42px; font-weight: 900; color: var(--p); margin: 20px 0; }
-    .pay-table-view { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .pay-table-view th { background: #f8fafc; padding: 10px; text-align: left; color: #64748b; font-size: 13px; border-bottom: 1px solid #e2e8f0; }
-    .pay-table-view td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 15px; font-weight: 600; color: #333; }
-    .pay-table-view td.money-col { text-align: right; font-family: monospace; font-size: 16px; }
-    .pay-footer { margin-top: 30px; font-size: 11px; color: #94a3b8; font-style: italic; }
-
-    .weekly-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    .weekly-table { width: 100%; border-collapse: collapse; min-width: 600px; margin-bottom: 30px; }
     .weekly-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 14px; border-bottom: 2px solid #e2e8f0; }
     .weekly-table td { border: 1px solid #e2e8f0; padding: 8px; vertical-align: top; text-align: center; min-height: 60px; }
     .cell-mission { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; }
@@ -72,7 +56,16 @@
     .st-cancel { background: #e5e7eb; color: #6b7280; text-decoration: line-through; }
     .cell-price { font-size: 11px; font-weight: 800; margin-top: 4px; }
     .price-plus { color: #059669; } .price-zero { color: #9ca3af; } .price-minus { color: #ef4444; }
-
+    .pay-statement { background: white; border: 2px solid #1e293b; border-radius: 10px; padding: 30px; text-align: center; position: relative; margin-top: 30px; }
+    .pay-logo { font-size: 14px; font-weight: 900; color: #1e293b; margin-bottom: 20px; letter-spacing: 2px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
+    .pay-title { font-size: 24px; font-weight: bold; color: #1e293b; margin: 0; }
+    .pay-date-range { font-size: 14px; color: #64748b; margin-top: 5px; margin-bottom: 20px; }
+    .pay-big-total { font-size: 42px; font-weight: 900; color: var(--p); margin: 20px 0; }
+    .pay-table-view { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .pay-table-view th { background: #f8fafc; padding: 10px; text-align: left; color: #64748b; font-size: 13px; border-bottom: 1px solid #e2e8f0; }
+    .pay-table-view td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 15px; font-weight: 600; color: #333; }
+    .pay-table-view td.money-col { text-align: right; font-family: monospace; font-size: 16px; }
+    .pay-footer { margin-top: 30px; font-size: 11px; color: #94a3b8; font-style: italic; }
     .appearance-layout { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     .app-controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
     .app-btn { padding: 10px 20px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; }
@@ -106,7 +99,7 @@
     .total-box { text-align: right; }
     .total-label { font-size: 13px; color: #666; }
     .total-amount { font-size: 24px; font-weight: 800; color: var(--p); }
-    .time-wrapper { text-align: right; font-size: 12px; color: #333; margin-top: 2px; }
+    .time-wrapper { text-align: right; font-size: 11px; color: #666; margin-top: 2px; }
     .time-range { display: block; font-weight: bold; color: #333; }
     .time-duration { display: block; }
   </style>
@@ -128,47 +121,51 @@
 </div>
 
 <div id="weekly" class="view">
-  <div style="text-align: center; margin-bottom: 20px;">
-    <select id="wStudent" onchange="loadWeekly()" style="padding:10px; font-weight:bold; width: auto; border-radius:8px;"><option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option></select>
-    <select id="wWeekSelect" onchange="loadWeekly()" style="padding:10px; width:auto; border-radius:8px;"></select>
-  </div>
-  
-  <div class="report-card" id="weeklyReportContainer">
-    <div class="report-header">
-      <span id="wReportTitle">주간 성과 리포트</span>
-      <span style="font-size:14px; color:#666; font-weight:normal;" id="wDateRange">-</span>
+  <div class="weekly-card">
+    <div class="weekly-header">
+      <div style="display:flex; gap:10px;">
+        <select id="wStudent" onchange="loadWeekly()" style="padding:10px; font-weight:bold;"><option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option></select>
+        <select id="wWeekSelect" onchange="loadWeekly()" style="padding:10px; width:auto; border-radius:8px;"></select>
+      </div>
+      <div class="total-box"><div class="total-label">이번 주 총 수입</div><div class="total-amount" id="totalWeekMoney">0원</div></div>
     </div>
     
-    <div class="weekly-charts">
-      <div class="chart-box"><div class="chart-title">① 자기 관리</div><div class="chart-wrapper"><canvas id="wcSelf"></canvas><div class="chart-value-text" id="wtSelf">-</div></div><div class="chart-comment" id="wcSelfMsg">분석 중...</div></div>
-      <div class="chart-box"><div class="chart-title">② 도전 성향</div><div class="chart-wrapper"><canvas id="wcChal"></canvas><div class="chart-value-text" id="wtChal" style="top:70%;">-</div></div><div class="chart-comment" id="wcChalMsg">분석 중...</div></div>
-      <div class="chart-box"><div class="chart-title">④ 생산성 (평균 대비)</div><div class="chart-wrapper" style="width:100%;"><canvas id="wcProd" style="height:80px;"></canvas></div><div class="chart-comment" id="wcProdMsg">분석 중...</div></div>
-      <div class="chart-box"><div class="chart-title">⑤ 마감 준수</div><div class="chart-wrapper"><canvas id="wcComp"></canvas><div class="chart-value-text" id="wtComp">-</div></div><div class="chart-comment" id="wcCompMsg">분석 중...</div></div>
+    <div class="report-card" id="weeklyReportContainer" style="margin-top:0; box-shadow:none; padding:0;">
+      <div class="report-header">
+        <span id="wReportTitle">주간 성과 리포트</span>
+        <span style="font-size:14px; color:#666; font-weight:normal;" id="wDateRange">-</span>
+      </div>
+      
+      <div class="weekly-charts">
+        <div class="chart-box"><div class="chart-title">① 자기 관리</div><div class="chart-wrapper"><canvas id="wcSelf"></canvas><div class="chart-value-text" id="wtSelf">-</div></div><div class="chart-comment" id="wcSelfMsg">분석 중...</div></div>
+        <div class="chart-box"><div class="chart-title">② 도전 성향</div><div class="chart-wrapper"><canvas id="wcChal"></canvas><div class="chart-value-text" id="wtChal" style="top:70%;">-</div></div><div class="chart-comment" id="wcChalMsg">분석 중...</div></div>
+        <div class="chart-box"><div class="chart-title">④ 생산성 (평균 대비)</div><div class="chart-wrapper" style="width:100%;"><canvas id="wcProd" style="height:80px;"></canvas></div><div class="chart-comment" id="wcProdMsg">분석 중...</div></div>
+        <div class="chart-box"><div class="chart-title">⑤ 마감 준수</div><div class="chart-wrapper"><canvas id="wcComp"></canvas><div class="chart-value-text" id="wtComp">-</div></div><div class="chart-comment" id="wcCompMsg">분석 중...</div></div>
+      </div>
+
+      <div class="report-guide">
+        <span class="guide-title">📢 성과 분석 가이드</span>
+        <div class="guide-item"><span class="guide-icon">✅</span><b>자기 관리:</b> 생활 미션(기상, 정리정돈 등) 성공률</div>
+        <div class="guide-item"><span class="guide-icon">🔥</span><b>도전 성향:</b> 선택한 미션의 난이도 평균 (Hard=3점, Easy=1점)</div>
+        <div class="guide-item"><span class="guide-icon">💰</span><b>생산성:</b> 전체 사원 평균 소득 대비 나의 소득 비율</div>
+        <div class="guide-item"><span class="guide-icon">⏰</span><b>마감 준수:</b> 계획된 미션 중 정해진 시간 내에 완료한 비율</div>
+      </div>
+
+      <div class="report-sub">주간 업무 수행 기록</div>
+      <div style="overflow-x:auto;" id="weeklyBoard"></div>
+      
+      <div class="pay-statement">
+          <div class="pay-logo">LIFE DESIGN STUDIO</div>
+          <h2 class="pay-title" id="payStatementTitle">OOO 급여 명세서</h2>
+          <div class="pay-date-range" id="payDateRange">-</div>
+          <div class="pay-big-total" id="payStatementTotal">₩0</div>
+          <table class="pay-table-view"><thead><tr><th>항목 (요일)</th><th style="text-align:right;">지급액</th></tr></thead><tbody id="payTableBody"></tbody></table>
+          <div class="pay-footer">위 금액을 정히 영수함. <br> Powered by LDS System</div>
+      </div>
     </div>
 
-    <div class="report-guide">
-      <span class="guide-title">📢 성과 분석 가이드</span>
-      <div class="guide-item"><span class="guide-icon">✅</span><b>자기 관리:</b> 생활 미션(기상, 정리정돈 등) 성공률</div>
-      <div class="guide-item"><span class="guide-icon">🔥</span><b>도전 성향:</b> 선택한 미션의 난이도 평균 (Hard=3점, Easy=1점)</div>
-      <div class="guide-item"><span class="guide-icon">💰</span><b>생산성:</b> 전체 사원 평균 소득 대비 나의 소득 비율</div>
-      <div class="guide-item"><span class="guide-icon">⏰</span><b>마감 준수:</b> 계획된 미션 중 정해진 시간 내에 완료한 비율</div>
-    </div>
-
-    <div class="report-sub">주간 업무 수행 기록</div>
-    <div style="overflow-x:auto;" id="weeklyBoard"></div>
-    
-    <div class="pay-statement" id="captureArea">
-        <div class="pay-logo">LIFE DESIGN STUDIO</div>
-        <h2 class="pay-title" id="payStatementTitle">OOO 급여 명세서</h2>
-        <div class="pay-date-range" id="payDateRange">-</div>
-        <div class="pay-big-total" id="payStatementTotal">₩0</div>
-        <table class="pay-table-view"><thead><tr><th>항목 (요일)</th><th style="text-align:right;">지급액</th></tr></thead><tbody id="payTableBody"></tbody></table>
-        <div class="pay-footer">위 금액을 정히 영수함. <br> Powered by LDS System</div>
-    </div>
-
+    <button class="btn-download" onclick="downloadWeeklyJPG()">📸 통합 리포트 저장 (JPG)</button>
   </div>
-
-  <button class="btn-download" onclick="downloadWeeklyJPG()">📸 리포트 및 명세서 저장 (JPG)</button>
 </div>
 
 <div id="appearance" class="view">
@@ -237,32 +234,25 @@
 <div id="imgModal"><div id="imgModalBox"><img id="imgModalContent" src=""><div style="display:flex; gap:10px;"><button class="img-modal-btn" onclick="downloadExpandedImg()">💾 JPG 저장</button><button class="img-modal-btn" onclick="closeImgModal()">닫기</button></div></div></div>
 
 <script>
-// ▼▼▼▼▼ [필수] 선생님 배포 URL 입력 ▼▼▼▼▼
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzim1Q2PTjlKqzASUIwRC-xyUVRmpX73_BuRlxuUa19TYz5eWrJchd9uBf85Os-szat5Q/exec"; 
-// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+// ▼▼▼▼▼ 선생님의 배포 URL을 여기에 입력하세요! ▼▼▼▼▼
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1xjGDjfEC1-nxmRyrJh_wUPcZ_rHBSNGQba-5NP0sD7pzRWb0GLBdv2WcHqr-feOqXg/exec";
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
 const noDiffMissions = ["교류수업", "SCL책력", "검정고시", "음악", "심화공부", "오후활동", "맞춤학습", "예배", "축구"];
 let globalChart = null; 
-let weeklyCharts = {}; 
-let historyData = null; 
+let weeklyCharts = {}; // 차트 객체 저장
 let currentCalDate = new Date(); 
 let loadedMonthlyData = {}; 
 
 Chart.register(ChartDataLabels);
 
 document.addEventListener("DOMContentLoaded", () => {
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const dd = String(today.getDate()).padStart(2, '0');
-  const todayStr = `${yyyy}-${mm}-${dd}`;
-
-  if(document.getElementById('dDate')) document.getElementById('dDate').value = todayStr;
-  if(document.getElementById('appUploadDate')) document.getElementById('appUploadDate').value = todayStr;
-  
-  currentCalDate = new Date(todayStr);
-  
+  const offset = 1000 * 60 * 60 * 9; 
+  const today = new Date(new Date().getTime() + offset).toISOString().slice(0,10);
+  if(document.getElementById('dDate')) document.getElementById('dDate').value = today;
+  if(document.getElementById('appUploadDate')) document.getElementById('appUploadDate').value = today;
+  currentCalDate = new Date(today);
   initWeekSelector(); 
   loadDaily(); 
   loadAppearanceMonthly();
@@ -440,8 +430,12 @@ function closeImgModal() { document.getElementById('imgModal').style.display = '
 function downloadExpandedImg() { const src = document.getElementById('imgModalContent').src; const link = document.createElement('a'); link.href = src; link.download = `LDS_Photo_${Date.now()}.jpg`; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
 function switchAppMode(mode) { if(mode === 'individual') { document.getElementById('btnAppIndividual').classList.add('active'); document.getElementById('btnAppWeekly').classList.remove('active'); document.getElementById('appIndividualView').style.display = 'block'; document.getElementById('appWeeklyView').style.display = 'none'; loadAppearanceMonthly(); } else { document.getElementById('btnAppIndividual').classList.remove('active'); document.getElementById('btnAppWeekly').classList.add('active'); document.getElementById('appIndividualView').style.display = 'none'; document.getElementById('appWeeklyView').style.display = 'block'; loadAppearanceWeekly(); } }
 function resizeImage(file, maxWidth, maxHeight, callback) { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = function (event) { const img = new Image(); img.src = event.target.result; img.onload = function () { let width = img.width; let height = img.height; if (width > height) { if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; } } else { if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; } } const canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height; const ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL("image/jpeg", 0.7)); }; }; }
-function initWeekSelector() { const today = new Date(); const wSel = document.getElementById('wWeekSelect'); const pSel = document.getElementById('pWeekSelect'); const aSel = document.getElementById('appWeekSelect'); for (let i = 0; i < 5; i++) { const d = new Date(today); d.setDate(today.getDate() - (i * 7)); const day = d.getDay(); const diff = d.getDate() - day + (day == 0 ? -6 : 1); const monday = new Date(d.setDate(diff)); const val = monday.toISOString().slice(0,10); const txt = `${monday.getMonth()+1}월 ${Math.ceil(monday.getDate()/7)}주차 (${val}~)`; const opt1 = document.createElement('option'); opt1.value=val; opt1.innerText=txt; wSel.appendChild(opt1); const opt2 = document.createElement('option'); opt2.value=val; opt2.innerText=txt; if(pSel) pSel.appendChild(opt2); const opt3 = document.createElement('option'); opt3.value=val; opt3.innerText=txt; if(aSel) aSel.appendChild(opt3); } }
+function initWeekSelector() { const today = new Date(); const wSel = document.getElementById('wWeekSelect'); const pSel = document.getElementById('pWeekSelect'); const aSel = document.getElementById('appWeekSelect'); for (let i = 0; i < 5; i++) { const d = new Date(today); d.setDate(today.getDate() - (i * 7)); const day = d.getDay(); const diff = d.getDate() - day + (day == 0 ? -6 : 1); const monday = new Date(d.setDate(diff)); const val = monday.toISOString().slice(0,10); const txt = `${monday.getMonth()+1}월 ${Math.ceil(monday.getDate()/7)}주차 (${val}~)`; const opt1 = document.createElement('option'); opt1.value=val; opt1.innerText=txt; wSel.appendChild(opt1); if(pSel) { const opt2 = document.createElement('option'); opt2.value=val; opt2.innerText=txt; pSel.appendChild(opt2); } if(aSel) { const opt3 = document.createElement('option'); opt3.value=val; opt3.innerText=txt; aSel.appendChild(opt3); } } }
 function openQrModal(sid, name) { document.getElementById('qrModal').style.display = 'flex'; document.getElementById('qrName').innerText = name; const qrContainer = document.getElementById('qrImage'); const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(sid + "," + name)}&size=200&margin=1`; qrContainer.innerHTML = `<img src="${qrUrl}" style="width:150px; height:150px;">`; }
+function openModal(sid,mid,diff){ document.getElementById('modal').style.display='flex'; document.getElementById('mTitle').innerText=students[sid]+" - "+mid; document.getElementById('mSid').value=sid; document.getElementById('mMid').value=mid; document.getElementById('lifePhoto').value=""; document.getElementById('lifeMsg').value=""; document.querySelectorAll('.life-chk').forEach(c=>c.checked=false); document.getElementById('ui-life').style.display='none'; document.getElementById('ui-normal').style.display='none'; document.getElementById('ui-day').style.display='none'; document.getElementById('ctrlMissionSelect').value=""; document.getElementById('tComment').value=diff||"NORMAL"; document.getElementById('tStart').value=""; document.getElementById('tEnd').value=""; if(mid==='생활미션')document.getElementById('ui-life').style.display='block'; else if(mid==='하루 기록')document.getElementById('ui-day').style.display='block'; else{ document.getElementById('ui-normal').style.display='block'; if(noDiffMissions.includes(mid))document.getElementById('diffSection').style.display='none'; else document.getElementById('diffSection').style.display='block'; } }
+function handleLife(s){ const f=document.getElementById('lifePhoto').files[0]; const msg=document.getElementById('lifeMsg').value; if(f)uploadPhoto(s, msg); else{ if(s==='life_ok'){if(!confirm("사진 없이 완료 승인하시겠습니까?"))return; sendCtrl('life_ok', msg);} else sendCtrl('fail', msg); } }
+function uploadPhoto(s, msg){ const f=document.getElementById('lifePhoto').files[0]; const reader=new FileReader(); reader.readAsDataURL(f); reader.onload=function(e){ const img=new Image(); img.src=e.target.result; img.onload=function(){ const canvas=document.createElement("canvas"); const ctx=canvas.getContext("2d"); const maxDim=800; let w=img.width,h=img.height; if(w>h){if(w>maxDim){h*=maxDim/w;w=maxDim;}}else{if(h>maxDim){w*=maxDim/h;h=maxDim;}} canvas.width=w; canvas.height=h; ctx.drawImage(img,0,0,w,h); const b64=canvas.toDataURL("image/jpeg",0.7).split(',')[1]; const sid=document.getElementById('mSid').value; const d=document.getElementById('dDate').value; fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"uploadLifePhoto",base64:b64,mimeType:"image/jpeg",sid:sid,name:students[sid],date:d,status:s,message:msg})}).then(r=>r.json()).then(()=>{alert("처리 완료"); document.getElementById('modal').style.display='none'; loadDaily();}); } } }
+function sendCtrl(a, msg){ const d=document.getElementById('dDate').value; if(a==='life_ok'||a==='fail'||a==='cancel'){ if(document.getElementById('mMid').value==='생활미션'){ fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"teacherControl",sid:document.getElementById('mSid').value,mid:"생활미션",act:a,message:msg,date:d})}).then(()=>{alert("완료됨"); document.getElementById('modal').style.display='none'; loadDaily();}); return; } } const n=document.getElementById('ctrlMissionSelect').value; fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"teacherControl",sid:document.getElementById('mSid').value,mid:document.getElementById('mMid').value,newMissionName:n,act:a,comment:document.getElementById('tComment').value,startTime:document.getElementById('tStart').value,endTime:document.getElementById('tEnd').value,date:d})}).then(()=>{alert("처리됨"); document.getElementById('modal').style.display='none'; loadDaily();}); }
 </script>
 </body>
 </html>
