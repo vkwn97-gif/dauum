@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
-    /* 기존 CSS 그대로 유지 */
+    /* ... (기존 CSS) ... */
     :root { --p: #4f46e5; --bg: #f1f5f9; --ok: #10b981; --fail: #ef4444; --cancel: #9ca3af; }
     body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 20px; color:#333; margin:0; }
     .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -16,6 +16,7 @@
     .tab.active { background: var(--p); color: white; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
     .view { display: none; } .view.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .mail-icon { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; background: white; padding: 8px; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .daily-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
     .student-col { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     .col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
@@ -37,7 +38,7 @@
     .weekly-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
     .chart-box { background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; display:flex; flex-direction:column; align-items:center; }
     .chart-title { font-size: 14px; font-weight: bold; color: #475569; margin-bottom: 10px; }
-    .chart-wrapper { width: 100%; height: 120px; position: relative; display: flex; justify-content: center; align-items: center; }
+    .chart-wrapper { width: 120px; height: 120px; position: relative; display: flex; justify-content: center; align-items: center; }
     .chart-comment { font-size: 12px; color: #1e293b; margin-top: 10px; background: white; padding: 8px; border-radius: 8px; width: 100%; border: 1px solid #e2e8f0; font-weight: 600; line-height: 1.4; box-sizing: border-box; }
     .chart-value-text { font-size: 20px; font-weight: 900; color: #333; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
     .report-sub { font-size: 14px; font-weight: 800; color: #475569; margin: 15px 0 8px; border-left: 4px solid var(--p); padding-left: 8px; }
@@ -85,25 +86,15 @@
     .app-table td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; vertical-align: top; }
     .app-thumb { width: 100%; height: 120px; object-fit: contain; background: #f8fafc; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; }
     .no-photo { color: #ccc; font-size: 12px; padding: 40px 0; }
-    .weekly-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
-    .weekly-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .btn { padding: 10px; width: 100%; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; margin-top: 5px; }
+    .chk-group label { display: block; margin-bottom: 8px; cursor: pointer; font-size: 14px; }
+    .btn-download { margin-top: 15px; width: 100%; background: #1e293b; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .total-box { text-align: right; }
     .total-label { font-size: 13px; color: #666; }
     .total-amount { font-size: 24px; font-weight: 800; color: var(--p); }
     .time-wrapper { text-align: right; font-size: 11px; color: #666; margin-top: 2px; }
     .time-range { display: block; font-weight: bold; color: #333; }
     .time-duration { display: block; }
-    #modal, #qrModal, #imgModal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index: 1000; }
-    .modal-box { background: white; padding: 25px; border-radius: 15px; width: 400px; max-height: 90vh; overflow-y: auto; }
-    #imgModalContent { max-width: 90%; max-height: 80vh; object-fit: contain; background: black; }
-    #imgModalBox { background: transparent; text-align: center; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-    .img-modal-btn { background: white; color: #333; padding: 10px 20px; border-radius: 20px; font-weight: bold; border: none; cursor: pointer; margin: 10px; }
-    #qrCard { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
-    #qrImage { margin: 20px auto; padding:10px; border:1px solid #eee; display: flex; justify-content: center; background: white; }
-    input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-    .btn { padding: 10px; width: 100%; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; margin-top: 5px; }
-    .chk-group label { display: block; margin-bottom: 8px; cursor: pointer; font-size: 14px; }
-    .btn-download { margin-top: 15px; width: 100%; background: #1e293b; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
     /* 월간 전용 */
     .metric-row { display: flex; flex-direction: column; margin-bottom: 25px; background: #f8fafc; padding: 15px; border-radius: 12px; }
     .metric-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -123,6 +114,19 @@
     .comp-down { background: #fee2e2; color: #991b1b; }
     .chk-label { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; cursor: pointer; color: #475569; }
     .chk-label input { width:auto; margin:0; }
+    #modal, #qrModal, #imgModal, #mailModal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index: 1000; }
+    .modal-box { background: white; padding: 25px; border-radius: 15px; width: 400px; max-height: 90vh; overflow-y: auto; }
+    #imgModalContent { max-width: 90%; max-height: 80vh; object-fit: contain; background: black; }
+    #imgModalBox { background: transparent; text-align: center; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .img-modal-btn { background: white; color: #333; padding: 10px 20px; border-radius: 20px; font-weight: bold; border: none; cursor: pointer; margin: 10px; }
+    #qrCard { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
+    #qrImage { margin: 20px auto; padding:10px; border:1px solid #eee; display: flex; justify-content: center; background: white; }
+    /* 신문고 목록 스타일 */
+    .mail-item { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 10px; margin-bottom: 8px; }
+    .mail-date { font-size: 11px; color: #64748b; margin-bottom: 4px; }
+    .mail-title { font-weight: bold; font-size: 14px; margin-bottom: 5px; color: #1e293b; }
+    .mail-content { font-size: 13px; color: #333; white-space: pre-wrap; line-height: 1.4; }
+    input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
   </style>
 </head>
 <body>
@@ -132,7 +136,10 @@
   <div class="tab" id="tab-weekly" onclick="goTab('weekly')">📊 주간 리포트</div>
   <div class="tab" id="tab-monthly" onclick="goTab('monthly')">🏆 월간 리포트</div>
   <div class="tab" id="tab-appearance" onclick="goTab('appearance')">👔 용모 관리</div>
+  <div class="tab" id="tab-notice" onclick="goTab('notice')">📢 공지사항</div>
 </div>
+
+<div class="mail-icon" onclick="openMailModal()">📩</div>
 
 <div id="daily" class="view active">
   <div style="margin-bottom: 15px;">
@@ -157,25 +164,21 @@
         <span id="wReportTitle">주간 성과 리포트</span>
         <span style="font-size:14px; color:#666; font-weight:normal;" id="wDateRange">-</span>
       </div>
-      
       <div class="weekly-charts">
         <div class="chart-box"><div class="chart-title">① 자기 관리</div><div class="chart-wrapper"><canvas id="wcSelf"></canvas><div class="chart-value-text" id="wsSelf">-</div></div><div class="chart-comment" id="wsSelfMsg">분석 중...</div></div>
         <div class="chart-box"><div class="chart-title">② 도전 성향</div><div class="chart-wrapper"><canvas id="wcChal"></canvas><div class="chart-value-text" id="wsChal" style="top:70%;">-</div></div><div class="chart-comment" id="wsChalMsg">분석 중...</div></div>
         <div class="chart-box"><div class="chart-title">③ 생산성 (평균 대비)</div><div class="chart-wrapper" style="width:100%;"><canvas id="wcProd" style="height:80px;"></canvas><div class="chart-value-text" id="wsProd" style="display:none;"></div></div><div class="chart-comment" id="wsProdMsg">분석 중...</div></div>
         <div class="chart-box"><div class="chart-title">④ 마감 준수</div><div class="chart-wrapper"><canvas id="wcComp"></canvas><div class="chart-value-text" id="wsComp">-</div></div><div class="chart-comment" id="wsCompMsg">분석 중...</div></div>
       </div>
-
       <div class="report-guide">
         <span class="guide-title">📢 성과 분석 가이드</span>
-        <div class="guide-item"><span class="guide-icon">✅</span><b>자기 관리:</b> 생활 미션(기상, 정리정돈 등) 성공률</div>
-        <div class="guide-item"><span class="guide-icon">🔥</span><b>도전 성향:</b> 선택한 미션의 난이도 평균 (Hard=3점, Easy=1점)</div>
-        <div class="guide-item"><span class="guide-icon">💰</span><b>생산성:</b> 전체 사원 평균 소득 대비 나의 소득 비율</div>
-        <div class="guide-item"><span class="guide-icon">⏰</span><b>마감 준수:</b> 계획된 미션 중 정해진 시간 내에 완료한 비율</div>
+        <div class="guide-item"><span class="guide-icon">✅</span><b>자기 관리:</b> 생활 미션 성공률</div>
+        <div class="guide-item"><span class="guide-icon">🔥</span><b>도전 성향:</b> 난이도 평균 (E=1, N=2, H=3)</div>
+        <div class="guide-item"><span class="guide-icon">💰</span><b>생산성:</b> 전체 사원 평균 소득 대비 비율</div>
+        <div class="guide-item"><span class="guide-icon">⏰</span><b>마감 준수:</b> 시간 내 성공 비율</div>
       </div>
-
       <div class="report-sub">주간 업무 수행 기록</div>
       <div style="overflow-x:auto;" id="weeklyBoard"></div>
-      
       <div class="pay-statement">
           <div class="pay-logo">LIFE DESIGN STUDIO</div>
           <h2 class="pay-title" id="payStatementTitle">OOO 급여 명세서</h2>
@@ -190,7 +193,7 @@
 </div>
 
 <div id="monthly" class="view">
-  <div style="text-align: center; margin-bottom: 20px; display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap;">
+  <div style="text-align: center; margin-bottom: 20px;">
     <select id="mStudent" onchange="loadMonthly()" style="padding:10px; font-weight:bold; width: auto; border-radius:8px;"><option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option></select>
     <input type="month" id="mMonth" onchange="loadMonthly()" style="padding:10px; border-radius:8px; border:1px solid #ddd; width:auto;">
     <label class="chk-label" style="background:white; padding:8px 12px; border-radius:8px; border:1px solid #ddd;">
@@ -199,55 +202,26 @@
   </div>
   <div class="report-card" id="monthlyReportContainer">
     <div class="report-header"><span id="mReportTitle">월간 종합 분석</span></div>
-    
+    <div class="stat-section"><div class="stat-header"><span>● 5대 핵심 역량 비교 (나 vs 전체 평균)</span></div><div class="radar-container"><canvas id="monthlyRadarChart"></canvas></div></div>
+    <div class="metric-row"><div class="metric-header"><span class="metric-title">✅ ① 자기 관리 (Self-Management)</span></div><div class="metric-chart"><canvas id="mcSelf"></canvas></div><table class="metric-table" id="mtSelf"><thead><tr><th>주차</th><th>성공/전체</th><th>성공률</th></tr></thead><tbody></tbody></table></div>
+    <div class="metric-row"><div class="metric-header"><span class="metric-title">🔥 ② 도전 성향 (Challenge)</span></div><div class="metric-chart"><canvas id="mcChal"></canvas></div><table class="metric-table" id="mtChal"><thead><tr><th>주차</th><th>E/N/H</th><th>평균 점수</th></tr></thead><tbody></tbody></table></div>
+    <div class="metric-row"><div class="metric-header"><span class="metric-title">📈 ③ 성장 지향 (Growth)</span></div><div class="metric-chart"><canvas id="mcGrow"></canvas></div><div style="font-size:12px; color:#666; margin-top:5px; text-align:center;">* 내 평균 난이도보다 높은 난이도를 선택한 비율</div></div>
+    <div class="metric-row"><div class="metric-header"><span class="metric-title">💰 ④ 생산성 (Productivity)</span></div><div class="metric-chart"><canvas id="mcProd"></canvas></div><table class="metric-table" id="mtProd"><thead><tr><th>주차</th><th>내 소득</th></tr></thead><tbody></tbody></table></div>
+    <div class="metric-row"><div class="metric-header"><span class="metric-title">⏰ ⑤ 마감 준수 (Completion)</span></div><div class="metric-chart"><canvas id="mcComp"></canvas></div><table class="metric-table" id="mtComp"><thead><tr><th>주차</th><th>완료/전체</th><th>준수율</th></tr></thead><tbody></tbody></table></div>
     <div class="stat-section">
-      <div class="stat-header">
-         <span>● 5대 핵심 역량 비교 (나 vs 전체 평균)</span>
-      </div>
-      <div class="radar-container">
-        <canvas id="monthlyRadarChart"></canvas>
-      </div>
+      <div class="stat-header">● 상세 활동 내역</div>
+      <table class="monthly-table">
+          <thead><tr><th>활동명</th><th>1주</th><th>2주</th><th>3주</th><th>4주</th><th>5주</th><th>합계</th></tr></thead>
+          <tbody id="mDetailBody"></tbody>
+      </table>
     </div>
-
-    <div class="metric-row">
-      <div class="metric-header"><span class="metric-title">✅ ① 자기 관리 (Self-Management)</span></div>
-      <div class="metric-chart"><canvas id="mcSelf"></canvas></div>
-      <table class="metric-table" id="mtSelf"><thead><tr><th>주차</th><th>성공/전체</th><th>성공률</th></tr></thead><tbody></tbody></table>
-    </div>
-
-    <div class="metric-row">
-      <div class="metric-header"><span class="metric-title">🔥 ② 도전 성향 (Challenge)</span></div>
-      <div class="metric-chart"><canvas id="mcChal"></canvas></div>
-      <table class="metric-table" id="mtChal"><thead><tr><th>주차</th><th>E/N/H</th><th>평균 점수</th></tr></thead><tbody></tbody></table>
-    </div>
-
-    <div class="metric-row">
-      <div class="metric-header"><span class="metric-title">📈 ③ 성장 지향 (Growth)</span></div>
-      <div class="metric-chart"><canvas id="mcGrow"></canvas></div>
-      <div style="font-size:12px; color:#666; margin-top:5px; text-align:center;">* 내 평균 난이도보다 높은 난이도를 선택한 비율</div>
-    </div>
-
-    <div class="metric-row">
-      <div class="metric-header"><span class="metric-title">💰 ④ 생산성 (Productivity)</span></div>
-      <div class="metric-chart"><canvas id="mcProd"></canvas></div>
-      <table class="metric-table" id="mtProd"><thead><tr><th>주차</th><th>내 소득</th></tr></thead><tbody></tbody></table>
-    </div>
-
-    <div class="metric-row">
-      <div class="metric-header"><span class="metric-title">⏰ ⑤ 마감 준수 (Completion)</span></div>
-      <div class="metric-chart"><canvas id="mcComp"></canvas></div>
-      <table class="metric-table" id="mtComp"><thead><tr><th>주차</th><th>완료/전체</th><th>준수율</th></tr></thead><tbody></tbody></table>
-    </div>
-
     <div style="margin-top:20px; border-top:2px solid #eee; padding-top:15px;">
         <div style="font-size:16px; font-weight:bold; margin-bottom:10px;">💵 월간 급여 비교</div>
         <div class="stats-grid-3" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div class="score-box"><div class="score-val" id="mTotalIncome">-</div><div class="score-lbl">나의 월급 총액</div></div>
           <div class="score-box" id="boxAvgIncome"><div class="score-val" id="mAvgAll" style="color:#64748b">-</div><div class="score-lbl">전체 사원 평균</div></div>
         </div>
-        <div style="margin-top:10px; font-size:12px; color:#666; text-align:center;" id="msgAvgDiff">
-          * 전체 평균 대비 <span id="mProdText" style="font-weight:bold;">-</span> 성과를 냈습니다.
-        </div>
+        <div style="margin-top:10px; font-size:12px; color:#666; text-align:center;" id="msgAvgDiff">* 전체 평균 대비 <span id="mProdText" style="font-weight:bold;">-</span> 성과를 냈습니다.</div>
     </div>
   </div>
   <button class="btn-download" onclick="downloadMonthlyJPG()">📸 월간 리포트 저장 (JPG)</button>
@@ -291,6 +265,15 @@
   </div>
 </div>
 
+<div id="notice" class="view">
+  <div style="background:white; padding:20px; border-radius:20px; max-width:600px; margin:0 auto;">
+    <h2 style="margin-top:0;">📢 공지사항 등록</h2>
+    <p style="color:#666; font-size:13px;">여기에 작성한 내용은 학생 앱 메인화면에 공지로 뜹니다.</p>
+    <textarea id="noticeInput" rows="5" placeholder="공지할 내용을 입력하세요..." style="width:100%; border:1px solid #ddd; padding:10px; border-radius:8px;"></textarea>
+    <button onclick="saveNotice()" class="btn" style="background:var(--p); color:white;">공지 등록하기</button>
+  </div>
+</div>
+
 <div id="modal">
   <div class="modal-box">
     <h3 id="mTitle" style="margin-top:0; color:var(--p);"></h3>
@@ -303,7 +286,8 @@
       <div style="display:flex; gap:5px; margin-top:5px;"><button class="btn" style="background:var(--fail);" onclick="handleLife('fail')">❌ 실패</button><button class="btn" style="background:var(--cancel); color:white;" onclick="sendCtrl('cancel')">🚫 휴강</button></div>
     </div>
     <div id="ui-normal">
-      <select id="ctrlMissionSelect"><option value="">(유지)</option><optgroup label="오전"><option>글쓰기</option><option>독서</option><option>자서전</option></optgroup><optgroup label="선택"><option>컴퓨터</option><option>운동</option><option>영어회화</option><option>글씨 연습</option></optgroup><optgroup label="오후"><option>검정고시</option><option>음악</option><option>SCL책력</option><option>심화공부</option><option>교류수업</option><option>축구</option><option>예배</option></optgroup></select>
+      <select id="ctrlMissionSelect"><option value="">(유지)</option><optgroup label="오전"><option>글쓰기</option><option>독서</option><option>자서전</option></optgroup><optgroup label="선택"><option>컴퓨터</option><option>운동</option><option>영어회화</option><option>글씨 연습</option></optgroup><optgroup label="오후"><option>검정고시</option><option>음악</option><option>SCL책력</option><option>심화공부</option><option>교류수업</option><option>축구</option><option>예배</option></optgroup>
+      <option value="행사" style="color:blue; font-weight:bold;">🎉 행사</option></select>
       <div id="diffSection"><select id="tComment"><option value="NORMAL">NORMAL</option><option value="EASY">EASY</option><option value="HARD">HARD</option></select></div>
       <div style="display:flex; gap:10px;"><input type="time" id="tStart">~<input type="time" id="tEnd"></div>
       <div style="display:flex; gap:5px; margin-top:15px;"><button class="btn" style="background:var(--ok);" onclick="sendCtrl('end')">완료</button><button class="btn" style="background:var(--fail);" onclick="sendCtrl('fail')">실패</button><button class="btn" style="background:var(--cancel); color:white;" onclick="sendCtrl('cancel')">휴강</button></div>
@@ -317,14 +301,23 @@
   <div id="qrCard"><h2 style="margin:0; color:#1e293b;">LIFE DESIGN STUDIO</h2><p style="color:#64748b; font-size:12px; margin-bottom:20px;">OFFICIAL EMPLOYEE ID</p><div id="qrImage"></div><h3 id="qrName" style="margin:10px 0;"></h3><button onclick="downloadQR()" style="background:var(--p); color:white; width:100%; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:5px;">💾 JPG 저장</button><button onclick="document.getElementById('qrModal').style.display='none'" style="background:#94a3b8; color:white; width:100%; padding:10px; border:none; border-radius:8px; cursor:pointer;">닫기</button></div>
 </div>
 <div id="imgModal"><div id="imgModalBox"><img id="imgModalContent" src=""><div style="display:flex; gap:10px;"><button class="img-modal-btn" onclick="downloadExpandedImg()">💾 JPG 저장</button><button class="img-modal-btn" onclick="closeImgModal()">닫기</button></div></div></div>
+<div id="mailModal">
+  <div class="modal-box" style="width:500px;">
+    <h3 style="margin-top:0;">📩 LDS 신문고</h3>
+    <div id="mailList" style="max-height:60vh; overflow-y:auto; text-align:left;">
+      <div style="text-align:center; color:#888;">불러오는 중...</div>
+    </div>
+    <button onclick="document.getElementById('mailModal').style.display='none'" style="background:#eee; color:#333; margin-top:10px; width:100%; padding:10px; border:none; border-radius:8px; cursor:pointer;">닫기</button>
+  </div>
+</div>
 
 <script>
 // ▼▼▼▼▼ 선생님의 배포 URL 입력 ▼▼▼▼▼
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzMySkYyce3KSjMaPA84AInJYhUCXrHHCbK1aTeyBjBI45WsZy4eAFUaSS9mvrzpRun/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxnV3U5RyDsROS5_u7UeoOFZNNl4GwS4cEdpEMAnbDeaGiwXjWlx62BBp-HZ_D9eQ-iLA/exec";
 // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
-const noDiffMissions = ["교류수업", "SCL책력", "검정고시", "음악", "심화공부", "오후활동", "맞춤학습", "예배", "축구"];
+const noDiffMissions = ["교류수업", "SCL책력", "검정고시", "음악", "심화공부", "오후활동", "맞춤학습", "예배", "축구", "행사"];
 let weeklyCharts = {}; 
 let monthlyCharts = {}; 
 let radarChart = null; 
@@ -360,6 +353,7 @@ function goTab(id) {
   if(id==='weekly') document.getElementById('tab-weekly').classList.add('active');
   if(id==='monthly') document.getElementById('tab-monthly').classList.add('active');
   if(id==='appearance') document.getElementById('tab-appearance').classList.add('active');
+  if(id==='notice') document.getElementById('tab-notice').classList.add('active'); // [NEW]
   
   if(id === 'daily') loadDaily();
   else if(id === 'weekly') loadWeekly();
@@ -370,19 +364,54 @@ function goTab(id) {
   }
 }
 
+// [NEW] 공지사항 저장
+function saveNotice() {
+  const txt = document.getElementById('noticeInput').value;
+  if(!txt) return alert("내용을 입력하세요.");
+  fetch(WEB_APP_URL, {method:"POST", body:JSON.stringify({action:"saveNotice", content:txt})})
+  .then(()=>{ alert("공지가 등록되었습니다."); document.getElementById('noticeInput').value=""; });
+}
+
+// [NEW] 신문고 리스트 불러오기
+function openMailModal() {
+  document.getElementById('mailModal').style.display = 'flex';
+  const list = document.getElementById('mailList');
+  list.innerHTML = `<div style="text-align:center; color:#888;">불러오는 중...</div>`;
+  
+  fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getSinmungoList" }) })
+  .then(r => r.json()).then(res => {
+     list.innerHTML = "";
+     if(!res.data || res.data.length === 0) {
+        list.innerHTML = `<div style="text-align:center; padding:20px; color:#888;">도착한 신문고가 없습니다.</div>`;
+        return;
+     }
+     res.data.forEach(item => {
+        const d = new Date(item.date);
+        const dateStr = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} (${['일','월','화','수','목','금','토'][d.getDay()]}) ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+        list.innerHTML += `<div class="mail-item"><div class="mail-date">${dateStr}</div><div class="mail-title">📢 ${item.nick}님의 신문고</div><div class="mail-content">${item.content}</div></div>`;
+     });
+  });
+}
+
 function loadDaily(){ 
   const date=document.getElementById('dDate').value; 
   fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"getDailyData",date:date})}).then(res=>res.json()).then(data=>{ 
     const board=document.getElementById('dailyBoard'); 
     board.innerHTML=""; 
+    // [FIX] 로그 데이터가 없을 때 안전장치
+    if(!data.logs) data.logs = {};
+
     Object.keys(students).forEach(sid=>{ 
       const col=document.createElement('div'); col.className='student-col'; 
-      const l=data.logs[sid]||{}; const s=data.schedules[sid]; 
+      const l=data.logs[sid]||{}; 
+      // [FIX] 스케줄 데이터가 없을 때 안전장치
+      const s=(data.schedules && data.schedules[sid]) ? data.schedules[sid] : null;
+      
       let currentTotal = 0; 
       const life=l["생활미션"]; if(life && life.money) currentTotal += life.money; 
       if(s) { 
         [s.m1,s.m2,s.m3,s.c1a,s.c1b,s.c2].forEach(m=>{ 
-          if(!m.n)return; let effectiveName=m.n; let ml=l[m.n]; 
+          if(!m || !m.n)return; let effectiveName=m.n; let ml=l[m.n]; 
           const schedKeys=[s.m1.n,s.m2.n,s.m3.n,s.c1a.n,s.c1b.n,s.c2.n]; const allLogKeys=Object.keys(l).filter(k=>k!=="생활미션"&&k!=="하루 기록"); const extraMissions=allLogKeys.filter(k=>!schedKeys.includes(k)); 
           if(!ml&&(m.n.includes("선택")||m.n==="미정"||m.n==="오후활동")&&extraMissions.length>0){ effectiveName=extraMissions.shift(); ml=l[effectiveName]; } 
           if(ml && ml.money) currentTotal += ml.money; 
@@ -395,7 +424,7 @@ function loadDaily(){
       col.innerHTML+=`<div class="m-item ${lifeCls}" onclick="openModal('${sid}','생활미션')"><b>🌞 생활미션</b> <span>${lifeTxt}</span></div>`; 
       if(s){ 
         [s.m1,s.m2,s.m3,s.c1a,s.c1b,s.c2].forEach(m=>{ 
-          if(!m.n)return; let effectiveName=m.n; let ml=l[m.n]; 
+          if(!m || !m.n)return; let effectiveName=m.n; let ml=l[m.n]; 
           let c=""; if(ml){ if(ml.status=='start')c='ing'; if(ml.status=='end')c='done'; if(ml.status=='fail')c='fail'; if(ml.status=='cancel')c='cancel'; } 
           let tRange="-"; let tDur="-";
           if(ml && ml.note) {
@@ -454,6 +483,7 @@ function loadWeekly(){
     }); 
     h+=`<tr><td style="font-weight:bold;">일일 수입</td>`; for(let i=0;i<5;i++)h+=`<td style="font-weight:bold; color:var(--p);">₩${res.days[i].money.toLocaleString()}</td>`; h+=`</tr></tbody></table>`; 
     document.getElementById('weeklyBoard').innerHTML=h; 
+    
     document.getElementById('payStatementTitle').innerText = `${students[sid]} 급여 명세서`;
     document.getElementById('payDateRange').innerText = `${startDate.toLocaleDateString()} ~ ${endDate.toLocaleDateString()}`;
     document.getElementById('payStatementTotal').innerText = "₩" + res.total.toLocaleString();
@@ -468,7 +498,6 @@ function loadMonthly() {
   const sid = document.getElementById('mStudent').value;
   const month = document.getElementById('mMonth').value;
   const showAvg = document.getElementById('mShowAvg').checked;
-  
   if (!month) return;
 
   fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getMonthlyData", sid: sid, month: month }) })
@@ -479,11 +508,13 @@ function loadMonthly() {
     const s = res.myScores;
     const g = res.globalScores;
     const wk = res.weeklyStats;
+    const details = res.weeklyDetails;
 
-    // 오각형 레이더 차트
+    // --- 오각형 레이더 차트 (토글 적용) ---
     const ctxRadar = document.getElementById('monthlyRadarChart').getContext('2d');
     if(radarChart) radarChart.destroy();
     
+    // 기본 데이터셋 (나의 점수)
     const datasets = [{
        label: '나의 점수',
        data: [s.self, s.challenge, s.growth, s.productivity, s.completion],
@@ -492,6 +523,8 @@ function loadMonthly() {
        pointBackgroundColor: 'rgb(255, 99, 132)',
        borderWidth: 2
     }];
+    
+    // [토글] 평균 보기 체크 시 데이터셋 추가
     if(showAvg) {
       datasets.push({
         label: '전체 평균',
@@ -503,19 +536,34 @@ function loadMonthly() {
         borderDash: [5, 5]
       });
     }
+
     radarChart = new Chart(ctxRadar, {
       type: 'radar',
-      data: { labels: ['자기관리', '도전성향', '성장지향', '생산성', '마감준수'], datasets: datasets },
-      options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } }, plugins: { legend: { position: 'bottom' } } }
+      data: {
+        labels: ['자기관리', '도전성향', '성장지향', '생산성', '마감준수'],
+        datasets: datasets
+      },
+      options: {
+        scales: { r: { min: 0, max: 100, ticks: { display: false } } },
+        plugins: { legend: { position: 'bottom' } }
+      }
     });
 
-    // 5대 지표별 가로 막대 그래프
+    // --- 5대 지표별 가로 막대 그래프 ---
     const drawHorizChart = (id, score, color) => {
         const ctx = document.getElementById(id).getContext('2d');
         if(monthlyCharts[id]) monthlyCharts[id].destroy();
         monthlyCharts[id] = new Chart(ctx, {
             type: 'bar',
-            data: { labels: [''], datasets: [{ data: [score], backgroundColor: color, barThickness: 30, borderRadius: 5 }] },
+            data: {
+                labels: [''],
+                datasets: [{
+                    data: [score],
+                    backgroundColor: color,
+                    barThickness: 30,
+                    borderRadius: 5
+                }]
+            },
             options: {
                 indexAxis: 'y',
                 plugins: { legend: {display:false}, datalabels: { anchor:'end', align:'right', font:{weight:'bold'}, formatter: v=>v } },
@@ -531,7 +579,7 @@ function loadMonthly() {
     drawHorizChart('mcProd', s.productivity, '#3b82f6');
     drawHorizChart('mcComp', s.completion, '#ef4444');
 
-    // 상세 테이블
+    // --- 상세 테이블 그리기 (undefined 안전장치 추가) ---
     const tSelf = document.getElementById('mtSelf').querySelector('tbody'); tSelf.innerHTML="";
     for(let w=1; w<=5; w++) {
        if(wk[w] && wk[w].life.total > 0) {
@@ -539,6 +587,7 @@ function loadMonthly() {
            tSelf.innerHTML += `<tr><td>${w}주차</td><td>${wk[w].life.success}/${wk[w].life.total}</td><td>${rate}%</td></tr>`;
        }
     }
+
     const tChal = document.getElementById('mtChal').querySelector('tbody'); tChal.innerHTML="";
     for(let w=1; w<=5; w++) {
        if(wk[w] && wk[w].challenge.count > 0) {
@@ -546,10 +595,12 @@ function loadMonthly() {
            tChal.innerHTML += `<tr><td>${w}주차</td><td>${wk[w].challenge.easy}/${wk[w].challenge.normal}/${wk[w].challenge.hard}</td><td>${avg}점</td></tr>`;
        }
     }
+
     const tProd = document.getElementById('mtProd').querySelector('tbody'); tProd.innerHTML="";
     for(let w=1; w<=5; w++) {
        if(wk[w] && wk[w].income > 0) tProd.innerHTML += `<tr><td>${w}주차</td><td>₩${wk[w].income.toLocaleString()}</td></tr>`;
     }
+
     const tComp = document.getElementById('mtComp').querySelector('tbody'); tComp.innerHTML="";
     for(let w=1; w<=5; w++) {
        if(wk[w] && wk[w].completion.total > 0) {
@@ -558,11 +609,29 @@ function loadMonthly() {
        }
     }
     
-    // 급여 비교
+    // [FIXED] 월간 상세 활동 내역 테이블 (mDetailBody ID 추가됨)
+    const tbodyDetail = document.getElementById('mDetailBody');
+    tbodyDetail.innerHTML = "";
+    const missionsList = ["독서", "글쓰기", "자서전", "운동", "영어회화", "검정고시", "행사"];
+    missionsList.forEach(m => {
+        let row = `<tr><td>${m}</td>`;
+        let totalCount = 0; let totalMoney = 0;
+        for(let w=1; w<=5; w++) {
+            const item = (details[w] && details[w][m]) ? details[w][m] : {count:0, money:0};
+            row += `<td>${item.count > 0 ? item.count+'회' : '-'}</td>`;
+            totalCount += item.count; totalMoney += item.money;
+        }
+        row += `<td style="font-weight:bold;">${totalCount}회 (₩${totalMoney.toLocaleString()})</td></tr>`;
+        tbodyDetail.innerHTML += row;
+    });
+
+    // 안전장치 추가
     const myTotal = (fin && fin.myTotal) ? fin.myTotal : 0;
     const allTotal = (fin && fin.allTotalAvg) ? fin.allTotalAvg : 0;
+
     document.getElementById('mTotalIncome').innerText = `₩${myTotal.toLocaleString()}`;
     document.getElementById('mAvgAll').innerText = `₩${allTotal.toLocaleString()}`;
+    
     let diff = myTotal - allTotal;
     let diffTxt = diff > 0 ? `+₩${diff.toLocaleString()}` : `-₩${Math.abs(diff).toLocaleString()}`;
     let diffClass = diff >= 0 ? "comp-up" : "comp-down";
@@ -582,6 +651,7 @@ function downloadWeeklyJPG() { const element = document.getElementById('weeklyRe
 function downloadMonthlyJPG() { const element = document.getElementById('monthlyReportContainer'); html2canvas(element).then(canvas => { const link = document.createElement('a'); link.download = `LDS_월간리포트.jpg`; link.href = canvas.toDataURL("image/jpeg"); link.click(); }); }
 
 function drawWeeklyCharts(s) {
+  // [FIX] wcSelf (canvas) / wsSelf (text) 구분 명확화
   const ctxSelf = document.getElementById('wcSelf').getContext('2d');
   if(weeklyCharts.self) weeklyCharts.self.destroy();
   weeklyCharts.self = new Chart(ctxSelf, { type: 'doughnut', data: { labels: ['성공','미흡'], datasets: [{ data: [s.self, 100-s.self], backgroundColor: ['#10b981','#e2e8f0'] }] }, options: { cutout: '70%', plugins: { legend: { display: false }, datalabels: { display: false } } } });
@@ -604,8 +674,18 @@ function drawWeeklyCharts(s) {
   weeklyCharts.comp = new Chart(ctxComp, { type: 'doughnut', data: { datasets: [{ data: [s.completion, 100-s.completion], backgroundColor: ['#3b82f6','#e2e8f0'] }] }, options: { cutout: '70%', plugins: { legend: { display: false }, datalabels: { display: false } } } });
   document.getElementById('wsComp').innerText = `${s.completion}%`; document.getElementById('wsCompMsg').innerText = getComment('comp', s.completion);
 }
+
 function getComment(type, score) { if(type === 'self') return score >= 90 ? "완벽한 자기관리! 👍" : (score >= 70 ? "좋은 습관입니다." : "조금 더 신경 써주세요."); if(type === 'chal') return score >= 2.5 ? "도전 정신 최고! 🔥" : (score >= 1.8 ? "안정적인 도전." : "더 도전해볼까요?"); if(type === 'prod') return score >= 20 ? "탁월한 성과! 💰" : (score >= -10 ? "평균적인 성과." : "분발하세요!"); if(type === 'comp') return score >= 95 ? "약속의 아이콘!" : (score >= 80 ? "잘 마쳤습니다." : "시간 관리 집중!"); return "-"; }
-function getMList(s,keys,l){ if(!s)return"-"; const allLogKeys=Object.keys(l).filter(k=>k!=="생활미션"&&k!=="하루 기록"); const schedKeys=keys.map(k=>s[k]?s[k].n:""); return keys.map(k=>{ if(!s[k]||!s[k].n)return""; let mName=s[k].n; let ml=l[mName]; if(!ml&&(mName.includes("선택")||mName==="미정"||mName==="오후활동")){ const overrideName=allLogKeys.find(key=>!schedKeys.includes(key)); if(overrideName){mName=overrideName;ml=l[overrideName];} } let stClass="",stTxt="",detailTxt="",diffHtml="",moneyHtml=""; if(ml){ const d=ml.comment; if(!noDiffMissions.includes(mName)&&["EASY","NORMAL","HARD"].includes(d)){ const dCls=d==='EASY'?'diff-EASY':(d==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls}">${d}</span>`; } else if(!noDiffMissions.includes(mName)&&s[k].l&&["EASY","NORMAL","HARD"].includes(s[k].l)){ const d2=s[k].l; const dCls2=d2==='EASY'?'diff-EASY':(d2==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls2}">${d2}</span>`; } if(ml.status=='end'){stClass='st-done';stTxt='완료';detailTxt=parseTimeStr(ml);} else if(ml.status=='start'){stClass='st-ing';stTxt='진행중';detailTxt=parseTimeStr(ml);} else if(ml.status=='fail'){stClass='st-fail';stTxt='실패';} else if(ml.status=='cancel'){stClass='st-cancel';stTxt='휴강';} if(ml.money!==undefined){ let mClass=ml.money>0?"price-plus":(ml.money<0?"price-minus":"price-zero"); moneyHtml=`<div class="cell-price ${mClass}">₩${ml.money.toLocaleString()}</div>`; } return`<div class="cell-mission">${mName}${diffHtml}<span class="cell-status ${stClass}">${stTxt}</span><div class="cell-detail">${detailTxt}</div>${moneyHtml}</div>`; } if(!noDiffMissions.includes(mName)&&s[k].l&&["EASY","NORMAL","HARD"].includes(s[k].l)){ const d2=s[k].l; const dCls2=d2==='EASY'?'diff-EASY':(d2==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls2}">${d2}</span>`; } return`<div class="cell-mission">${mName}${diffHtml}</div>`; }).join(""); }
+function getMList(s,keys,l){ 
+  if(!s)return"-"; 
+  // [NEW] 행사 통합 표시 로직 (선생님 앱에서도 깔끔하게)
+  const schedKeys=keys.map(k=>s[k]?s[k].n:"");
+  if(schedKeys.every(n => n === "행사")) {
+     return `<div class="cell-mission" style="font-weight:900; color:#d97706;">🎉 ${schedKeys.length > 2 ? "오전 행사 (통합)" : "선택 행사 (통합)"}</div>`;
+  }
+
+  const allLogKeys=Object.keys(l).filter(k=>k!=="생활미션"&&k!=="하루 기록"); 
+  return keys.map(k=>{ if(!s[k]||!s[k].n)return""; let mName=s[k].n; let ml=l[mName]; if(!ml&&(mName.includes("선택")||mName==="미정"||mName==="오후활동")){ const overrideName=allLogKeys.find(key=>!schedKeys.includes(key)); if(overrideName){mName=overrideName;ml=l[overrideName];} } let stClass="",stTxt="",detailTxt="",diffHtml="",moneyHtml=""; if(ml){ const d=ml.comment; if(!noDiffMissions.includes(mName)&&["EASY","NORMAL","HARD"].includes(d)){ const dCls=d==='EASY'?'diff-EASY':(d==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls}">${d}</span>`; } else if(!noDiffMissions.includes(mName)&&s[k].l&&["EASY","NORMAL","HARD"].includes(s[k].l)){ const d2=s[k].l; const dCls2=d2==='EASY'?'diff-EASY':(d2==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls2}">${d2}</span>`; } if(ml.status=='end'){stClass='st-done';stTxt='완료';detailTxt=parseTimeStr(ml);} else if(ml.status=='start'){stClass='st-ing';stTxt='진행중';detailTxt=parseTimeStr(ml);} else if(ml.status=='fail'){stClass='st-fail';stTxt='실패';} else if(ml.status=='cancel'){stClass='st-cancel';stTxt='휴강';} if(ml.money!==undefined){ let mClass=ml.money>0?"price-plus":(ml.money<0?"price-minus":"price-zero"); moneyHtml=`<div class="cell-price ${mClass}">₩${ml.money.toLocaleString()}</div>`; } return`<div class="cell-mission">${mName}${diffHtml}<span class="cell-status ${stClass}">${stTxt}</span><div class="cell-detail">${detailTxt}</div>${moneyHtml}</div>`; } if(!noDiffMissions.includes(mName)&&s[k].l&&["EASY","NORMAL","HARD"].includes(s[k].l)){ const d2=s[k].l; const dCls2=d2==='EASY'?'diff-EASY':(d2==='HARD'?'diff-HARD':'diff-NORMAL'); diffHtml=`<span class="diff-badge ${dCls2}">${d2}</span>`; } return`<div class="cell-mission">${mName}${diffHtml}</div>`; }).join(""); }
 function parseTimeStr(ml){ if(!ml||!ml.note)return"-"; let txt=ml.note; if(txt.includes("duration:")){ try{ const parts=txt.split('|'); const durPart=parts.find(p=>p.startsWith("duration:")); if(durPart){ const seconds=parseInt(durPart.split(':')[1]); if(!isNaN(seconds)){ const m=Math.floor(seconds/60); const s=seconds%60; return`${m}분 ${s}초 소요`; } } }catch(e){return"시간 정보 오류";} } if(txt.includes("Start"))return txt.replace("Start:","시작:"); if(txt.includes("NaN"))return"-"; return txt; }
 function uploadAppearancePhoto() { if (!WEB_APP_URL || WEB_APP_URL.includes("여기에")) return alert("스크립트 상단의 WEB_APP_URL을 설정해주세요!"); const file = document.getElementById('appPhotoInput').files[0]; const date = document.getElementById('appUploadDate').value; if(!file) return alert("사진을 선택해주세요!"); if(!date) return alert("날짜를 선택해주세요!"); const btn = event.target; btn.innerText = "업로드 중..."; btn.disabled = true; resizeImage(file, 800, 800, function(resizedBase64) { const rawBase64 = resizedBase64.split(',')[1]; const sid = document.getElementById('appStudent').value; fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"uploadAppearance", base64:rawBase64, mimeType:"image/jpeg", sid:sid, name:students[sid], date:date}) }).then(r=>r.json()).then(res => { if(res.ok) { alert(`${date} 날짜로 저장되었습니다.`); document.getElementById('appPhotoInput').value = ""; loadAppearanceMonthly(); } else { alert("실패: " + res.error); } }).catch(err => alert("전송 오류: " + err)).finally(() => { btn.innerText = "업로드 및 저장"; btn.disabled = false; }); }); }
 function loadAppearanceMonthly() { const sid = document.getElementById('appStudent').value; const selectedDate = document.getElementById('appUploadDate').value || new Date().toISOString().slice(0,10); fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"getAppearanceData", mode:"monthly", sid:sid}) }).then(r=>r.json()).then(res => { loadedMonthlyData = {}; if(res.data && res.data.monthly) { res.data.monthly.forEach(item => { loadedMonthlyData[item.date] = item.url; }); } renderCalendar(); }); }
