@@ -1,335 +1,755 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LDS 사원 앱</title>
-  <style>
-    /* CSS 유지 */
-    :root { --p: #4f46e5; --bg: #f8fafc; --card: #ffffff; --ok: #10b981; --fail: #ef4444; }
-    body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 15px; margin: 0; color:#333; }
-    .view { display: none; } .view.active { display: block; animation: fadeIn 0.3s; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    .container { max-width: 500px; margin: 0 auto; position: relative; }
-    .card { background: var(--card); border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; text-align: center; }
-    .user-card { cursor: pointer; transition: 0.2s; border: 1px solid transparent; display: flex; align-items: center; justify-content: flex-start; gap: 15px; padding: 20px; }
-    .user-card:active { transform: scale(0.98); border-color: var(--p); }
-    .avatar { font-size: 24px; background: #e0e7ff; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-    .user-info { text-align: left; }
-    .user-name { font-size: 18px; font-weight: bold; margin: 0; color: #1e293b; }
-    .user-role { font-size: 12px; color: #64748b; margin: 0; }
-    .lds-header { text-align: center; margin: 40px 0 30px; }
-    .lds-logo-text { font-size: 12px; font-weight: 900; color: #94a3b8; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
-    .lds-main-title { font-size: 26px; font-weight: 800; color: #1e293b; margin: 0; }
-    .lds-date { color: #64748b; margin-top: 8px; font-size: 14px; font-weight: 500; }
-    select, button, textarea, input[type=text] { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 10px; font-size: 16px; box-sizing: border-box; }
-    button.primary { background: var(--p); color: white; border: none; font-weight: bold; cursor: pointer; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    label { font-size: 14px; font-weight: 800; color: var(--p); margin: 20px 0 10px; display: block; text-align: left; }
-    .day-badge { display: inline-block; background: #e0e7ff; color: var(--p); padding: 5px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
-    .mission-item { background: white; border: 1px solid #e2e8f0; border-radius: 15px; padding: 15px; margin-bottom: 10px; text-align: left; position: relative; }
-    .mission-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-    .mission-name { font-weight: bold; font-size: 16px; }
-    .mission-lv { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
-    .btn-action { width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: 1px solid var(--p); background: white; color: var(--p); transition: 0.2s; }
-    .btn-action.ing { background: #fff7ed; border: 2px solid orange; color: #d97706; animation: pulse 1.5s infinite; }
-    .btn-action.done { background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; cursor: not-allowed; }
-    .btn-action.done.admin-active { cursor: pointer; border: 1px dashed #94a3b8; background: #f8fafc; color: #64748b; }
-    .btn-action:disabled { opacity: 0.6; cursor: not-allowed; background: #f8fafc; border-color: #cbd5e1; color: #94a3b8; }
-    .live-timer { font-size: 24px; font-weight: 800; color: #d97706; text-align: center; margin: 10px 0; display: none; }
-    .proof-photo { width: 100%; max-height: 200px; object-fit: contain; border-radius: 10px; margin-top: 10px; border: 2px solid #e2e8f0; display: block; cursor: pointer; background: #000; }
-    .teacher-msg { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 14px; font-weight: bold; line-height: 1.4; }
-    #sinmungoBtn { position: absolute; top: 15px; left: 15px; font-size: 32px; cursor: pointer; background: white; border: none; z-index: 99; border-radius: 50%; width: 50px; height: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display:flex; justify-content:center; align-items:center; }
-    #noticeBtn { position: absolute; top: 15px; right: 15px; font-size: 32px; cursor: pointer; background: white; border: none; z-index: 99; border-radius: 50%; width: 50px; height: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display:flex; justify-content:center; align-items:center; }
-    #adminBtn { position: fixed; bottom: 15px; right: 15px; font-size: 18px; cursor: pointer; background: rgba(0,0,0,0.1); border: none; z-index: 99; color: #fff; width: 30px; height: 30px; border-radius: 50%; display:flex; justify-content:center; align-items:center; }
-    #adminPanel { background: #1e293b; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-    .admin-row { display: flex; gap: 5px; width: 100%; justify-content: center; }
-    #adminModalOverlay, #adminTimeModal, #reflectionModal, #sinmungoModal, #noticeModal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
-    #adminModalContent, #reflectionContent, #sinmungoContent, #noticeContent { background: white; width: 100%; max-width: 400px; border-radius: 20px; padding: 30px; box-sizing: border-box; text-align: center; margin: 20px; }
-    .hidden { display: none !important; }
-    #refFeedback { font-size: 14px; font-weight: bold; margin-bottom: 10px; padding: 8px; border-radius: 8px; background: #f1f5f9; color: #64748b; }
-    .ref-easy { color: #10b981; background: #ecfdf5; }
-    .ref-normal { color: #3b82f6; background: #eff6ff; }
-    .ref-hard { color: #ef4444; background: #fef2f2; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDS 사원 앱</title>
+    <style>
+        /* ... CSS는 v82와 동일 ... */
+        :root {
+            --p: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --ok: #10b981;
+            --fail: #ef4444;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: var(--bg);
+            padding: 15px;
+            margin: 0;
+            color: #333;
+        }
+
+        .view {
+            display: none;
+        }
+
+            .view.active {
+                display: block;
+                animation: fadeIn 0.3s;
+            }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .user-card {
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 15px;
+            padding: 20px;
+        }
+
+            .user-card:active {
+                transform: scale(0.98);
+                border-color: var(--p);
+            }
+
+        .avatar {
+            font-size: 24px;
+            background: #e0e7ff;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .user-info {
+            text-align: left;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .lds-header {
+            text-align: center;
+            margin: 20px 0 30px;
+        }
+
+        .lds-logo-text {
+            font-size: 12px;
+            font-weight: 900;
+            color: #94a3b8;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .lds-main-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .lds-date {
+            color: #64748b;
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        #topNoticeBar {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: left;
+            display: none;
+            border: 1px solid #fcd34d;
+            font-size: 14px;
+            align-items: center;
+            gap: 10px;
+        }
+
+        select, button, textarea, input[type=text] {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+            button.primary {
+                background: var(--p);
+                color: white;
+                border: none;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--p);
+            margin: 20px 0 10px;
+            display: block;
+            text-align: left;
+        }
+
+        .day-badge {
+            display: inline-block;
+            background: #e0e7ff;
+            color: var(--p);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .mission-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            text-align: left;
+            position: relative;
+        }
+
+        .mission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .mission-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .mission-lv {
+            font-size: 12px;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid var(--p);
+            background: white;
+            color: var(--p);
+            transition: 0.2s;
+        }
+
+            .btn-action.ing {
+                background: #fff7ed;
+                border: 2px solid orange;
+                color: #d97706;
+                animation: pulse 1.5s infinite;
+            }
+
+            .btn-action.done {
+                background: #f1f5f9;
+                color: #94a3b8;
+                border: 1px solid #e2e8f0;
+                cursor: pointer;
+            }
+
+                .btn-action.done:hover {
+                    background: #e2e8f0;
+                }
+
+            .btn-action:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                background: #f8fafc;
+                border-color: #cbd5e1;
+                color: #94a3b8;
+            }
+
+        .live-timer {
+            font-size: 24px;
+            font-weight: 800;
+            color: #d97706;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .proof-photo {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 2px solid #e2e8f0;
+            display: block;
+            cursor: pointer;
+            background: #000;
+        }
+
+        .teacher-msg {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        #sinmungoBtn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 32px;
+            cursor: pointer;
+            background: white;
+            border: none;
+            z-index: 99;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #noticeBtn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 32px;
+            cursor: pointer;
+            background: white;
+            border: none;
+            z-index: 99;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #adminBtn {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            font-size: 18px;
+            cursor: pointer;
+            background: rgba(0,0,0,0.1);
+            border: none;
+            z-index: 99;
+            color: #fff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #adminPanel {
+            background: #1e293b;
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .admin-row {
+            display: flex;
+            gap: 5px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        #adminModalOverlay, #adminTimeModal, #reflectionModal, #sinmungoModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        #adminModalContent, #reflectionContent, #sinmungoContent {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 30px;
+            box-sizing: border-box;
+            text-align: center;
+            margin: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #refFeedback {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .ref-easy {
+            color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .ref-normal {
+            color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .ref-hard {
+            color: #ef4444;
+            background: #fef2f2;
+        }
+    </style>
 </head>
 <body>
 
-<div id="view-dashboard" class="view active container">
-  <button id="sinmungoBtn" onclick="openSinmungo()">📩</button>
-  <button id="noticeBtn" onclick="openNotice()">📢</button>
-  <button id="adminBtn" onclick="openAdminModal()">⚙️</button>
-  
-  <div id="adminPanel" class="hidden">
-    <div style="font-weight:bold; color:#fbbf24;">🔧 관리자 타임머신 모드</div>
-    <div class="admin-row">
-      <input type="date" id="simDateInput" style="padding:8px; border-radius:8px; border:none; width:auto;">
-      <button onclick="applySimDate()" style="background:var(--p); color:white; border:none; padding:8px 15px; border-radius:8px; width:auto; margin:0;">이동</button>
+    <div id="view-dashboard" class="view active container">
+        <button id="sinmungoBtn" onclick="openSinmungo()">📩</button>
+        <button id="adminBtn" onclick="openAdminModal()">⚙️</button>
+        <div id="adminPanel" class="hidden">
+            <div style="font-weight:bold; color:#fbbf24;">🔧 관리자 타임머신</div>
+            <div class="admin-row"><input type="date" id="simDateInput"><button onclick="applySimDate()">이동</button></div>
+            <button onclick="exitAdmin()">종료</button>
+        </div>
+        <div class="lds-header"><div class="lds-logo-text">LIFE DESIGN STUDIO</div><h1 class="lds-main-title">LDS 사원 앱</h1><p id="todayDate" class="lds-date"></p></div>
+        <div id="topNoticeBar">📢 <span id="topNoticeText">...</span></div>
+        <div class="card user-card" onclick="checkUser('S01','강태윤')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">강태윤</h2></div></div>
+        <div class="card user-card" onclick="checkUser('S02','김대중')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">김대중</h2></div></div>
+        <div class="card user-card" onclick="checkUser('S03','최원준')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">최원준</h2></div></div>
     </div>
-    <button onclick="exitAdmin()" style="background:#ef4444; color:white; border:none; padding:8px; border-radius:8px; width:100%; font-size:12px; margin:0;">관리자 모드 종료</button>
-  </div>
-  
-  <div class="lds-header"><div class="lds-logo-text">LIFE DESIGN STUDIO</div><h1 class="lds-main-title">LDS 사원 앱</h1><p id="todayDate" class="lds-date"></p></div>
-  <div class="card user-card" onclick="checkUser('S01','강태윤')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">강태윤</h2><p class="user-role">LDS 사원 (S01)</p></div></div>
-  <div class="card user-card" onclick="checkUser('S02','김대중')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">김대중</h2><p class="user-role">LDS 사원 (S02)</p></div></div>
-  <div class="card user-card" onclick="checkUser('S03','최원준')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">최원준</h2><p class="user-role">LDS 사원 (S03)</p></div></div>
-</div>
 
-<div id="view-plan" class="view container">
-  <div class="card">
-    <div class="day-badge" id="planDayBadge">요일</div>
-    <h2 id="planTitle" style="color:#1e293b;">업무 계획 수립</h2>
-    <div id="plan-normal">
-      <label>🕰️ 09:30 ~ 11:00 아이브러리</label>
-      <div class="grid"><select id="m1_name"><option selected>글쓰기</option><option value="행사">🎉 행사</option></select><select id="m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-      <div class="grid"><select id="m2_name"><option selected>독서</option><option value="행사">🎉 행사</option></select><select id="m2_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-      <div class="grid"><select id="m3_name"><option selected>자서전</option><option value="행사">🎉 행사</option></select><select id="m3_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-      <label>🕰️ 11:00 ~ 12:00 선택 수업</label>
-      <div class="grid"><select id="c1_a"><option>컴퓨터</option><option>운동</option><option>글씨 연습</option><option>영어회화</option><option value="행사">🎉 행사</option></select><select id="c1_a_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-      <div class="grid"><select id="c1_b"><option selected>운동</option><option>컴퓨터</option><option>글씨 연습</option><option>영어회화</option><option value="행사">🎉 행사</option></select><select id="c1_b_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-      <label>🕰️ 13:00 ~ 15:00 오후 활동</label>
-      <select id="c2"><option>검정고시</option><option>음악</option><option>SCL책력</option><option>심화공부</option><option>운동</option><option value="행사">🎉 행사</option></select>
+    <div id="view-plan" class="view container">
+        <div class="card">
+            <div class="day-badge" id="planDayBadge">요일</div>
+            <h2 id="planTitle" style="color:#1e293b;">업무 계획 수립</h2>
+
+            <div id="plan-normal" style="display:none;">
+                <label>🕰️ 09:30 ~ 11:00 아이브러리</label>
+                <div class="grid"><select id="m1_name"><option selected>글쓰기</option><option value="행사">🎉 행사</option></select><select id="m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <div class="grid"><select id="m2_name"><option selected>독서</option><option value="행사">🎉 행사</option></select><select id="m2_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <div class="grid"><select id="m3_name"><option selected>자서전</option><option value="행사">🎉 행사</option></select><select id="m3_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <label>🕰️ 11:00 ~ 12:00 선택 수업</label>
+                <div class="grid"><select id="c1_a"><option>컴퓨터</option><option>운동</option><option>글씨 연습</option><option>영어회화</option><option value="행사">🎉 행사</option></select><select id="c1_a_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <div class="grid"><select id="c1_b"><option selected>운동</option><option>컴퓨터</option><option>글씨 연습</option><option>영어회화</option><option value="행사">🎉 행사</option></select><select id="c1_b_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <label>🕰️ 13:00 ~ 15:00 오후 활동</label>
+                <select id="c2"><option>검정고시</option><option>음악</option><option>SCL책력</option><option>심화공부</option><option>운동</option><option value="행사">🎉 행사</option></select>
+            </div>
+
+            <div id="plan-thursday" style="display:none;">
+                <div style="background:#f1f5f9; padding:10px; border-radius:10px; margin-bottom:10px;"><b>⚽ 오전: 축구 수업</b> (09:30 ~ 12:00)</div>
+                <label>🕰️ 13:00 ~ 15:00 오후 선택</label>
+                <select id="th_c2"><option>검정고시</option><option>교류수업</option><option value="행사">🎉 행사</option></select>
+                <label>🕰️ 15:00 ~ 17:00 아이브러리</label>
+                <div class="grid"><select id="th_m1_name"><option selected>글쓰기</option><option value="행사">🎉 행사</option></select><select id="th_m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <div class="grid"><select id="th_m2_name"><option selected>독서</option><option value="행사">🎉 행사</option></select><select id="th_m2_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <div class="grid"><select id="th_m3_name"><option selected>자서전</option><option value="행사">🎉 행사</option></select><select id="th_m3_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+            </div>
+
+            <div id="plan-friday" style="display:none;">
+                <label>🕰️ 09:30 ~ 12:00 아이브러리</label>
+                <div class="grid"><select id="fr_m1_name"><option selected>글쓰기</option><option value="행사">🎉 행사</option></select><select id="fr_m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <div class="grid"><select id="fr_m2_name"><option selected>독서</option><option value="행사">🎉 행사</option></select><select id="fr_m2_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <div class="grid"><select id="fr_m3_name"><option selected>자서전</option><option value="행사">🎉 행사</option></select><select id="fr_m3_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <label>🕰️ 11:00 ~ 12:00 선택 수업</label>
+                <div class="grid"><select id="fr_c1_a"><option>컴퓨터</option><option>운동</option><option>글씨 연습</option><option>영어회화</option><option value="행사">🎉 행사</option></select><select id="fr_c1_a_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <div class="grid"><select id="fr_c1_b"><option selected>운동</option><option>컴퓨터</option><option>글씨 연습</option><option>영어회화</option><option value="행사">🎉 행사</option></select><select id="fr_c1_b_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+                <div style="background:#f1f5f9; padding:10px; border-radius:10px; margin-top:20px;"><b>🙏 오후: 예배 및 우리다움</b> (13:00 ~ 15:00)</div>
+            </div>
+
+            <button class="primary" onclick="savePlan()" style="margin-top:20px;">업무 스케줄 제출</button>
+            <button onclick="goHome()" style="background:white; color:#64748b; margin-top:5px;">취소</button>
+        </div>
     </div>
-    <div id="plan-thursday" style="display:none;">
-        <div style="background:#f1f5f9; padding:10px; border-radius:10px; margin-bottom:10px;"><b>⚽ 오전: 축구 수업</b> (09:30 ~ 12:00)</div>
-        <label>🕰️ 13:00 ~ 15:00 오후 선택</label>
-        <select id="th_c2"><option>검정고시</option><option>교류수업</option><option value="행사">🎉 행사</option></select>
-        <label>🕰️ 15:00 ~ 17:00 아이브러리</label>
-        <div class="grid"><select id="th_m1_name"><option selected>글쓰기</option><option value="행사">🎉 행사</option></select><select id="th_m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-        <div class="grid"><select id="th_m2_name"><option selected>독서</option><option value="행사">🎉 행사</option></select><select id="th_m2_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-        <div class="grid"><select id="th_m3_name"><option selected>자서전</option><option value="행사">🎉 행사</option></select><select id="th_m3_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
+
+    <div id="view-mission" class="view container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:0 5px;">
+            <h2 id="missionTitle" style="font-size:18px; color:#1e293b;"></h2>
+            <div style="display:flex; gap:8px;">
+                <button onclick="editPlan()" style="background:white; color:var(--p); border:1px solid var(--p); padding:6px 12px; width:auto; border-radius:8px; font-size:13px; margin:0;">✏️ 수정</button>
+                <button onclick="goHome()" style="background:#f1f5f9; color:#64748b; border:none; padding:6px 12px; width:auto; border-radius:8px; font-size:13px; margin:0;">나가기</button>
+            </div>
+        </div>
+        <div id="missionList"></div>
     </div>
-    <div id="plan-friday" style="display:none;">
-        <label>🕰️ 09:30 ~ 12:00 아이브러리</label>
-        <div class="grid"><select id="fr_m1_name"><option selected>글쓰기</option><option value="행사">🎉 행사</option></select><select id="fr_m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-        <div class="grid"><select id="fr_m2_name"><option selected>독서</option><option value="행사">🎉 행사</option></select><select id="fr_m2_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-        <div class="grid"><select id="fr_m3_name"><option selected>자서전</option><option value="행사">🎉 행사</option></select><select id="fr_m3_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-        <label>🕰️ 11:00 ~ 12:00 선택 수업</label>
-        <div class="grid"><select id="fr_c1_a"><option>컴퓨터</option><option>운동</option><option>글씨 연습</option><option>영어회화</option><option value="행사">🎉 행사</option></select><select id="fr_c1_a_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-        <div class="grid"><select id="fr_c1_b"><option selected>운동</option><option>컴퓨터</option><option>글씨 연습</option><option>영어회화</option><option value="행사">🎉 행사</option></select><select id="fr_c1_b_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
-        <div style="background:#f1f5f9; padding:10px; border-radius:10px; margin-top:20px;"><b>🙏 오후: 예배 및 우리다움</b> (13:00 ~ 15:00)</div>
-    </div>
-    <button class="primary" onclick="savePlan()" style="margin-top:20px;">업무 스케줄 제출</button>
-    <button onclick="goHome()" style="background:white; color:#64748b; margin-top:5px;">취소</button>
-  </div>
-</div>
 
-<div id="view-mission" class="view container">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:0 5px;">
-    <h2 id="missionTitle" style="font-size:18px; color:#1e293b;"></h2>
-    <div style="display:flex; gap:8px;">
-      <button onclick="editPlan()" style="background:white; color:var(--p); border:1px solid var(--p); padding:6px 12px; width:auto; border-radius:8px; font-size:13px; margin:0;">✏️ 수정</button>
-      <button onclick="goHome()" style="background:#f1f5f9; color:#64748b; border:none; padding:6px 12px; width:auto; border-radius:8px; font-size:13px; margin:0;">나가기</button>
-    </div>
-  </div>
-  <div id="missionList"></div>
-</div>
+    <div id="reflectionModal"><div id="reflectionContent"><h3>📝 행사 소감문</h3><input type="text" id="eventNameInput" placeholder="행사명 입력"><textarea id="reflectionText" rows="6" placeholder="소감문 작성" oninput="checkRefLen()"></textarea><div id="refFeedback">현재: EASY (0자)</div><button id="btnRefSubmit" onclick="submitReflection()" style="background:var(--ok); color:white; margin-top:10px;">완료하기</button><button onclick="document.getElementById('reflectionModal').style.display='none'" style="background:#eee; color:#333; margin-top:5px;">취소</button></div></div>
+    <div id="sinmungoModal"><div id="sinmungoContent"><h3>📩 LDS 신문고</h3><input type="text" id="smNick" placeholder="닉네임"><textarea id="smContent" rows="5"></textarea><button onclick="submitSinmungo()" style="background:var(--p); color:white;">보내기</button><button onclick="document.getElementById('sinmungoModal').style.display='none'">닫기</button></div></div>
+    <div id="adminModalOverlay"><div id="adminModalContent"><h3>🔧 관리자 모드</h3><input type="password" id="adminPw"><button onclick="checkAdminPw()">로그인</button><button onclick="document.getElementById('adminModalOverlay').style.display='none'">취소</button></div></div>
+    <div id="adminTimeModal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; display:none;"><div style="background:white; width:300px; padding:20px; border-radius:15px; text-align:center;"><h3>⏰ 시간 설정</h3><div style="display:flex; gap:5px;"><input type="time" id="admStart">~<input type="time" id="admEnd"></div><button onclick="finishAdminMission()">완료 처리</button><button onclick="document.getElementById('adminTimeModal').style.display='none'">취소</button></div></div>
 
-<div id="reflectionModal"><div id="reflectionContent"><h3>📝 행사 소감문</h3><input type="text" id="eventNameInput" placeholder="행사명"><textarea id="reflectionText" rows="6" placeholder="소감문 작성 (100자 이상 NORMAL, 200자 이상 HARD)"></textarea><div id="refFeedback">현재: EASY (0자)</div><button id="btnRefSubmit" onclick="submitReflection()" style="background:var(--ok); color:white; margin-top:10px;">완료하기</button><button onclick="document.getElementById('reflectionModal').style.display='none'" style="background:#eee; color:#333; margin-top:5px;">취소</button></div></div>
-<div id="noticeModal"><div id="noticeContent"><h3>📢 LDS 공지사항</h3><div id="noticeText" style="text-align:left;padding:15px;background:#f8fafc;border-radius:10px;"></div><button onclick="document.getElementById('noticeModal').style.display='none'" style="background:var(--p); color:white; margin-top:10px;">확인</button></div></div>
-<div id="sinmungoModal"><div id="sinmungoContent"><h3>📩 LDS 신문고</h3><input type="text" id="smNick" placeholder="닉네임"><textarea id="smContent" rows="5"></textarea><button onclick="submitSinmungo()" style="background:var(--p); color:white;">보내기</button><button onclick="document.getElementById('sinmungoModal').style.display='none'">닫기</button></div></div>
-<div id="adminModalOverlay"><div id="adminModalContent"><h3>🔧 관리자 모드</h3><input type="password" id="adminPw"><button onclick="checkAdminPw()">로그인</button><button onclick="document.getElementById('adminModalOverlay').style.display='none'">취소</button></div></div>
-<div id="adminTimeModal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; display:none;"><div style="background:white; width:300px; padding:20px; border-radius:15px; text-align:center;"><h3>⏰ 시간 설정</h3><div style="display:flex; gap:5px;"><input type="time" id="admStart">~<input type="time" id="admEnd"></div><button onclick="finishAdminMission()">완료 처리</button><button onclick="document.getElementById('adminTimeModal').style.display='none'">취소</button></div></div>
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyFL9ZOD4EERaRdkNMbtj28nViMciVf-3OBk-QlLnXne0qARm6BnGB1kAOKoMFmp2hWmQ/exec";
 
-<script>
-// ▼▼▼▼▼ 선생님 배포 URL ▼▼▼▼▼
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyQmCpxD9AfGTGExe-Th4dw1Kr4lSZeSZ_6SserR1lt-D9ementbdlfF5tL3GIDzxOe2g/exec";
-// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        let appDate = new Date(); let curId, curName, curM;
+        let currentScheduleData = null; let currentLogs = {};
+        let timerInterval = null; let isAdminMode = false; let currentEventMission = null;
 
-let appDate = new Date(); let curId, curName, curM;
-let currentScheduleData = null; let currentLogs = {}; 
-let timerInterval = null; let isAdminMode = false; let currentEventMission = null;
+        document.addEventListener("DOMContentLoaded", () => {
+            renderDate();
+            updatePlanView();
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getLatestNotice" }) }).then(r => r.json()).then(res => {
+                if (res.notice) {
+                    document.getElementById('topNoticeBar').style.display = 'flex';
+                    document.getElementById('topNoticeText').innerText = res.notice;
+                }
+            });
+        });
 
-document.addEventListener("DOMContentLoaded", () => { renderDate(); updatePlanView(); });
+        function renderDate() { const days = ['일', '월', '화', '수', '목', '금', '토']; document.getElementById('todayDate').innerText = `${appDate.toLocaleDateString()} (${days[appDate.getDay()]})`; document.getElementById('planDayBadge').innerText = `${days[appDate.getDay()]}요일 업무`; }
+        function getAppDateStr() { const offset = appDate.getTimezoneOffset() * 60000; return new Date(appDate.getTime() - offset).toISOString().slice(0, 10); }
+        function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function goHome() { showView('view-dashboard'); }
+        function openSinmungo() { document.getElementById('sinmungoModal').style.display = 'flex'; document.getElementById('smContent').value = ""; }
+        function submitSinmungo() { const n = document.getElementById('smNick').value; const c = document.getElementById('smContent').value; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveSinmungo", nickname: n, content: c }) }).then(() => { alert("접수완료"); document.getElementById('sinmungoModal').style.display = 'none'; }); }
+        function openAdminModal() { document.getElementById('adminModalOverlay').style.display = 'flex'; }
+        function checkAdminPw() { if (document.getElementById('adminPw').value === "1q2w3e4r!@") { isAdminMode = true; document.getElementById('adminModalOverlay').style.display = 'none'; document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('adminBtn').classList.add('hidden'); document.getElementById('simDateInput').value = getAppDateStr(); if (currentScheduleData) renderMissions(currentScheduleData); } }
+        function applySimDate() { appDate = new Date(document.getElementById('simDateInput').value); renderDate(); updatePlanView(); goHome(); }
+        function exitAdmin() { isAdminMode = false; appDate = new Date(); renderDate(); document.getElementById('adminPanel').classList.add('hidden'); document.getElementById('adminBtn').classList.remove('hidden'); updatePlanView(); }
 
-function renderDate() { const days=['일','월','화','수','목','금','토']; document.getElementById('todayDate').innerText = `${appDate.toLocaleDateString()} (${days[appDate.getDay()]})`; document.getElementById('planDayBadge').innerText = `${days[appDate.getDay()]}요일 업무`; }
-function getAppDateStr() { const offset = appDate.getTimezoneOffset()*60000; return new Date(appDate.getTime()-offset).toISOString().slice(0,10); }
-function showView(id) { document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function goHome() { showView('view-dashboard'); }
-function openNotice() { document.getElementById('noticeModal').style.display='flex'; fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"getLatestNotice"})}).then(r=>r.json()).then(res=>{document.getElementById('noticeText').innerText=res.notice;}); }
-function openSinmungo() { document.getElementById('sinmungoModal').style.display='flex'; document.getElementById('smContent').value=""; }
-function submitSinmungo() { const n=document.getElementById('smNick').value; const c=document.getElementById('smContent').value; fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"saveSinmungo",nickname:n,content:c})}).then(()=>{alert("접수완료");document.getElementById('sinmungoModal').style.display='none';}); }
-function openAdminModal() { document.getElementById('adminModalOverlay').style.display='flex'; }
-function checkAdminPw() { if(document.getElementById('adminPw').value==="1q2w3e4r!@"){ isAdminMode=true; document.getElementById('adminModalOverlay').style.display='none'; document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('adminBtn').classList.add('hidden'); document.getElementById('simDateInput').value=getAppDateStr(); if(currentScheduleData)renderMissions(currentScheduleData); } }
-function applySimDate() { appDate=new Date(document.getElementById('simDateInput').value); renderDate(); updatePlanView(); goHome(); }
-function exitAdmin() { isAdminMode=false; appDate=new Date(); renderDate(); document.getElementById('adminPanel').classList.add('hidden'); document.getElementById('adminBtn').classList.remove('hidden'); updatePlanView(); }
+        function updatePlanView() {
+            const day = appDate.getDay();
+            document.getElementById('plan-normal').style.display = 'none';
+            document.getElementById('plan-thursday').style.display = 'none';
+            document.getElementById('plan-friday').style.display = 'none';
+            if (day === 4) document.getElementById('plan-thursday').style.display = 'block';
+            else if (day === 5) document.getElementById('plan-friday').style.display = 'block';
+            else document.getElementById('plan-normal').style.display = 'block';
+        }
 
-function updatePlanView() {
-    const day = appDate.getDay();
-    document.getElementById('plan-normal').style.display='none';
-    document.getElementById('plan-thursday').style.display='none';
-    document.getElementById('plan-friday').style.display='none';
-    if(day===4) document.getElementById('plan-thursday').style.display='block';
-    else if(day===5) document.getElementById('plan-friday').style.display='block';
-    else document.getElementById('plan-normal').style.display='block';
-}
+        function checkUser(id, name) {
+            curId = id; curName = name;
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "checkSchedule", id: id, date: getAppDateStr() }) }).then(r => r.json()).then(res => {
+                currentLogs = res.logs || {};
+                // 저장된 스케줄이 있으면 폼에 채워넣기 (불러오기)
+                if (res.savedSchedule) fillPlanForm(res.savedSchedule);
 
-function checkUser(id, name) { 
-    curId=id; curName=name; 
-    fetch(WEB_APP_URL, { method:"POST", body:JSON.stringify({action:"checkSchedule", id:id, date:getAppDateStr()}) }).then(r=>r.json()).then(res=>{ 
-        currentLogs=res.logs||{}; 
-        if(res.hasSchedule){ currentScheduleData=res.data; renderMissions(res.data); showView('view-mission'); document.getElementById('missionTitle').innerText=`${name} 사원 (${getAppDateStr()})`; restoreMissionState(); } 
-        else { showView('view-plan'); } 
-    }); 
-}
+                if (res.hasSchedule) {
+                    currentScheduleData = res.data;
+                    renderMissions(res.data);
+                    showView('view-mission');
+                    document.getElementById('missionTitle').innerText = `${name} 사원 (${getAppDateStr()})`;
+                } else {
+                    showView('view-plan');
+                    updatePlanView();
+                }
+            });
+        }
 
-function savePlan() { 
-  const d = {action:"saveSchedule",id:curId,date:getAppDateStr(),dayStr:(appDate.getDay()===4?"목":appDate.getDay()===5?"금":"평일")};
-  const day = appDate.getDay();
-  if(day===4) { 
-      d.c2n=document.getElementById('th_c2').value; 
-      d.m1n=document.getElementById('th_m1_name').value; d.m1l=document.getElementById('th_m1_lv').value; 
-      d.m2n=document.getElementById('th_m2_name').value; d.m2l=document.getElementById('th_m2_lv').value; 
-      d.m3n=document.getElementById('th_m3_name').value; d.m3l=document.getElementById('th_m3_lv').value; 
-  } else if(day===5) { 
-      d.m1n=document.getElementById('fr_m1_name').value; d.m1l=document.getElementById('fr_m1_lv').value; 
-      d.m2n=document.getElementById('fr_m2_name').value; d.m2l=document.getElementById('fr_m2_lv').value; 
-      d.m3n=document.getElementById('fr_m3_name').value; d.m3l=document.getElementById('fr_m3_lv').value; 
-      d.c1an=document.getElementById('fr_c1_a').value; d.c1al=document.getElementById('fr_c1_a_lv').value; 
-      d.c1bn=document.getElementById('fr_c1_b').value; d.c1bl=document.getElementById('fr_c1_b_lv').value; 
-      d.c2n="예배"; 
-  } else { 
-      d.m1n=document.getElementById('m1_name').value; d.m1l=document.getElementById('m1_lv').value; 
-      d.m2n=document.getElementById('m2_name').value; d.m2l=document.getElementById('m2_lv').value; 
-      d.m3n=document.getElementById('m3_name').value; d.m3l=document.getElementById('m3_lv').value; 
-      d.c1an=document.getElementById('c1_a').value; d.c1al=document.getElementById('c1_a_lv').value; 
-      d.c1bn=document.getElementById('c1_b').value; d.c1bl=document.getElementById('c1_b_lv').value; 
-      d.c2n=document.getElementById('c2').value; 
-  }
-  fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify(d)});
-  alert("제출완료"); 
-  currentScheduleData = { day: d.dayStr, m1: {n:d.m1n,l:d.m1l}, m2: {n:d.m2n,l:d.m2l}, m3: {n:d.m3n,l:d.m3l}, c1a: {n:d.c1an||"",l:d.c1al||""}, c1b: {n:d.c1bn||"",l:d.c1bl||""}, c2: {n:d.c2n,l:""} };
-  renderMissions(currentScheduleData); showView('view-mission');
-}
+        function fillPlanForm(d) {
+            const day = appDate.getDay();
+            if (day === 4) {
+                if (d.c2 && d.c2.n) document.getElementById('th_c2').value = d.c2.n;
+                if (d.m1 && d.m1.n) document.getElementById('th_m1_name').value = d.m1.n;
+                if (d.m1 && d.m1.l) document.getElementById('th_m1_lv').value = d.m1.l;
+                if (d.m2 && d.m2.n) document.getElementById('th_m2_name').value = d.m2.n;
+                if (d.m2 && d.m2.l) document.getElementById('th_m2_lv').value = d.m2.l;
+                if (d.m3 && d.m3.n) document.getElementById('th_m3_name').value = d.m3.n;
+                if (d.m3 && d.m3.l) document.getElementById('th_m3_lv').value = d.m3.l;
+            } else if (day === 5) {
+                if (d.m1 && d.m1.n) document.getElementById('fr_m1_name').value = d.m1.n;
+                if (d.m1 && d.m1.l) document.getElementById('fr_m1_lv').value = d.m1.l;
+                if (d.m2 && d.m2.n) document.getElementById('fr_m2_name').value = d.m2.n;
+                if (d.m2 && d.m2.l) document.getElementById('fr_m2_lv').value = d.m2.l;
+                if (d.m3 && d.m3.n) document.getElementById('fr_m3_name').value = d.m3.n;
+                if (d.m3 && d.m3.l) document.getElementById('fr_m3_lv').value = d.m3.l;
+                if (d.c1a && d.c1a.n) document.getElementById('fr_c1_a').value = d.c1a.n;
+                if (d.c1a && d.c1a.l) document.getElementById('fr_c1_a_lv').value = d.c1a.l;
+                if (d.c1b && d.c1b.n) document.getElementById('fr_c1_b').value = d.c1b.n;
+                if (d.c1b && d.c1b.l) document.getElementById('fr_c1_b_lv').value = d.c1b.l;
+            } else {
+                if (d.m1 && d.m1.n) document.getElementById('m1_name').value = d.m1.n;
+                if (d.m1 && d.m1.l) document.getElementById('m1_lv').value = d.m1.l;
+                if (d.m2 && d.m2.n) document.getElementById('m2_name').value = d.m2.n;
+                if (d.m2 && d.m2.l) document.getElementById('m2_lv').value = d.m2.l;
+                if (d.m3 && d.m3.n) document.getElementById('m3_name').value = d.m3.n;
+                if (d.m3 && d.m3.l) document.getElementById('m3_lv').value = d.m3.l;
+                if (d.c1a && d.c1a.n) document.getElementById('c1_a').value = d.c1a.n;
+                if (d.c1a && d.c1a.l) document.getElementById('c1_a_lv').value = d.c1a.l;
+                if (d.c1b && d.c1b.n) document.getElementById('c1_b').value = d.c1b.n;
+                if (d.c1b && d.c1b.l) document.getElementById('c1_b_lv').value = d.c1b.l;
+                if (d.c2 && d.c2.n) document.getElementById('c2').value = d.c2.n;
+            }
+        }
 
-function editPlan() { showView('view-plan'); }
+        function savePlan() {
+            const d = { action: "saveSchedule", id: curId, date: getAppDateStr(), dayStr: (appDate.getDay() === 4 ? "목" : appDate.getDay() === 5 ? "금" : "평일") };
+            const day = appDate.getDay();
+            if (day === 4) {
+                d.c2n = document.getElementById('th_c2').value;
+                d.m1n = document.getElementById('th_m1_name').value; d.m1l = document.getElementById('th_m1_lv').value;
+                d.m2n = document.getElementById('th_m2_name').value; d.m2l = document.getElementById('th_m2_lv').value;
+                d.m3n = document.getElementById('th_m3_name').value; d.m3l = document.getElementById('th_m3_lv').value;
+            } else if (day === 5) {
+                d.m1n = document.getElementById('fr_m1_name').value; d.m1l = document.getElementById('fr_m1_lv').value;
+                d.m2n = document.getElementById('fr_m2_name').value; d.m2l = document.getElementById('fr_m2_lv').value;
+                d.m3n = document.getElementById('fr_m3_name').value; d.m3l = document.getElementById('fr_m3_lv').value;
+                d.c1an = document.getElementById('fr_c1_a').value; d.c1al = document.getElementById('fr_c1_a_lv').value;
+                d.c1bn = document.getElementById('fr_c1_b').value; d.c1bl = document.getElementById('fr_c1_b_lv').value;
+                d.c2n = "예배";
+            } else {
+                d.m1n = document.getElementById('m1_name').value; d.m1l = document.getElementById('m1_lv').value;
+                d.m2n = document.getElementById('m2_name').value; d.m2l = document.getElementById('m2_lv').value;
+                d.m3n = document.getElementById('m3_name').value; d.m3l = document.getElementById('m3_lv').value;
+                d.c1an = document.getElementById('c1_a').value; d.c1al = document.getElementById('c1_a_lv').value;
+                d.c1bn = document.getElementById('c1_b').value; d.c1bl = document.getElementById('c1_b_lv').value;
+                d.c2n = document.getElementById('c2').value;
+            }
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(d) });
+            alert("제출완료");
+            currentScheduleData = { day: d.dayStr, m1: { n: d.m1n, l: d.m1l }, m2: { n: d.m2n, l: d.m2l }, m3: { n: d.m3n, l: d.m3l }, c1a: { n: d.c1an || "", l: d.c1al || "" }, c1b: { n: d.c1bn || "", l: d.c1bl || "" }, c2: { n: d.c2n, l: "" } };
+            renderMissions(currentScheduleData); showView('view-mission');
+        }
 
-function renderMissions(d) {
-  const list = document.getElementById('missionList'); list.innerHTML = "";
-  const lifeLog = currentLogs["생활미션"]; let lifeSt="미완료", imgH="", msgH="";
-  if(lifeLog){ 
-      if(lifeLog.status==='life_ok') lifeSt="✅ 확인됨"; 
-      else if(lifeLog.status==='fail') lifeSt="❌ 실패"; 
-      else if(lifeLog.status==='gong') lifeSt="✅ 공결"; 
-      if(lifeLog.photo) imgH=`<img src="${lifeLog.photo}" class="proof-photo" onclick="window.open(this.src)">`; 
-      if(lifeLog.message) msgH=`<div class="teacher-msg">📢 ${lifeLog.message}</div>`; 
-  }
-  list.innerHTML += `<div class="mission-item" style="border-left:5px solid #f59e0b; background:#fffbeb;"><div class="mission-header"><span class="mission-name">🌞 생활미션</span><span class="mission-lv">${lifeSt}</span></div>${imgH}${msgH}</div>`;
+        function editPlan() { showView('view-plan'); updatePlanView(); }
 
-  // 목요일 (축구)
-  if (d.day === "목") {
-      list.innerHTML += `<div class="mission-item done"><b>⚽ 오전: 축구 수업</b></div><div style="font-size:12px;color:#888;">오후 선택</div>`;
-      if(d.c2) renderItem(list, d.c2);
-      const th = [d.m1, d.m2, d.m3];
-      if (th.every(m => m && m.n === "행사")) renderEventCard(list, "15:00 ~ 17:00", "오후 행사", "행사_목오후", 3);
-      else { list.innerHTML+=`<div style="font-size:12px;color:#888;">15:00 ~ 17:00</div>`; th.forEach(t => renderItem(list, t)); }
-      return;
-  }
+        function renderMissions(d) {
+            const list = document.getElementById('missionList'); list.innerHTML = "";
+            const lifeLog = currentLogs["생활미션"]; let lifeSt = "미완료", imgH = "", msgH = "";
+            if (lifeLog) {
+                if (lifeLog.status === 'life_ok') lifeSt = "✅ 확인됨";
+                else if (lifeLog.status === 'fail') lifeSt = "❌ 실패";
+                else if (lifeLog.status === 'gong') lifeSt = "✅ 공결";
+                if (lifeLog.photo) imgH = `<img src="${lifeLog.photo}" class="proof-photo" onclick="window.open(this.src)">`;
+                if (lifeLog.message) msgH = `<div class="teacher-msg">📢 ${lifeLog.message}</div>`;
+            }
+            list.innerHTML += `<div class="mission-item" style="border-left:5px solid #f59e0b; background:#fffbeb;"><div class="mission-header"><span class="mission-name">🌞 생활미션</span><span class="mission-lv">${lifeSt}</span></div>${imgH}${msgH}</div>`;
 
-  // 금요일 (예배)
-  if (d.day === "금") {
-      const morning = [d.m1, d.m2, d.m3];
-      if (morning.every(m => m && m.n === "행사")) renderEventCard(list, "09:30 ~ 11:00", "오전 행사", "행사_오전", 3);
-      else { list.innerHTML+=`<div style="font-size:12px;color:#888;">오전</div>`; morning.forEach(t => renderItem(list, t)); }
-      
-      const choice = [d.c1a, d.c1b];
-      if (choice.every(m => m && m.n === "행사")) renderEventCard(list, "11:00 ~ 12:00", "선택 행사", "행사_선택", 2);
-      else { list.innerHTML+=`<div style="font-size:12px;color:#888;">선택</div>`; choice.forEach(t => renderItem(list, t)); }
-      
-      list.innerHTML += `<div class="mission-item done"><b>🙏 오후: 예배 및 우리다움</b></div>`;
-      return;
-  }
+            if (d.day === "목") {
+                list.innerHTML += `<div class="mission-item done"><b>⚽ 오전: 축구 수업</b></div><div style="font-size:12px;color:#888;">오후 선택</div>`;
+                if (d.c2) renderItem(list, d.c2);
+                const th = [d.m1, d.m2, d.m3];
+                if (th.every(m => m && m.n === "행사")) renderEventCard(list, "15:00 ~ 17:00", "오후 행사", "행사_목오후", 3);
+                else { list.innerHTML += `<div style="font-size:12px;color:#888;">15:00 ~ 17:00</div>`; th.forEach(t => renderItem(list, t)); }
+                return;
+            }
+            if (d.day === "금") {
+                const morning = [d.m1, d.m2, d.m3];
+                if (morning.every(m => m && m.n === "행사")) renderEventCard(list, "09:30 ~ 11:00", "오전 행사", "행사_오전", 3);
+                else { list.innerHTML += `<div style="font-size:12px;color:#888;">오전</div>`; morning.forEach(t => renderItem(list, t)); }
+                const choice = [d.c1a, d.c1b];
+                if (choice.every(m => m && m.n === "행사")) renderEventCard(list, "11:00 ~ 12:00", "선택 행사", "행사_선택", 2);
+                else { list.innerHTML += `<div style="font-size:12px;color:#888;">선택</div>`; choice.forEach(t => renderItem(list, t)); }
+                list.innerHTML += `<div class="mission-item done"><b>🙏 오후: 예배 및 우리다움</b></div>`;
+                return;
+            }
+            const morning = [d.m1, d.m2, d.m3];
+            if (morning.every(m => m && m.n === "행사")) renderEventCard(list, "09:30 ~ 11:00", "오전 행사", "행사_오전", 3);
+            else { list.innerHTML += `<div style="font-size:12px;color:#888;">오전</div>`; morning.forEach(t => renderItem(list, t)); }
+            const choice = [d.c1a, d.c1b];
+            if (choice.every(m => m && m.n === "행사")) renderEventCard(list, "11:00 ~ 12:00", "선택 행사", "행사_선택", 2);
+            else { list.innerHTML += `<div style="font-size:12px;color:#888;">선택</div>`; choice.forEach(t => renderItem(list, t)); }
+            list.innerHTML += `<div style="font-size:12px;color:#888;">오후</div>`;
+            if (d.c2 && d.c2.n === "행사") renderEventCard(list, "13:00 ~ 15:00", "오후 행사", "행사_오후", 1);
+            else renderItem(list, d.c2);
+        }
 
-  // 평일
-  const morning = [d.m1, d.m2, d.m3];
-  if (morning.every(m => m && m.n === "행사")) renderEventCard(list, "09:30 ~ 11:00", "오전 행사", "행사_오전", 3);
-  else { list.innerHTML+=`<div style="font-size:12px;color:#888;">오전</div>`; morning.forEach(t => renderItem(list, t)); }
-  
-  const choice = [d.c1a, d.c1b];
-  if (choice.every(m => m && m.n === "행사")) renderEventCard(list, "11:00 ~ 12:00", "선택 행사", "행사_선택", 2);
-  else { list.innerHTML+=`<div style="font-size:12px;color:#888;">선택</div>`; choice.forEach(t => renderItem(list, t)); }
-  
-  list.innerHTML+=`<div style="font-size:12px;color:#888;">오후</div>`;
-  if (d.c2 && d.c2.n === "행사") renderEventCard(list, "13:00 ~ 15:00", "오후 행사", "행사_오후", 1);
-  else renderItem(list, d.c2);
-}
+        function renderEventCard(container, timeStr, name, keyName) {
+            const log = currentLogs[keyName];
+            const isDone = (log && (log.status === 'end' || log.status === 'gong')) || (currentLogs['행사'] && currentLogs['행사'].status === 'end');
+            const div = document.createElement('div'); div.className = "mission-item";
+            let btnText = isDone ? (log && log.status === 'gong' ? "✅ 공결" : "✅ 완료됨") : "📝 소감문 작성 및 완료";
+            div.innerHTML = `<div style="font-size:12px; color:#888;">${timeStr}</div><div class="mission-header"><span class="mission-name">🎉 ${name}</span></div><button class="btn-action ${isDone ? 'done' : ''}" onclick="openReflectionModal('${name}', '${keyName}')" ${isDone ? 'disabled' : ''}>${btnText}</button>`;
+            container.appendChild(div);
+        }
+        function openReflectionModal(name, key) { currentEventMission = key; document.getElementById('reflectionModal').style.display = 'flex'; }
+        function checkRefLen() { const len = document.getElementById('reflectionText').value.length; let diff = "EASY", cls = "ref-easy"; if (len >= 200) { diff = "HARD"; cls = "ref-hard"; } else if (len >= 100) { diff = "NORMAL"; cls = "ref-normal"; } document.getElementById('refFeedback').innerText = `현재: ${diff} (${len}자)`; document.getElementById('refFeedback').className = cls; document.getElementById('btnRefSubmit').innerText = `${diff}로 완료하기`; }
+        function submitReflection() {
+            const text = document.getElementById('reflectionText').value;
+            const len = text.length; let diff = "EASY"; if (len >= 200) diff = "HARD"; else if (len >= 100) diff = "NORMAL";
+            const key = currentEventMission;
+            currentLogs[key] = { status: 'end' }; renderMissions(currentScheduleData);
+            document.getElementById('reflectionModal').style.display = 'none';
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveEventReflection", student_id: curId, student_name: curName, eventName: "행사", mission_id: key, date: getAppDateStr(), difficulty: diff, content: text }) });
+        }
 
-function renderEventCard(container, timeStr, name, keyName) { 
-  const log = currentLogs[keyName]; // 서버에서 받은 로그 확인
-  // 만약 로그가 행사_오전 키로 없다면 '행사' 키로도 확인
-  const isDone = (log && (log.status === 'end' || log.status === 'gong')) || (currentLogs['행사'] && currentLogs['행사'].status === 'end');
-  
-  const div=document.createElement('div'); div.className="mission-item"; 
-  let btnText = isDone ? (log && log.status==='gong'?"✅ 공결":"✅ 완료됨") : "📝 소감문 작성 및 완료";
-  div.innerHTML=`<div style="font-size:12px; color:#888;">${timeStr}</div><div class="mission-header"><span class="mission-name">🎉 ${name}</span></div><button class="btn-action ${isDone?'done':''}" onclick="openReflectionModal('${name}', '${keyName}')" ${isDone?'disabled':''}>${btnText}</button>`; 
-  container.appendChild(div); 
-}
-function openReflectionModal(name, key) { currentEventMission = key; document.getElementById('reflectionModal').style.display='flex'; }
-function checkRefLen() { const len=document.getElementById('reflectionText').value.length; let diff="EASY", cls="ref-easy"; if(len>=200){ diff="HARD"; cls="ref-hard"; } else if(len>=100){ diff="NORMAL"; cls="ref-normal"; } document.getElementById('refFeedback').innerText=`현재: ${diff} (${len}자)`; document.getElementById('refFeedback').className=cls; document.getElementById('btnRefSubmit').innerText=`${diff}로 완료하기`; }
-function submitReflection() { 
-  const text=document.getElementById('reflectionText').value; 
-  const len=text.length; let diff="EASY"; if(len>=200)diff="HARD"; else if(len>=100)diff="NORMAL"; 
-  const key = currentEventMission;
-  currentLogs[key] = { status: 'end' }; renderMissions(currentScheduleData); 
-  document.getElementById('reflectionModal').style.display='none'; 
-  fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"saveEventReflection", student_id:curId, student_name:curName, eventName:"행사", mission_id:key, date:getAppDateStr(), difficulty:diff, content:text})});
-}
+        function renderItem(container, t) {
+            if (!t || !t.n) return;
+            const serverLog = currentLogs[t.n];
+            const isDone = serverLog && (serverLog.status === 'end' || serverLog.status === 'ok' || serverLog.status === 'gong');
+            const isStart = serverLog && serverLog.status === 'start';
 
-function renderItem(container, t) { 
-  if(!t||!t.n)return; 
-  const serverLog=currentLogs[t.n]; 
-  const isDone=serverLog&&(serverLog.status==='end'||serverLog.status==='ok'||serverLog.status==='gong'); 
-  const isStart=serverLog&&serverLog.status==='start';
-  
-  const div=document.createElement('div'); div.className="mission-item"; 
-  let btnText="업무 시작", btnClass="";
-  if(isDone) { 
-      btnText = serverLog.status==='gong' ? "✅ 공결" : "✅ 완료됨"; 
-      btnClass="done"; 
-  }
-  else if(isStart) { btnText="🔥 진행 중 (클릭하여 완료)"; btnClass="ing"; }
-  if(isAdminMode && isDone) { btnText="✅ 완료 (수정)"; btnClass="done admin-active"; }
+            const div = document.createElement('div'); div.className = "mission-item";
+            let btnText = "업무 시작", btnClass = "";
+            if (isDone) {
+                btnText = serverLog.status === 'gong' ? "✅ 공결" : "✅ 완료됨";
+                btnClass = "done";
+            }
+            else if (isStart) { btnText = "🔥 진행 중 (클릭하여 완료)"; btnClass = "ing"; }
+            if (isAdminMode && isDone) { btnText = "✅ 완료 (수정)"; btnClass = "done admin-active"; }
 
-  div.innerHTML=`<div class="mission-header"><span class="mission-name">${t.n}</span><span class="mission-lv">${t.l||"-"}</span></div><div class="live-timer" id="timer-${t.n}" style="display:${isStart?'block':'none'}">00:00:00</div><button class="btn-action ${btnClass}" id="btn-${t.n}" onclick="handleMission('${t.n}','${t.l}')" ${isDone&&!isAdminMode?'disabled':''}>${btnText}</button>`; 
-  container.appendChild(div); 
-  if(isStart) startTimer(t.n);
-}
+            div.innerHTML = `<div class="mission-header"><span class="mission-name">${t.n}</span><span class="mission-lv">${t.l || "-"}</span></div><div class="live-timer" id="timer-${t.n}" style="display:${isStart ? 'block' : 'none'}">00:00:00</div><button class="btn-action ${btnClass}" id="btn-${t.n}" onclick="handleMission('${t.n}','${t.l}')" ${isDone && !isAdminMode ? 'disabled' : ''}>${btnText}</button>`;
+            container.appendChild(div);
+            if (isStart) startTimer(t.n);
+        }
 
-function handleMission(name, level) { 
-  if(isAdminMode && currentLogs[name] && (currentLogs[name].status==='end' || currentLogs[name].status==='gong')) { curM=name; document.getElementById('adminTimeModal').style.display='flex'; return; }
-  const serverLog=currentLogs[name];
-  const isStart = serverLog && serverLog.status === 'start';
+        function handleMission(name, level) {
+            const key = `${curId}_active_${getAppDateStr()}`;
+            if (isAdminMode && currentLogs[name] && (currentLogs[name].status === 'end' || currentLogs[name].status === 'gong')) { curM = name; document.getElementById('adminTimeModal').style.display = 'flex'; return; }
+            const serverLog = currentLogs[name];
+            const isStart = serverLog && serverLog.status === 'start';
 
-  if(!isStart) {
-      if(Object.values(currentLogs).some(l=>l.status==='start')) return alert("이미 진행 중인 업무가 있습니다!");
-      currentLogs[name] = { status: 'start' }; 
-      fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"saveLog",subAction:"start",student_id:curId,mission_id:name,date:getAppDateStr(),note:"Start"})});
-      renderMissions(currentScheduleData);
-  } else {
-      if(!confirm("업무를 완료하시겠습니까?")) return;
-      currentLogs[name] = { status: 'end' };
-      fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"saveLog",subAction:"end",student_id:curId,mission_id:name,date:getAppDateStr(),difficulty:level,note:"End"})});
-      renderMissions(currentScheduleData);
-  }
-}
+            if (!isStart) {
+                if (Object.values(currentLogs).some(l => l.status === 'start')) return alert("이미 진행 중인 업무가 있습니다!");
+                currentLogs[name] = { status: 'start' };
+                localStorage.setItem(key, name);
+                localStorage.setItem(`${key}_start`, Date.now());
+                fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "start", student_id: curId, mission_id: name, date: getAppDateStr(), note: "Start" }) });
+                renderMissions(currentScheduleData);
+            } else {
+                if (!confirm("업무를 완료하시겠습니까?")) return;
+                const st = parseInt(localStorage.getItem(`${key}_start`));
+                const endT = Date.now();
+                let timeStr = "완료";
+                if (st) {
+                    const diffMin = Math.round((endT - st) / 60000);
+                    const sTime = new Date(st).toTimeString().slice(0, 5);
+                    const eTime = new Date(endT).toTimeString().slice(0, 5);
+                    timeStr = `${sTime} ~ ${eTime} (${diffMin}분 소요)`;
+                    localStorage.removeItem(key);
+                }
+                currentLogs[name] = { status: 'end' };
+                fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: name, date: getAppDateStr(), difficulty: level, note: timeStr }) });
+                renderMissions(currentScheduleData);
+            }
+        }
 
-function finishAdminMission() { 
-    const s=document.getElementById('admStart').value; const e=document.getElementById('admEnd').value; 
-    fetch(WEB_APP_URL,{method:"POST",body:JSON.stringify({action:"saveLog",subAction:"end",student_id:curId,mission_id:curM,date:getAppDateStr(),difficulty:"NORMAL",note:`${s}~${e}`})})
-    .then(()=>{alert("수정완료");document.getElementById('adminTimeModal').style.display='none';checkUser(curId,curName);}); 
-}
-function startTimer(name) { 
-    if(timerInterval) clearInterval(timerInterval);
-    let sec=0; 
-    timerInterval = setInterval(()=>{ sec++; 
-        const h=String(Math.floor(sec/3600)).padStart(2,'0'); 
-        const m=String(Math.floor((sec%3600)/60)).padStart(2,'0'); 
-        const s=String(sec%60).padStart(2,'0'); 
-        const el=document.getElementById(`timer-${name}`);
-        if(el) el.innerText=`${h}:${m}:${s}`; 
-    },1000); 
-}
-function restoreMissionState() { }
-</script>
+        function finishAdminMission() {
+            const s = document.getElementById('admStart').value; const e = document.getElementById('admEnd').value;
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: curM, date: getAppDateStr(), difficulty: "NORMAL", note: `${s}~${e}` }) })
+                .then(() => { alert("수정완료"); document.getElementById('adminTimeModal').style.display = 'none'; checkUser(curId, curName); });
+        }
+        function startTimer(name) {
+            if (timerInterval) clearInterval(timerInterval);
+            const key = `${curId}_active_${getAppDateStr()}`;
+            let st = parseInt(localStorage.getItem(`${key}_start`));
+            if (!st) { st = Date.now(); }
+            timerInterval = setInterval(() => {
+                const diff = Math.floor((Date.now() - st) / 1000);
+                const h = String(Math.floor(diff / 3600)).padStart(2, '0');
+                const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+                const s = String(diff % 60).padStart(2, '0');
+                const el = document.getElementById(`timer-${name}`);
+                if (el) el.innerText = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+        function restoreMissionState() { }
+    </script>
 </body>
 </html>
