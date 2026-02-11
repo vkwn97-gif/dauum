@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
-        /* ... (CSS 동일, 모달 스타일 업데이트) ... */
         :root {
             --p: #4f46e5;
             --bg: #f1f5f9;
@@ -326,7 +325,6 @@
                 vertical-align: top;
             }
 
-        /* 주간 카드 */
         .w-card {
             background: #fff;
             border: 1px solid #e2e8f0;
@@ -453,12 +451,6 @@
             height: 450px;
             margin: 0 auto;
             position: relative;
-        }
-
-        .stats-grid-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
         }
 
         .score-box {
@@ -630,7 +622,6 @@
             <div id="report-page-1" class="report-page">
                 <div class="report-header"><span id="mReportTitle1">월간 리포트 (역량 상세)</span></div>
                 <span class="page-title">PART 1. 5대 핵심 역량 상세 분석</span>
-
                 <div class="weekly-charts">
                     <div class="chart-box"><div class="chart-title">자기 관리</div><div class="chart-wrapper"><canvas id="mcSelf"></canvas><div class="chart-value-text" id="msSelf">-</div></div><div class="chart-comment" id="msgSelf">분석 중...</div></div>
                     <div class="chart-box"><div class="chart-title">도전 성향</div><div class="chart-wrapper"><canvas id="mcChal"></canvas><div class="chart-value-text" id="msChal">-</div></div><div class="chart-comment" id="msgChal">분석 중...</div></div>
@@ -638,20 +629,16 @@
                     <div class="chart-box"><div class="chart-title">생산성</div><div class="chart-wrapper" style="width:100%;"><canvas id="mcProd" style="height:80px;"></canvas><div class="chart-value-text" id="msProd" style="display:none;"></div></div><div class="chart-comment" id="msgProd">분석 중...</div></div>
                     <div class="chart-box"><div class="chart-title">마감 준수</div><div class="chart-wrapper"><canvas id="mcComp"></canvas><div class="chart-value-text" id="msComp">-</div></div><div class="chart-comment" id="msgComp">분석 중...</div></div>
                 </div>
-
                 <span class="page-title" style="margin-top:40px;">PART 2. 상세 활동 내역 (누적)</span>
                 <table class="monthly-table"><thead><tr><th>활동명</th><th>1주</th><th>2주</th><th>3주</th><th>4주</th><th>5주</th><th>합계</th></tr></thead><tbody id="mDetailBody"></tbody></table>
             </div>
 
             <div id="report-page-2" class="report-page">
                 <div class="report-header"><span>월간 리포트 (종합 분석)</span></div>
-
                 <span class="page-title">PART 3. 역량 밸런스</span>
                 <div class="radar-container"><canvas id="monthlyRadarChart"></canvas></div>
-
                 <span class="page-title" style="margin-top:40px;">PART 4. 주차별 급여 추이 (단위: 원)</span>
                 <table class="salary-table" id="salaryTable"><thead><tr><th>구분</th><th>1주차</th><th>2주차</th><th>3주차</th><th>4주차</th><th>5주차</th></tr></thead><tbody></tbody></table>
-
                 <div style="margin-top:20px; border-top:2px solid #eee; padding-top:15px; text-align:right;">
                     <div style="font-size:16px; font-weight:bold; margin-bottom:5px;">💰 월간 총 급여 합계</div>
                     <div style="font-size:36px; font-weight:900; color:var(--p);" id="mTotalIncome">₩0</div>
@@ -701,7 +688,30 @@
             </div>
 
             <div id="ui-normal">
-                <select id="ctrlMissionSelect"><option value="">(유지)</option><option value="행사">🎉 행사</option><option value="글쓰기">글쓰기</option><option value="독서">독서</option></select>
+                <select id="ctrlMissionSelect">
+                    <option value="">(미션명 변경 시 선택)</option>
+                    <optgroup label="아이브러리 (오전)">
+                        <option value="글쓰기">글쓰기</option>
+                        <option value="독서">독서</option>
+                        <option value="자서전">자서전</option>
+                    </optgroup>
+                    <optgroup label="선택 미션">
+                        <option value="컴퓨터">컴퓨터</option>
+                        <option value="운동">운동</option>
+                        <option value="영어회화">영어회화</option>
+                        <option value="글씨연습">글씨연습</option>
+                    </optgroup>
+                    <optgroup label="오후 활동">
+                        <option value="검정고시">검정고시</option>
+                        <option value="음악">음악</option>
+                        <option value="SCL책력">SCL책력</option>
+                        <option value="심화공부">심화공부</option>
+                        <option value="교류수업">교류수업</option>
+                    </optgroup>
+                    <optgroup label="기타">
+                        <option value="행사">🎉 행사</option>
+                    </optgroup>
+                </select>
                 <div id="diffSection"><select id="tComment"><option value="NORMAL">NORMAL</option><option value="EASY">EASY</option><option value="HARD">HARD</option></select></div>
                 <div style="display:flex;gap:5px;margin-bottom:10px;"><input type="time" id="tStart">~<input type="time" id="tEnd"></div>
                 <button class="btn" style="background:var(--ok);" onclick="sendCtrl('end')">완료/수정</button>
@@ -726,7 +736,7 @@
 
     <script>
         // ▼▼▼▼▼ 선생님의 배포 URL 입력 ▼▼▼▼▼
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyFL9ZOD4EERaRdkNMbtj28nViMciVf-3OBk-QlLnXne0qARm6BnGB1kAOKoMFmp2hWmQ/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWqDgpz3SMHSOE1DzJVu-dCKnHex2M0uwrMfQMDY_AYhLisOfvcu3QDkdIAwmA9jLKWA/exec";
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
@@ -761,7 +771,6 @@
             if (id === 'notice') document.getElementById('tab-notice').classList.add('active');
         }
 
-        // ... (saveNotice, openMailModal 등 기본 함수 동일 - 생략 없이 사용)
         function saveNotice() { const txt = document.getElementById('noticeInput').value; if (!txt) return alert("내용을 입력하세요."); fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveNotice", content: txt }) }).then(() => { alert("공지 등록 완료"); document.getElementById('noticeInput').value = ""; }); }
         function openMailModal() { document.getElementById('mailModal').style.display = 'flex'; document.getElementById('mailList').innerHTML = "불러오는 중..."; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getSinmungoList" }) }).then(r => r.json()).then(res => { let h = ""; if (!res.data || res.data.length === 0) h = "<div style='text-align:center;padding:20px;'>신문고가 없습니다.</div>"; else res.data.forEach(m => { const d = new Date(m.date); h += `<div class="mail-item"><div class="mail-date">${d.toLocaleDateString()}</div><div class="mail-title">${m.nick}</div><div class="mail-content">${m.content}</div></div>`; }); document.getElementById('mailList').innerHTML = h; }); }
 
@@ -778,7 +787,6 @@
                     const s = (data.schedules && data.schedules[sid]) ? data.schedules[sid] : null;
 
                     let currentTotal = 0;
-                    // 돈 계산은 로그의 money 합산 (상벌점 포함)
                     Object.keys(l).forEach(k => {
                         if (k === 'adjustments') { l[k].forEach(a => currentTotal += a.amount); }
                         else if (l[k].money) currentTotal += l[k].money;
@@ -799,7 +807,6 @@
                             if (!s[k] || !s[k].n) return;
                             let mName = s[k].n;
 
-                            // 오전 행사 통합
                             if (isMorningEvent && morning.includes(k)) {
                                 if (!displayedEvents.has('morning_event')) {
                                     let log = l['행사_오전'] || l['행사'];
@@ -816,7 +823,6 @@
 
                             let displayName = mName;
                             let logKey = mName;
-                            // 행사 매핑
                             if (mName === '행사') {
                                 if (k.startsWith('c1')) logKey = '행사_선택';
                                 else if (k === 'c2') logKey = (s.day === '목') ? '행사_목오후' : '행사_오후';
@@ -825,13 +831,17 @@
                             }
 
                             let log = l[logKey] || l[mName];
-                            let c = ""; let priceHtml = ""; let timeStr = "";
+                            let c = ""; let priceHtml = ""; let timeStr = ""; let badge = "";
                             if (log) {
                                 if (log.status == 'end' || log.status == 'ok') c = 'done'; else if (log.status == 'start') c = 'ing'; else if (log.status == 'gong') c = 'gong';
                                 if (log.money) priceHtml = ` <span class="cell-price">₩${log.money.toLocaleString()}</span>`;
-                                if (log.note && log.note.includes("분")) timeStr = ` <span style="font-size:10px;color:#666;">${log.note}</span>`;
+                                if (log.note && log.note.includes("분")) timeStr = ` <div style="font-size:10px;color:#888;margin-top:2px;">⏱ ${log.note}</div>`;
+                                if (log.message) {
+                                    let d = log.message.charAt(0).toUpperCase();
+                                    if (['E', 'N', 'H'].includes(d)) badge = ` <span style="font-size:10px;font-weight:bold;color:#666;">(${d})</span>`;
+                                }
                             }
-                            col.innerHTML += `<div class="m-item ${c}" onclick="openModal('${sid}','${mName}')"><div>${displayName} ${priceHtml}</div>${timeStr}</div>`;
+                            col.innerHTML += `<div class="m-item ${c}" onclick="openModal('${sid}','${mName}')"><div>${displayName}${badge} ${priceHtml}</div>${timeStr}</div>`;
                         });
                     }
                     board.appendChild(col);
@@ -839,7 +849,6 @@
             });
         }
 
-        // 주간 리포트 (상세화)
         function loadWeekly() {
             const sid = document.getElementById('wStudent').value;
             const date = document.getElementById('wWeekSelect').value;
@@ -907,7 +916,6 @@
                 });
         }
 
-        // 월간 리포트
         function loadMonthly() {
             const sid = document.getElementById('mStudent').value;
             const month = document.getElementById('mMonth').value;
@@ -916,7 +924,6 @@
                 .then(r => r.json()).then(res => {
                     const s = res.myScores || { self: 0, challenge: 0, growth: 0, productivity: 0, completion: 0 };
                     const c = res.counts || {};
-
                     drawCharts('m', s);
 
                     document.getElementById('msgSelf').innerText = `총 ${c.life.total}회 중 ${c.life.success}회 성공 (${s.self}%)`;
@@ -985,8 +992,10 @@
         function drawRadar(s, g) {
             const ctxRadar = document.getElementById('monthlyRadarChart').getContext('2d');
             if (radarChart) radarChart.destroy();
+
             const normChal = Math.max(0, Math.min(100, (s.challenge - 1) * 50));
             const normProd = Math.max(0, Math.min(100, (s.productivity / 2) + 50));
+
             radarChart = new Chart(ctxRadar, {
                 type: 'radar',
                 data: {
@@ -1068,7 +1077,13 @@
         function openQrModal(sid, name) { document.getElementById('qrModal').style.display = 'flex'; document.getElementById('qrName').innerText = name; document.getElementById('qrImage').innerHTML = `<img src="https://quickchart.io/qr?text=${encodeURIComponent(sid + "," + name)}&size=200">`; }
         function downloadMonthlyJPG() { html2canvas(document.getElementById('monthlyReportContainer')).then(c => { const a = document.createElement('a'); a.download = 'MonthReport.jpg'; a.href = c.toDataURL(); a.click(); }); }
         function downloadWeeklyJPG() { html2canvas(document.getElementById('weeklyReportContainer')).then(c => { const a = document.createElement('a'); a.download = 'WeekReport.jpg'; a.href = c.toDataURL(); a.click(); }); }
-        function openModal(sid, mid) { document.getElementById('modal').style.display = 'flex'; document.getElementById('mTitle').innerText = mid; document.getElementById('mSid').value = sid; document.getElementById('mMid').value = mid; if (mid === '생활미션') { document.getElementById('ui-life').style.display = 'block'; document.getElementById('ui-normal').style.display = 'none'; } else { document.getElementById('ui-life').style.display = 'none'; document.getElementById('ui-normal').style.display = 'block'; } }
+        function openModal(sid, mid) {
+            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('mTitle').innerText = mid;
+            document.getElementById('mSid').value = sid;
+            document.getElementById('mMid').value = mid;
+            if (mid === '생활미션') { document.getElementById('ui-life').style.display = 'block'; document.getElementById('ui-normal').style.display = 'none'; } else { document.getElementById('ui-life').style.display = 'none'; document.getElementById('ui-normal').style.display = 'block'; }
+        }
         function handleLife(s) { const f = document.getElementById('lifePhoto').files[0]; const msg = document.getElementById('lifeMsg').value; if (f) { const r = new FileReader(); r.readAsDataURL(f); r.onload = function (e) { sendData(s, msg, e.target.result.split(',')[1], f.type); } } else { sendData(s, msg, null, null); } }
         function sendData(s, msg, b64, mime) {
             const sid = document.getElementById('mSid').value; const d = document.getElementById('dDate').value;
@@ -1076,14 +1091,46 @@
             if (b64) { body.base64 = b64; body.mimeType = mime; body.name = document.getElementById('appStudent').selectedOptions[0].text; }
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(body) }).then(() => { alert("완료"); document.getElementById('modal').style.display = 'none'; loadDaily(); });
         }
-        function sendCtrl(act) { const sid = document.getElementById('mSid').value; const mid = document.getElementById('mMid').value; const d = document.getElementById('dDate').value; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "teacherControl", sid: sid, mid: mid, act: act, date: d, comment: document.getElementById('tComment').value, startTime: document.getElementById('tStart').value, endTime: document.getElementById('tEnd').value }) }).then(() => { alert("처리됨"); document.getElementById('modal').style.display = 'none'; loadDaily(); }); }
-        // 상벌점 전송
+        function sendCtrl(act) {
+            const sid = document.getElementById('mSid').value;
+            const mid = document.getElementById('mMid').value;
+            const d = document.getElementById('dDate').value;
+            const newName = document.getElementById('ctrlMissionSelect').value;
+            const finalName = newName ? newName : mid;
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "teacherControl", sid: sid, mid: mid, newMissionName: finalName, act: act, date: d,
+                    comment: document.getElementById('tComment').value, startTime: document.getElementById('tStart').value, endTime: document.getElementById('tEnd').value
+                })
+            }).then(() => { alert("처리되었습니다."); document.getElementById('modal').style.display = 'none'; loadDaily(); });
+        }
         function sendAdjustment() {
-            const sid = document.getElementById('mSid').value; const d = document.getElementById('dDate').value;
+            const sid = document.getElementById('mSid').value;
+            const d = document.getElementById('dDate').value;
             const amount = document.getElementById('adjAmount').value;
             const reason = document.getElementById('adjReason').value;
+
             if (!amount) return alert("금액을 입력하세요");
-            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "teacherControl", sid: sid, mid: "상벌점", date: d, message: amount, comment: reason }) }).then(() => { alert("적용됨"); document.getElementById('modal').style.display = 'none'; loadDaily(); });
+
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "teacherControl",
+                    sid: sid,
+                    mid: "상벌점",
+                    date: d,
+                    message: reason, // 사유 -> message
+                    comment: amount  // 금액 -> comment
+                })
+            }).then(() => {
+                alert("상벌점이 적용되었습니다.");
+                document.getElementById('modal').style.display = 'none';
+                // 입력창 초기화
+                document.getElementById('adjAmount').value = "";
+                document.getElementById('adjReason').value = "";
+                loadDaily();
+            });
         }
     </script>
 </body>

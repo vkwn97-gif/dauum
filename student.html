@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LDS 사원 앱</title>
     <style>
-        /* ... CSS는 v82와 동일 ... */
         :root {
             --p: #4f46e5;
             --bg: #f8fafc;
@@ -308,24 +307,6 @@
             align-items: center;
         }
 
-        #noticeBtn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 32px;
-            cursor: pointer;
-            background: white;
-            border: none;
-            z-index: 99;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
         #adminBtn {
             position: fixed;
             bottom: 15px;
@@ -364,7 +345,7 @@
             justify-content: center;
         }
 
-        #adminModalOverlay, #adminTimeModal, #reflectionModal, #sinmungoModal {
+        #adminModalOverlay, #adminTimeModal, #reflectionModal, #sinmungoModal, #lateStartModal {
             position: fixed;
             top: 0;
             left: 0;
@@ -439,7 +420,6 @@
         <div class="card">
             <div class="day-badge" id="planDayBadge">요일</div>
             <h2 id="planTitle" style="color:#1e293b;">업무 계획 수립</h2>
-
             <div id="plan-normal" style="display:none;">
                 <label>🕰️ 09:30 ~ 11:00 아이브러리</label>
                 <div class="grid"><select id="m1_name"><option selected>글쓰기</option><option value="행사">🎉 행사</option></select><select id="m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
@@ -451,17 +431,14 @@
                 <label>🕰️ 13:00 ~ 15:00 오후 활동</label>
                 <select id="c2"><option>검정고시</option><option>음악</option><option>SCL책력</option><option>심화공부</option><option>운동</option><option value="행사">🎉 행사</option></select>
             </div>
-
             <div id="plan-thursday" style="display:none;">
                 <div style="background:#f1f5f9; padding:10px; border-radius:10px; margin-bottom:10px;"><b>⚽ 오전: 축구 수업</b> (09:30 ~ 12:00)</div>
-                <label>🕰️ 13:00 ~ 15:00 오후 선택</label>
-                <select id="th_c2"><option>검정고시</option><option>교류수업</option><option value="행사">🎉 행사</option></select>
+                <label>🕰️ 13:00 ~ 15:00 오후 선택</label><select id="th_c2"><option>검정고시</option><option>교류수업</option><option value="행사">🎉 행사</option></select>
                 <label>🕰️ 15:00 ~ 17:00 아이브러리</label>
                 <div class="grid"><select id="th_m1_name"><option selected>글쓰기</option><option value="행사">🎉 행사</option></select><select id="th_m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
                 <div class="grid"><select id="th_m2_name"><option selected>독서</option><option value="행사">🎉 행사</option></select><select id="th_m2_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
                 <div class="grid"><select id="th_m3_name"><option selected>자서전</option><option value="행사">🎉 행사</option></select><select id="th_m3_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
             </div>
-
             <div id="plan-friday" style="display:none;">
                 <label>🕰️ 09:30 ~ 12:00 아이브러리</label>
                 <div class="grid"><select id="fr_m1_name"><option selected>글쓰기</option><option value="행사">🎉 행사</option></select><select id="fr_m1_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
@@ -472,7 +449,6 @@
                 <div class="grid"><select id="fr_c1_b"><option selected>운동</option><option>컴퓨터</option><option>글씨 연습</option><option>영어회화</option><option value="행사">🎉 행사</option></select><select id="fr_c1_b_lv"><option>NORMAL</option><option>EASY</option><option>HARD</option></select></div>
                 <div style="background:#f1f5f9; padding:10px; border-radius:10px; margin-top:20px;"><b>🙏 오후: 예배 및 우리다움</b> (13:00 ~ 15:00)</div>
             </div>
-
             <button class="primary" onclick="savePlan()" style="margin-top:20px;">업무 스케줄 제출</button>
             <button onclick="goHome()" style="background:white; color:#64748b; margin-top:5px;">취소</button>
         </div>
@@ -494,22 +470,28 @@
     <div id="adminModalOverlay"><div id="adminModalContent"><h3>🔧 관리자 모드</h3><input type="password" id="adminPw"><button onclick="checkAdminPw()">로그인</button><button onclick="document.getElementById('adminModalOverlay').style.display='none'">취소</button></div></div>
     <div id="adminTimeModal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; display:none;"><div style="background:white; width:300px; padding:20px; border-radius:15px; text-align:center;"><h3>⏰ 시간 설정</h3><div style="display:flex; gap:5px;"><input type="time" id="admStart">~<input type="time" id="admEnd"></div><button onclick="finishAdminMission()">완료 처리</button><button onclick="document.getElementById('adminTimeModal').style.display='none'">취소</button></div></div>
 
+    <div id="lateStartModal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; display:none;">
+        <div style="background:white; width:300px; padding:20px; border-radius:15px; text-align:center;">
+            <h3>⏳ 늦은 시작</h3><p style="font-size:12px; color:#666;">실제 수행 시간을 입력하세요.</p>
+            <div style="display:flex; gap:5px; justify-content:center; margin-bottom:15px;"><input type="time" id="lateStartT"> ~ <input type="time" id="lateEndT"></div>
+            <button class="btn-action" style="background:var(--ok); color:white;" onclick="submitLateStart()">입력 완료</button>
+            <button class="btn-action" style="background:#eee; color:#333; margin-top:5px;" onclick="document.getElementById('lateStartModal').style.display='none'">취소</button>
+        </div>
+    </div>
+
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyFL9ZOD4EERaRdkNMbtj28nViMciVf-3OBk-QlLnXne0qARm6BnGB1kAOKoMFmp2hWmQ/exec";
+        // ▼▼▼▼▼ 선생님의 배포 URL 입력 ▼▼▼▼▼
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWqDgpz3SMHSOE1DzJVu-dCKnHex2M0uwrMfQMDY_AYhLisOfvcu3QDkdIAwmA9jLKWA/exec";
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         let appDate = new Date(); let curId, curName, curM;
         let currentScheduleData = null; let currentLogs = {};
         let timerInterval = null; let isAdminMode = false; let currentEventMission = null;
+        let curLateMission = null; let curLateLevel = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            renderDate();
-            updatePlanView();
-            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getLatestNotice" }) }).then(r => r.json()).then(res => {
-                if (res.notice) {
-                    document.getElementById('topNoticeBar').style.display = 'flex';
-                    document.getElementById('topNoticeText').innerText = res.notice;
-                }
-            });
+            renderDate(); updatePlanView();
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getLatestNotice" }) }).then(r => r.json()).then(res => { if (res.notice) { document.getElementById('topNoticeBar').style.display = 'flex'; document.getElementById('topNoticeText').innerText = res.notice; } });
         });
 
         function renderDate() { const days = ['일', '월', '화', '수', '목', '금', '토']; document.getElementById('todayDate').innerText = `${appDate.toLocaleDateString()} (${days[appDate.getDay()]})`; document.getElementById('planDayBadge').innerText = `${days[appDate.getDay()]}요일 업무`; }
@@ -525,30 +507,17 @@
 
         function updatePlanView() {
             const day = appDate.getDay();
-            document.getElementById('plan-normal').style.display = 'none';
-            document.getElementById('plan-thursday').style.display = 'none';
-            document.getElementById('plan-friday').style.display = 'none';
-            if (day === 4) document.getElementById('plan-thursday').style.display = 'block';
-            else if (day === 5) document.getElementById('plan-friday').style.display = 'block';
-            else document.getElementById('plan-normal').style.display = 'block';
+            document.getElementById('plan-normal').style.display = 'none'; document.getElementById('plan-thursday').style.display = 'none'; document.getElementById('plan-friday').style.display = 'none';
+            if (day === 4) document.getElementById('plan-thursday').style.display = 'block'; else if (day === 5) document.getElementById('plan-friday').style.display = 'block'; else document.getElementById('plan-normal').style.display = 'block';
         }
 
         function checkUser(id, name) {
             curId = id; curName = name;
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "checkSchedule", id: id, date: getAppDateStr() }) }).then(r => r.json()).then(res => {
                 currentLogs = res.logs || {};
-                // 저장된 스케줄이 있으면 폼에 채워넣기 (불러오기)
                 if (res.savedSchedule) fillPlanForm(res.savedSchedule);
-
-                if (res.hasSchedule) {
-                    currentScheduleData = res.data;
-                    renderMissions(res.data);
-                    showView('view-mission');
-                    document.getElementById('missionTitle').innerText = `${name} 사원 (${getAppDateStr()})`;
-                } else {
-                    showView('view-plan');
-                    updatePlanView();
-                }
+                if (res.hasSchedule) { currentScheduleData = res.data; renderMissions(res.data); showView('view-mission'); document.getElementById('missionTitle').innerText = `${name} 사원 (${getAppDateStr()})`; }
+                else { showView('view-plan'); updatePlanView(); }
             });
         }
 
@@ -556,34 +525,21 @@
             const day = appDate.getDay();
             if (day === 4) {
                 if (d.c2 && d.c2.n) document.getElementById('th_c2').value = d.c2.n;
-                if (d.m1 && d.m1.n) document.getElementById('th_m1_name').value = d.m1.n;
-                if (d.m1 && d.m1.l) document.getElementById('th_m1_lv').value = d.m1.l;
-                if (d.m2 && d.m2.n) document.getElementById('th_m2_name').value = d.m2.n;
-                if (d.m2 && d.m2.l) document.getElementById('th_m2_lv').value = d.m2.l;
-                if (d.m3 && d.m3.n) document.getElementById('th_m3_name').value = d.m3.n;
-                if (d.m3 && d.m3.l) document.getElementById('th_m3_lv').value = d.m3.l;
+                if (d.m1 && d.m1.n) document.getElementById('th_m1_name').value = d.m1.n; if (d.m1 && d.m1.l) document.getElementById('th_m1_lv').value = d.m1.l;
+                if (d.m2 && d.m2.n) document.getElementById('th_m2_name').value = d.m2.n; if (d.m2 && d.m2.l) document.getElementById('th_m2_lv').value = d.m2.l;
+                if (d.m3 && d.m3.n) document.getElementById('th_m3_name').value = d.m3.n; if (d.m3 && d.m3.l) document.getElementById('th_m3_lv').value = d.m3.l;
             } else if (day === 5) {
-                if (d.m1 && d.m1.n) document.getElementById('fr_m1_name').value = d.m1.n;
-                if (d.m1 && d.m1.l) document.getElementById('fr_m1_lv').value = d.m1.l;
-                if (d.m2 && d.m2.n) document.getElementById('fr_m2_name').value = d.m2.n;
-                if (d.m2 && d.m2.l) document.getElementById('fr_m2_lv').value = d.m2.l;
-                if (d.m3 && d.m3.n) document.getElementById('fr_m3_name').value = d.m3.n;
-                if (d.m3 && d.m3.l) document.getElementById('fr_m3_lv').value = d.m3.l;
-                if (d.c1a && d.c1a.n) document.getElementById('fr_c1_a').value = d.c1a.n;
-                if (d.c1a && d.c1a.l) document.getElementById('fr_c1_a_lv').value = d.c1a.l;
-                if (d.c1b && d.c1b.n) document.getElementById('fr_c1_b').value = d.c1b.n;
-                if (d.c1b && d.c1b.l) document.getElementById('fr_c1_b_lv').value = d.c1b.l;
+                if (d.m1 && d.m1.n) document.getElementById('fr_m1_name').value = d.m1.n; if (d.m1 && d.m1.l) document.getElementById('fr_m1_lv').value = d.m1.l;
+                if (d.m2 && d.m2.n) document.getElementById('fr_m2_name').value = d.m2.n; if (d.m2 && d.m2.l) document.getElementById('fr_m2_lv').value = d.m2.l;
+                if (d.m3 && d.m3.n) document.getElementById('fr_m3_name').value = d.m3.n; if (d.m3 && d.m3.l) document.getElementById('fr_m3_lv').value = d.m3.l;
+                if (d.c1a && d.c1a.n) document.getElementById('fr_c1_a').value = d.c1a.n; if (d.c1a && d.c1a.l) document.getElementById('fr_c1_a_lv').value = d.c1a.l;
+                if (d.c1b && d.c1b.n) document.getElementById('fr_c1_b').value = d.c1b.n; if (d.c1b && d.c1b.l) document.getElementById('fr_c1_b_lv').value = d.c1b.l;
             } else {
-                if (d.m1 && d.m1.n) document.getElementById('m1_name').value = d.m1.n;
-                if (d.m1 && d.m1.l) document.getElementById('m1_lv').value = d.m1.l;
-                if (d.m2 && d.m2.n) document.getElementById('m2_name').value = d.m2.n;
-                if (d.m2 && d.m2.l) document.getElementById('m2_lv').value = d.m2.l;
-                if (d.m3 && d.m3.n) document.getElementById('m3_name').value = d.m3.n;
-                if (d.m3 && d.m3.l) document.getElementById('m3_lv').value = d.m3.l;
-                if (d.c1a && d.c1a.n) document.getElementById('c1_a').value = d.c1a.n;
-                if (d.c1a && d.c1a.l) document.getElementById('c1_a_lv').value = d.c1a.l;
-                if (d.c1b && d.c1b.n) document.getElementById('c1_b').value = d.c1b.n;
-                if (d.c1b && d.c1b.l) document.getElementById('c1_b_lv').value = d.c1b.l;
+                if (d.m1 && d.m1.n) document.getElementById('m1_name').value = d.m1.n; if (d.m1 && d.m1.l) document.getElementById('m1_lv').value = d.m1.l;
+                if (d.m2 && d.m2.n) document.getElementById('m2_name').value = d.m2.n; if (d.m2 && d.m2.l) document.getElementById('m2_lv').value = d.m2.l;
+                if (d.m3 && d.m3.n) document.getElementById('m3_name').value = d.m3.n; if (d.m3 && d.m3.l) document.getElementById('m3_lv').value = d.m3.l;
+                if (d.c1a && d.c1a.n) document.getElementById('c1_a').value = d.c1a.n; if (d.c1a && d.c1a.l) document.getElementById('c1_a_lv').value = d.c1a.l;
+                if (d.c1b && d.c1b.n) document.getElementById('c1_b').value = d.c1b.n; if (d.c1b && d.c1b.l) document.getElementById('c1_b_lv').value = d.c1b.l;
                 if (d.c2 && d.c2.n) document.getElementById('c2').value = d.c2.n;
             }
         }
@@ -601,15 +557,13 @@
                 d.m2n = document.getElementById('fr_m2_name').value; d.m2l = document.getElementById('fr_m2_lv').value;
                 d.m3n = document.getElementById('fr_m3_name').value; d.m3l = document.getElementById('fr_m3_lv').value;
                 d.c1an = document.getElementById('fr_c1_a').value; d.c1al = document.getElementById('fr_c1_a_lv').value;
-                d.c1bn = document.getElementById('fr_c1_b').value; d.c1bl = document.getElementById('fr_c1_b_lv').value;
-                d.c2n = "예배";
+                d.c1bn = document.getElementById('fr_c1_b').value; d.c1bl = document.getElementById('fr_c1_b_lv').value; d.c2n = "예배";
             } else {
                 d.m1n = document.getElementById('m1_name').value; d.m1l = document.getElementById('m1_lv').value;
                 d.m2n = document.getElementById('m2_name').value; d.m2l = document.getElementById('m2_lv').value;
                 d.m3n = document.getElementById('m3_name').value; d.m3l = document.getElementById('m3_lv').value;
                 d.c1an = document.getElementById('c1_a').value; d.c1al = document.getElementById('c1_a_lv').value;
-                d.c1bn = document.getElementById('c1_b').value; d.c1bl = document.getElementById('c1_b_lv').value;
-                d.c2n = document.getElementById('c2').value;
+                d.c1bn = document.getElementById('c1_b').value; d.c1bl = document.getElementById('c1_b_lv').value; d.c2n = document.getElementById('c2').value;
             }
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(d) });
             alert("제출완료");
@@ -686,17 +640,34 @@
             const isStart = serverLog && serverLog.status === 'start';
 
             const div = document.createElement('div'); div.className = "mission-item";
-            let btnText = "업무 시작", btnClass = "";
+            let btns = "";
             if (isDone) {
-                btnText = serverLog.status === 'gong' ? "✅ 공결" : "✅ 완료됨";
-                btnClass = "done";
+                let btnText = serverLog.status === 'gong' ? "✅ 공결" : "✅ 완료됨";
+                btns = `<button class="btn-action done" disabled>${btnText}</button>`;
+                if (isAdminMode) btns = `<button class="btn-action done admin-active" onclick="handleMission('${t.n}','${t.l}')">✅ 완료 (수정)</button>`;
+            } else if (isStart) {
+                btns = `<div class="live-timer" id="timer-${t.n}">00:00:00</div>
+                  <button class="btn-action ing" onclick="handleMission('${t.n}','${t.l}')">🔥 진행 중 (클릭하여 완료)</button>`;
+                startTimer(t.n);
+            } else {
+                btns = `<div style="display:flex; gap:5px;">
+                    <button class="btn-action" onclick="handleMission('${t.n}','${t.l}')">업무 시작</button>
+                    <button class="btn-action" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; font-size:12px;" onclick="openLateStart('${t.n}','${t.l}')">늦은 시작</button>
+                  </div>`;
             }
-            else if (isStart) { btnText = "🔥 진행 중 (클릭하여 완료)"; btnClass = "ing"; }
-            if (isAdminMode && isDone) { btnText = "✅ 완료 (수정)"; btnClass = "done admin-active"; }
-
-            div.innerHTML = `<div class="mission-header"><span class="mission-name">${t.n}</span><span class="mission-lv">${t.l || "-"}</span></div><div class="live-timer" id="timer-${t.n}" style="display:${isStart ? 'block' : 'none'}">00:00:00</div><button class="btn-action ${btnClass}" id="btn-${t.n}" onclick="handleMission('${t.n}','${t.l}')" ${isDone && !isAdminMode ? 'disabled' : ''}>${btnText}</button>`;
+            div.innerHTML = `<div class="mission-header"><span class="mission-name">${t.n}</span><span class="mission-lv">${t.l || "-"}</span></div>${btns}`;
             container.appendChild(div);
-            if (isStart) startTimer(t.n);
+        }
+
+        function openLateStart(name, level) { curLateMission = name; curLateLevel = level; document.getElementById('lateStartModal').style.display = 'flex'; }
+        function submitLateStart() {
+            const s = document.getElementById('lateStartT').value; const e = document.getElementById('lateEndT').value;
+            if (!s || !e) return alert("시간을 입력해주세요.");
+            const d = new Date(); const st = new Date(d.toDateString() + ' ' + s); const et = new Date(d.toDateString() + ' ' + e);
+            let diff = (et - st) / (1000 * 60); if (diff < 0) diff += 24 * 60;
+            const note = `${s}~${e} (${Math.round(diff)}분 소요)`;
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: curLateMission, date: getAppDateStr(), difficulty: curLateLevel, note: note }) })
+                .then(() => { alert("기록되었습니다."); document.getElementById('lateStartModal').style.display = 'none'; checkUser(curId, curName); });
         }
 
         function handleMission(name, level) {
@@ -707,22 +678,15 @@
 
             if (!isStart) {
                 if (Object.values(currentLogs).some(l => l.status === 'start')) return alert("이미 진행 중인 업무가 있습니다!");
-                currentLogs[name] = { status: 'start' };
-                localStorage.setItem(key, name);
-                localStorage.setItem(`${key}_start`, Date.now());
+                currentLogs[name] = { status: 'start' }; localStorage.setItem(key, name); localStorage.setItem(`${key}_start`, Date.now());
                 fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "start", student_id: curId, mission_id: name, date: getAppDateStr(), note: "Start" }) });
                 renderMissions(currentScheduleData);
             } else {
                 if (!confirm("업무를 완료하시겠습니까?")) return;
-                const st = parseInt(localStorage.getItem(`${key}_start`));
-                const endT = Date.now();
-                let timeStr = "완료";
+                const st = parseInt(localStorage.getItem(`${key}_start`)); const endT = Date.now(); let timeStr = "완료";
                 if (st) {
-                    const diffMin = Math.round((endT - st) / 60000);
-                    const sTime = new Date(st).toTimeString().slice(0, 5);
-                    const eTime = new Date(endT).toTimeString().slice(0, 5);
-                    timeStr = `${sTime} ~ ${eTime} (${diffMin}분 소요)`;
-                    localStorage.removeItem(key);
+                    const diffMin = Math.round((endT - st) / 60000); const sTime = new Date(st).toTimeString().slice(0, 5); const eTime = new Date(endT).toTimeString().slice(0, 5);
+                    timeStr = `${sTime} ~ ${eTime} (${diffMin}분 소요)`; localStorage.removeItem(key);
                 }
                 currentLogs[name] = { status: 'end' };
                 fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: name, date: getAppDateStr(), difficulty: level, note: timeStr }) });
@@ -736,18 +700,8 @@
                 .then(() => { alert("수정완료"); document.getElementById('adminTimeModal').style.display = 'none'; checkUser(curId, curName); });
         }
         function startTimer(name) {
-            if (timerInterval) clearInterval(timerInterval);
-            const key = `${curId}_active_${getAppDateStr()}`;
-            let st = parseInt(localStorage.getItem(`${key}_start`));
-            if (!st) { st = Date.now(); }
-            timerInterval = setInterval(() => {
-                const diff = Math.floor((Date.now() - st) / 1000);
-                const h = String(Math.floor(diff / 3600)).padStart(2, '0');
-                const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
-                const s = String(diff % 60).padStart(2, '0');
-                const el = document.getElementById(`timer-${name}`);
-                if (el) el.innerText = `${h}:${m}:${s}`;
-            }, 1000);
+            if (timerInterval) clearInterval(timerInterval); const key = `${curId}_active_${getAppDateStr()}`; let st = parseInt(localStorage.getItem(`${key}_start`)); if (!st) { st = Date.now(); }
+            timerInterval = setInterval(() => { const diff = Math.floor((Date.now() - st) / 1000); const h = String(Math.floor(diff / 3600)).padStart(2, '0'); const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0'); const s = String(diff % 60).padStart(2, '0'); const el = document.getElementById(`timer-${name}`); if (el) el.innerText = `${h}:${m}:${s}`; }, 1000);
         }
         function restoreMissionState() { }
     </script>
