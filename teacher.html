@@ -290,7 +290,7 @@
         }
 
         .chart-comment {
-            font-size: 12px;
+            font-size: 11px;
             color: #1e293b;
             margin-top: 10px;
             background: white;
@@ -301,6 +301,7 @@
             font-weight: 600;
             line-height: 1.4;
             box-sizing: border-box;
+            white-space: pre-wrap;
         }
 
         .weekly-table, .monthly-table {
@@ -588,10 +589,26 @@
                     <span style="font-size:14px; color:#666; font-weight:normal;" id="wDateRange">-</span>
                 </div>
                 <div class="weekly-charts">
-                    <div class="chart-box"><div class="chart-title">① 자기 관리</div><div class="chart-wrapper"><canvas id="wcSelf"></canvas><div class="chart-value-text" id="wsSelf">-</div></div><div class="chart-comment" id="wsSelfMsg">...</div></div>
-                    <div class="chart-box"><div class="chart-title">② 도전 성향</div><div class="chart-wrapper"><canvas id="wcChal"></canvas><div class="chart-value-text" id="wsChal">-</div></div><div class="chart-comment" id="wsChalMsg">...</div></div>
-                    <div class="chart-box"><div class="chart-title">③ 생산성</div><div class="chart-wrapper" style="width:100%;"><canvas id="wcProd" style="height:80px;"></canvas><div class="chart-value-text" id="wsProd" style="display:none;"></div></div><div class="chart-comment" id="wsProdMsg">...</div></div>
-                    <div class="chart-box"><div class="chart-title">④ 마감 준수</div><div class="chart-wrapper"><canvas id="wcComp"></canvas><div class="chart-value-text" id="wsComp">-</div></div><div class="chart-comment" id="wsCompMsg">...</div></div>
+                    <div class="chart-box">
+                        <div class="chart-title">① 자기 관리</div>
+                        <div class="chart-wrapper"><canvas id="wcSelf"></canvas><div class="chart-value-text" id="wsSelf">-</div></div>
+                        <div class="chart-comment" id="wsSelfMsg">분석 중...</div>
+                    </div>
+                    <div class="chart-box">
+                        <div class="chart-title">② 도전 성향</div>
+                        <div class="chart-wrapper"><canvas id="wcChal"></canvas><div class="chart-value-text" id="wsChal">-</div></div>
+                        <div class="chart-comment" id="wsChalMsg">분석 중...</div>
+                    </div>
+                    <div class="chart-box">
+                        <div class="chart-title">③ 생산성</div>
+                        <div class="chart-wrapper" style="width:100%;"><canvas id="wcProd" style="height:80px;"></canvas><div class="chart-value-text" id="wsProd" style="display:none;"></div></div>
+                        <div class="chart-comment" id="wsProdMsg">분석 중...</div>
+                    </div>
+                    <div class="chart-box">
+                        <div class="chart-title">④ 마감 준수</div>
+                        <div class="chart-wrapper"><canvas id="wcComp"></canvas><div class="chart-value-text" id="wsComp">-</div></div>
+                        <div class="chart-comment" id="wsCompMsg">분석 중...</div>
+                    </div>
                 </div>
                 <div class="report-sub">주간 업무 수행 기록</div>
                 <div style="overflow-x:auto;" id="weeklyBoard"></div>
@@ -622,13 +639,15 @@
             <div id="report-page-1" class="report-page">
                 <div class="report-header"><span id="mReportTitle1">월간 리포트 (역량 상세)</span></div>
                 <span class="page-title">PART 1. 5대 핵심 역량 상세 분석</span>
+
                 <div class="weekly-charts">
-                    <div class="chart-box"><div class="chart-title">자기 관리</div><div class="chart-wrapper"><canvas id="mcSelf"></canvas><div class="chart-value-text" id="msSelf">-</div></div><div class="chart-comment" id="msgSelf">분석 중...</div></div>
-                    <div class="chart-box"><div class="chart-title">도전 성향</div><div class="chart-wrapper"><canvas id="mcChal"></canvas><div class="chart-value-text" id="msChal">-</div></div><div class="chart-comment" id="msgChal">분석 중...</div></div>
-                    <div class="chart-box"><div class="chart-title">성장 지향</div><div class="chart-wrapper"><canvas id="mcGrow"></canvas><div class="chart-value-text" id="msGrow">-</div></div><div class="chart-comment" id="msgGrow">분석 중...</div></div>
-                    <div class="chart-box"><div class="chart-title">생산성</div><div class="chart-wrapper" style="width:100%;"><canvas id="mcProd" style="height:80px;"></canvas><div class="chart-value-text" id="msProd" style="display:none;"></div></div><div class="chart-comment" id="msgProd">분석 중...</div></div>
-                    <div class="chart-box"><div class="chart-title">마감 준수</div><div class="chart-wrapper"><canvas id="mcComp"></canvas><div class="chart-value-text" id="msComp">-</div></div><div class="chart-comment" id="msgComp">분석 중...</div></div>
+                    <div class="chart-box"><div class="chart-title">자기 관리</div><div class="chart-wrapper"><canvas id="mcSelf"></canvas><div class="chart-value-text" id="msSelf">-</div></div><div class="chart-comment" id="msgSelf">...</div></div>
+                    <div class="chart-box"><div class="chart-title">도전 성향</div><div class="chart-wrapper"><canvas id="mcChal"></canvas><div class="chart-value-text" id="msChal">-</div></div><div class="chart-comment" id="msgChal">...</div></div>
+                    <div class="chart-box"><div class="chart-title">성장 지향</div><div class="chart-wrapper"><canvas id="mcGrow"></canvas><div class="chart-value-text" id="msGrow">-</div></div><div class="chart-comment" id="msgGrow">...</div></div>
+                    <div class="chart-box"><div class="chart-title">생산성</div><div class="chart-wrapper" style="width:100%;"><canvas id="mcProd" style="height:80px;"></canvas><div class="chart-value-text" id="msProd" style="display:none;"></div></div><div class="chart-comment" id="msgProd">...</div></div>
+                    <div class="chart-box"><div class="chart-title">마감 준수</div><div class="chart-wrapper"><canvas id="mcComp"></canvas><div class="chart-value-text" id="msComp">-</div></div><div class="chart-comment" id="msgComp">...</div></div>
                 </div>
+
                 <span class="page-title" style="margin-top:40px;">PART 2. 상세 활동 내역 (누적)</span>
                 <table class="monthly-table"><thead><tr><th>활동명</th><th>1주</th><th>2주</th><th>3주</th><th>4주</th><th>5주</th><th>합계</th></tr></thead><tbody id="mDetailBody"></tbody></table>
             </div>
@@ -659,10 +678,8 @@
                 <button class="btn" style="background:var(--p);" onclick="uploadAppearancePhoto()">업로드 및 저장</button>
             </div>
             <div class="calendar-container">
-                <div class="calendar-header">
-                    <button class="cal-nav-btn" onclick="changeMonth(-1)">◀</button>
-                    <span id="calMonthTitle"></span>
-                    <button class="cal-nav-btn" onclick="changeMonth(1)">▶</button>
+                <div class="calendar-header" style="text-align:center; margin-bottom:10px;">
+                    <input type="month" id="appMonthPicker" style="font-size:16px; padding:8px; border-radius:8px; border:1px solid #ddd;" onchange="onAppMonthChange()">
                 </div>
                 <div class="calendar-grid" id="calendarGrid"></div>
             </div>
@@ -725,7 +742,6 @@
                 <input type="text" id="adjReason" placeholder="사유 (예: 청소 우수)">
                 <button class="btn" style="background:#f59e0b; color:white;" onclick="sendAdjustment()">적용</button>
             </div>
-
             <button class="btn" style="background:#eee;color:#333;margin-top:10px;" onclick="document.getElementById('modal').style.display='none'">닫기</button>
         </div>
     </div>
@@ -735,22 +751,26 @@
     <div id="qrModal"><div id="qrCard"><h2>LDS EMPLOYEE</h2><div id="qrImage"></div><h3 id="qrName"></h3><button onclick="document.getElementById('qrModal').style.display='none'" class="btn" style="background:#eee;">닫기</button></div></div>
 
     <script>
-        // ▼▼▼▼▼ 선생님의 배포 URL 입력 ▼▼▼▼▼
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWqDgpz3SMHSOE1DzJVu-dCKnHex2M0uwrMfQMDY_AYhLisOfvcu3QDkdIAwmA9jLKWA/exec";
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        // ▼▼▼▼▼ 선생님 배포 URL ▼▼▼▼▼
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxP2A8iTnwpfHfhzOgMNhGYv3QuQoOiwc4CwMtNVZPDsn0aHbtSSnYproNopkBtDJ7l/exec";
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
         let weeklyCharts = {}; let monthlyCharts = {}; let radarChart = null;
         let currentCalDate = new Date(); let loadedMonthlyData = {};
-
         Chart.register(ChartDataLabels);
 
         document.addEventListener("DOMContentLoaded", () => {
             const offset = 1000 * 60 * 60 * 9;
             const today = new Date(new Date().getTime() + offset);
-            document.getElementById('dDate').value = today.toISOString().slice(0, 10);
-            document.getElementById('appUploadDate').value = today.toISOString().slice(0, 10);
-            document.getElementById('mMonth').value = today.toISOString().slice(0, 7);
+            const ymd = today.toISOString().slice(0, 10);
+            const ym = today.toISOString().slice(0, 7);
+
+            document.getElementById('dDate').value = ymd;
+            document.getElementById('appUploadDate').value = ymd;
+            document.getElementById('mMonth').value = ym;
+            document.getElementById('appMonthPicker').value = ym;
+
             currentCalDate = new Date(today);
 
             initWeekSelector();
@@ -774,7 +794,7 @@
         function saveNotice() { const txt = document.getElementById('noticeInput').value; if (!txt) return alert("내용을 입력하세요."); fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveNotice", content: txt }) }).then(() => { alert("공지 등록 완료"); document.getElementById('noticeInput').value = ""; }); }
         function openMailModal() { document.getElementById('mailModal').style.display = 'flex'; document.getElementById('mailList').innerHTML = "불러오는 중..."; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getSinmungoList" }) }).then(r => r.json()).then(res => { let h = ""; if (!res.data || res.data.length === 0) h = "<div style='text-align:center;padding:20px;'>신문고가 없습니다.</div>"; else res.data.forEach(m => { const d = new Date(m.date); h += `<div class="mail-item"><div class="mail-date">${d.toLocaleDateString()}</div><div class="mail-title">${m.nick}</div><div class="mail-content">${m.content}</div></div>`; }); document.getElementById('mailList').innerHTML = h; }); }
 
-        // 일간 관리 (스마트 병합 적용)
+        // [수정된 loadDaily] 안전한 문자열 변환
         function loadDaily() {
             const date = document.getElementById('dDate').value;
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getDailyData", date: date }) }).then(res => res.json()).then(data => {
@@ -837,7 +857,8 @@
                                 if (log.money) priceHtml = ` <span class="cell-price">₩${log.money.toLocaleString()}</span>`;
                                 if (log.note && log.note.includes("분")) timeStr = ` <div style="font-size:10px;color:#888;margin-top:2px;">⏱ ${log.note}</div>`;
                                 if (log.message) {
-                                    let d = log.message.charAt(0).toUpperCase();
+                                    let msgStr = String(log.message);
+                                    let d = msgStr.charAt(0).toUpperCase();
                                     if (['E', 'N', 'H'].includes(d)) badge = ` <span style="font-size:10px;font-weight:bold;color:#666;">(${d})</span>`;
                                 }
                             }
@@ -853,17 +874,45 @@
             const sid = document.getElementById('wStudent').value;
             const date = document.getElementById('wWeekSelect').value;
             if (!date) return;
+
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getWeeklyData", sid: sid, date: date }) })
                 .then(r => r.json()).then(res => {
-                    const s = res.scores || { self: 0, challenge: 0, productivity: 0, completion: 0 };
-                    document.getElementById('wReportTitle').innerText = `${students[sid]}의 주간 성과 리포트`;
+
+                    // [에러 체크]
+                    if (!res.ok) {
+                        alert("데이터 로딩 실패: " + res.error);
+                        return;
+                    }
+
+                    const s = res.scores || { self: 0, challenge: 0, productivity: 0, completion: 0, detail: {} };
+                    const d = s.detail || { life: "-", chal: "-", prod: "-", comp: "-" };
+
+                    // [리포트 제목 커스터마이징: OOO의 O월 O주차 리포트]
+                    const optText = document.getElementById('wWeekSelect').selectedOptions[0].text;
+                    const titlePart = optText.split('(')[0].trim();
+                    document.getElementById('wReportTitle').innerText = `${students[sid]}의 ${titlePart} 리포트`;
+
                     drawCharts('w', s);
 
+                    // 상세 코멘트 적용
+                    document.getElementById('wsSelfMsg').innerText = d.life;
+                    document.getElementById('wsChalMsg').innerText = d.chal;
+                    document.getElementById('wsProdMsg').innerText = d.prod;
+                    document.getElementById('wsCompMsg').innerText = d.comp;
+
+                    // [안전한 접근] res.total이 있는지 확인
+                    const totalIncome = res.total || 0;
                     const bd = res.breakdown || { missionCount: 0, missionMoney: 0, lifeCount: 0, lifeMoney: 0, adjMoney: 0 };
+
                     let detailText = `성공 ${bd.missionCount}건(${bd.missionMoney.toLocaleString()}) + 생활 ${bd.lifeCount}건(${bd.lifeMoney.toLocaleString()})`;
                     if (bd.adjMoney !== 0) detailText += ` + 조정(${bd.adjMoney.toLocaleString()})`;
-                    detailText += ` = 총 ₩${res.total.toLocaleString()}`;
+                    detailText += ` = 총 ₩${totalIncome.toLocaleString()}`;
+
                     document.getElementById('wSalaryDetail').innerText = detailText;
+
+                    // [주간 급여 명세서 제목: OOO님 O월 O주차 급여 명세서]
+                    document.getElementById('payStatementTitle').innerText = `${students[sid]}님 ${titlePart} 급여 명세서`;
+                    document.getElementById('payStatementTotal').innerText = "₩" + totalIncome.toLocaleString();
 
                     let h = `<table class="weekly-table"><thead><tr><th>시간</th>`;["월", "화", "수", "목", "금"].forEach(d => h += `<th>${d}</th>`); h += `</tr></thead><tbody>`;
                     const slots = [{ t: "09:00", k: "life" }, { t: "09:30", k: "am" }, { t: "11:00", k: "sel1" }, { t: "13:00", k: "pm" }];
@@ -880,16 +929,14 @@
                                         let mName = sched[k].n;
                                         let logKey = mName;
                                         if (mName === '행사') {
-                                            if (keys.includes('m1')) logKey = '행사_오전';
-                                            else if (keys.includes('c1a')) logKey = '행사_선택';
-                                            else logKey = '행사_오후';
+                                            if (keys.includes('m1')) logKey = '행사_오전'; else if (keys.includes('c1a')) logKey = '행사_선택'; else logKey = '행사_오후';
                                         }
                                         let log = l[logKey] || l[mName];
                                         let badge = "";
                                         if (log) {
                                             if (log.status === 'gong') badge = `<span class="w-badge bg-gong">공결</span>`;
                                             else if (log.message) {
-                                                let diff = log.message.toUpperCase();
+                                                let diff = String(log.message).toUpperCase();
                                                 let bgClass = diff === 'HARD' ? 'bg-hard' : (diff === 'EASY' ? 'bg-easy' : 'bg-normal');
                                                 badge = `<span class="w-badge ${bgClass}">${diff.charAt(0)}</span>`;
                                             }
@@ -908,8 +955,6 @@
                     h += `<tr><td style="font-weight:bold;">합계</td>`; for (let i = 0; i < 5; i++)h += `<td style="font-weight:bold; color:var(--p);">₩${res.days[i].money.toLocaleString()}</td>`; h += `</tr></tbody></table>`;
                     document.getElementById('weeklyBoard').innerHTML = h;
 
-                    document.getElementById('payStatementTitle').innerText = `${students[sid]} 급여 명세서`;
-                    document.getElementById('payStatementTotal').innerText = "₩" + res.total.toLocaleString();
                     const tbody = document.getElementById('payTableBody'); tbody.innerHTML = "";
                     const dayNames = ["월요일", "화요일", "수요일", "목요일", "금요일"];
                     for (let i = 0; i < 5; i++) { const tr = document.createElement('tr'); tr.innerHTML = `<td>${dayNames[i]}</td><td class="money-col">₩${res.days[i].money.toLocaleString()}</td>`; tbody.appendChild(tr); }
@@ -920,6 +965,10 @@
             const sid = document.getElementById('mStudent').value;
             const month = document.getElementById('mMonth').value;
             if (!month) return;
+
+            const mParts = month.split('-');
+            document.getElementById('mReportTitle1').innerText = `${students[sid]}의 ${parseInt(mParts[1])}월 리포트 (역량 상세)`;
+
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getMonthlyData", sid, month }) })
                 .then(r => r.json()).then(res => {
                     const s = res.myScores || { self: 0, challenge: 0, growth: 0, productivity: 0, completion: 0 };
@@ -927,7 +976,7 @@
                     drawCharts('m', s);
 
                     document.getElementById('msgSelf').innerText = `총 ${c.life.total}회 중 ${c.life.success}회 성공 (${s.self}%)`;
-                    document.getElementById('msgChal').innerText = `평균 난이도 ${s.challenge}점\n(E:${c.chal.easy} / N:${c.chal.normal} / H:${c.chal.hard})`;
+                    document.getElementById('msgChal').innerText = `평균 난이도 ${s.challenge}점 (E:${c.chal.easy} / N:${c.chal.normal} / H:${c.chal.hard})`;
                     document.getElementById('msgGrow').innerText = `평균 이상 난이도 선택: ${c.grow.high}회 (${s.growth}%)`;
                     document.getElementById('msgProd').innerText = s.productivity >= 0 ? `평균 대비 +${s.productivity}% 달성` : `평균 대비 ${s.productivity}% (저조)`;
                     document.getElementById('msgComp').innerText = `시간 내 완료 ${c.comp.success}건 / 전체 ${c.comp.total}건 (${s.completion}%)`;
@@ -970,9 +1019,16 @@
                 });
             };
 
-            drawDoughnut(pf + 'cSelf', s.self, '#10b981'); document.getElementById(pf + 'sSelf').innerText = s.self + "%";
-            drawDoughnut(pf + 'cChal', (s.challenge - 1) * 50, '#f59e0b'); document.getElementById(pf + 'sChal').innerText = s.challenge;
+            // 자기관리 (숫자가 0이어도 그릴 수 있도록 최소값 1 보장)
+            drawDoughnut(pf + 'cSelf', Math.max(1, s.self), '#10b981');
+            document.getElementById(pf + 'sSelf').innerText = s.self + "%";
 
+            // 도전성향
+            const chalPercent = Math.min(100, Math.max(1, (s.challenge - 1) * 50));
+            drawDoughnut(pf + 'cChal', chalPercent, '#f59e0b');
+            document.getElementById(pf + 'sChal').innerText = s.challenge;
+
+            // 생산성
             const ctxProd = document.getElementById(pf + 'cProd').getContext('2d');
             if (weeklyCharts[pf + 'prod']) weeklyCharts[pf + 'prod'].destroy();
             weeklyCharts[pf + 'prod'] = new Chart(ctxProd, {
@@ -982,32 +1038,27 @@
             });
             if (document.getElementById(pf + 'sProd')) document.getElementById(pf + 'sProd').innerText = (s.productivity > 0 ? "+" : "") + s.productivity + "%";
 
-            drawDoughnut(pf + 'cComp', s.completion, '#ef4444'); document.getElementById(pf + 'sComp').innerText = s.completion + "%";
+            // 마감준수
+            drawDoughnut(pf + 'cComp', Math.max(1, s.completion), '#ef4444');
+            document.getElementById(pf + 'sComp').innerText = s.completion + "%";
 
+            // 성장지향 (월간)
             if (pf === 'm') {
-                drawDoughnut('mcGrow', s.growth, '#8b5cf6'); document.getElementById('msGrow').innerText = s.growth + "%";
+                drawDoughnut('mcGrow', Math.max(1, s.growth), '#8b5cf6');
+                document.getElementById('msGrow').innerText = s.growth + "%";
             }
         }
 
         function drawRadar(s, g) {
             const ctxRadar = document.getElementById('monthlyRadarChart').getContext('2d');
             if (radarChart) radarChart.destroy();
-
             const normChal = Math.max(0, Math.min(100, (s.challenge - 1) * 50));
             const normProd = Math.max(0, Math.min(100, (s.productivity / 2) + 50));
-
             radarChart = new Chart(ctxRadar, {
                 type: 'radar',
                 data: {
                     labels: ['자기관리', '도전성향', '성장지향', '생산성', '마감준수'],
-                    datasets: [{
-                        label: '나의 역량',
-                        data: [s.self, normChal, s.growth, normProd, s.completion],
-                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
-                        borderColor: '#4f46e5',
-                        borderWidth: 2,
-                        pointBackgroundColor: '#4f46e5'
-                    }]
+                    datasets: [{ label: '나의 역량', data: [s.self, normChal, s.growth, normProd, s.completion], backgroundColor: 'rgba(79, 70, 229, 0.2)', borderColor: '#4f46e5', borderWidth: 2, pointBackgroundColor: '#4f46e5' }]
                 },
                 options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } } }
             });
@@ -1018,35 +1069,47 @@
             const date = document.getElementById('appUploadDate').value;
             const sid = document.getElementById('appStudent').value;
             if (!file || !date) return alert("날짜와 사진을 확인해주세요.");
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
+            const reader = new FileReader(); reader.readAsDataURL(file);
             reader.onload = function (e) {
                 const base64 = e.target.result.split(',')[1];
                 const sText = document.getElementById('appStudent').selectedOptions[0].text;
-                fetch(WEB_APP_URL, {
-                    method: "POST", body: JSON.stringify({
-                        action: "uploadAppearance", base64: base64, mimeType: file.type, sid: sid, name: sText, date: date
-                    })
-                }).then(r => r.json()).then(res => {
-                    alert("업로드 완료!"); loadAppearanceMonthly();
-                });
+                fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "uploadAppearance", base64: base64, mimeType: file.type, sid: sid, name: sText, date: date }) }).then(r => r.json()).then(res => { alert("업로드 완료!"); loadAppearanceMonthly(); });
             }
         }
+
+        // [용모 관리 - 월 선택 시 호출]
+        function onAppMonthChange() {
+            const val = document.getElementById('appMonthPicker').value;
+            if (val) {
+                currentCalDate = new Date(val + "-01");
+                loadAppearanceMonthly();
+            }
+        }
+
         function loadAppearanceMonthly() {
             const sid = document.getElementById('appStudent').value;
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth() + 1;
+
+            // 모드: monthly -> 해당 월 데이터 조회
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getAppearanceData", mode: "monthly", sid: sid }) }).then(r => r.json()).then(res => {
                 loadedMonthlyData = {};
-                if (res.data && res.data.monthly) { res.data.monthly.forEach(item => { loadedMonthlyData[item.date] = item.url; }); }
+                if (res.data && res.data.monthly) {
+                    res.data.monthly.forEach(item => { loadedMonthlyData[item.date] = item.url; });
+                }
                 renderCalendar();
             });
         }
+
         function renderCalendar() {
             const year = currentCalDate.getFullYear(); const month = currentCalDate.getMonth();
-            document.getElementById('calMonthTitle').innerText = `${year}년 ${month + 1}월`;
+
+            // [Picker 값 동기화]
+            const pickerVal = `${year}-${String(month + 1).padStart(2, '0')}`;
+            document.getElementById('appMonthPicker').value = pickerVal;
+
             const firstDay = new Date(year, month, 1); const lastDay = new Date(year, month + 1, 0);
-            let html = "";
-            const days = ["일", "월", "화", "수", "목", "금", "토"]; days.forEach(d => html += `<div class="cal-day-name">${d}</div>`);
+            let html = ""; const days = ["일", "월", "화", "수", "목", "금", "토"]; days.forEach(d => html += `<div class="cal-day-name">${d}</div>`);
             for (let i = 0; i < firstDay.getDay(); i++) html += `<div></div>`;
             for (let i = 1; i <= lastDay.getDate(); i++) {
                 const ymd = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
@@ -1055,33 +1118,26 @@
             }
             document.getElementById('calendarGrid').innerHTML = html;
         }
-        function changeMonth(offset) { currentCalDate.setMonth(currentCalDate.getMonth() + offset); loadAppearanceMonthly(); }
+
+        // (changeMonth 함수 삭제 -> onAppMonthChange로 대체)
+
         function openImageModal(src) { document.getElementById('imgModal').style.display = 'flex'; document.getElementById('imgModalContent').src = src; }
         function closeImgModal() { document.getElementById('imgModal').style.display = 'none'; }
-        function downloadExpandedImg() {
-            const link = document.createElement('a'); link.href = document.getElementById('imgModalContent').src;
-            link.download = `LDS_Photo_${Date.now()}.jpg`; link.click();
-        }
-
+        function downloadExpandedImg() { const link = document.createElement('a'); link.href = document.getElementById('imgModalContent').src; link.download = `LDS_Photo_${Date.now()}.jpg`; link.click(); }
         function initWeekSelector() {
-            const wSel = document.getElementById('wWeekSelect');
-            const today = new Date();
+            const wSel = document.getElementById('wWeekSelect'); const today = new Date();
             for (let i = 0; i < 5; i++) {
                 const d = new Date(today); d.setDate(today.getDate() - (i * 7));
                 const diff = d.getDate() - d.getDay() + (d.getDay() == 0 ? -6 : 1);
                 const monday = new Date(d.setDate(diff)); const val = monday.toISOString().slice(0, 10);
-                const opt = document.createElement('option'); opt.value = val; opt.innerText = `${monday.getMonth() + 1}월 ${Math.ceil(monday.getDate() / 7)}주차 (${val}~)`;
-                wSel.appendChild(opt);
+                const opt = document.createElement('option'); opt.value = val; opt.innerText = `${monday.getMonth() + 1}월 ${Math.ceil(monday.getDate() / 7)}주차 (${val}~)`; wSel.appendChild(opt);
             }
         }
         function openQrModal(sid, name) { document.getElementById('qrModal').style.display = 'flex'; document.getElementById('qrName').innerText = name; document.getElementById('qrImage').innerHTML = `<img src="https://quickchart.io/qr?text=${encodeURIComponent(sid + "," + name)}&size=200">`; }
         function downloadMonthlyJPG() { html2canvas(document.getElementById('monthlyReportContainer')).then(c => { const a = document.createElement('a'); a.download = 'MonthReport.jpg'; a.href = c.toDataURL(); a.click(); }); }
         function downloadWeeklyJPG() { html2canvas(document.getElementById('weeklyReportContainer')).then(c => { const a = document.createElement('a'); a.download = 'WeekReport.jpg'; a.href = c.toDataURL(); a.click(); }); }
         function openModal(sid, mid) {
-            document.getElementById('modal').style.display = 'flex';
-            document.getElementById('mTitle').innerText = mid;
-            document.getElementById('mSid').value = sid;
-            document.getElementById('mMid').value = mid;
+            document.getElementById('modal').style.display = 'flex'; document.getElementById('mTitle').innerText = mid; document.getElementById('mSid').value = sid; document.getElementById('mMid').value = mid;
             if (mid === '생활미션') { document.getElementById('ui-life').style.display = 'block'; document.getElementById('ui-normal').style.display = 'none'; } else { document.getElementById('ui-life').style.display = 'none'; document.getElementById('ui-normal').style.display = 'block'; }
         }
         function handleLife(s) { const f = document.getElementById('lifePhoto').files[0]; const msg = document.getElementById('lifeMsg').value; if (f) { const r = new FileReader(); r.readAsDataURL(f); r.onload = function (e) { sendData(s, msg, e.target.result.split(',')[1], f.type); } } else { sendData(s, msg, null, null); } }
@@ -1110,25 +1166,14 @@
             const d = document.getElementById('dDate').value;
             const amount = document.getElementById('adjAmount').value;
             const reason = document.getElementById('adjReason').value;
-
             if (!amount) return alert("금액을 입력하세요");
-
             fetch(WEB_APP_URL, {
                 method: "POST",
-                body: JSON.stringify({
-                    action: "teacherControl",
-                    sid: sid,
-                    mid: "상벌점",
-                    date: d,
-                    message: reason, // 사유 -> message
-                    comment: amount  // 금액 -> comment
-                })
+                body: JSON.stringify({ action: "teacherControl", sid: sid, mid: "상벌점", date: d, message: reason, comment: amount })
             }).then(() => {
                 alert("상벌점이 적용되었습니다.");
                 document.getElementById('modal').style.display = 'none';
-                // 입력창 초기화
-                document.getElementById('adjAmount').value = "";
-                document.getElementById('adjReason').value = "";
+                document.getElementById('adjAmount').value = ""; document.getElementById('adjReason').value = "";
                 loadDaily();
             });
         }
