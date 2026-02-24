@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LDS 사원 앱</title>
     <style>
-        /* CSS 동일 */
         :root {
             --p: #4f46e5;
             --bg: #f8fafc;
@@ -124,7 +123,6 @@
             font-weight: 500;
         }
 
-        /* [★신규] 다중 공지사항을 위한 CSS */
         #topNoticeBar {
             display: none;
             flex-direction: column;
@@ -151,6 +149,134 @@
                 color: #b45309;
             }
 
+        /* 레이스 위젯 */
+        .race-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 2px solid #e0e7ff;
+        }
+
+        .race-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--p);
+            margin: 0 0 15px 0;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .race-goal {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .race-track {
+            position: relative;
+            padding-right: 15px;
+            margin-top: 10px;
+        }
+
+        .finish-line {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: repeating-linear-gradient(45deg, #cbd5e1 0, #cbd5e1 5px, #f8fafc 5px, #f8fafc 10px);
+            border-radius: 3px;
+            z-index: 0;
+        }
+
+        .lane {
+            margin-bottom: 18px;
+            position: relative;
+            z-index: 1;
+            text-align: left;
+        }
+
+            .lane:last-child {
+                margin-bottom: 0;
+            }
+
+        .lane-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 6px;
+            padding: 0 5px;
+        }
+
+        .runner-money {
+            color: var(--p);
+            font-weight: 900;
+            font-size: 14px;
+        }
+
+        .track-bg {
+            background: #f1f5f9;
+            height: 16px;
+            border-radius: 8px;
+            position: relative;
+            width: 100%;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .runner-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            border-radius: 8px;
+            transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* 5인 레인 색상 */
+        .lane-S01 .runner-bar {
+            background: linear-gradient(90deg, #64748b, #334155);
+        }
+        /* 태윤-해골(어두운색) */
+        .lane-S02 .runner-bar {
+            background: linear-gradient(90deg, #93c5fd, #3b82f6);
+        }
+        /* 대중-권총(파랑) */
+        .lane-S03 .runner-bar {
+            background: linear-gradient(90deg, #6ee7b7, #10b981);
+        }
+        /* 원준-컴퓨터(초록) */
+        .lane-S04 .runner-bar {
+            background: linear-gradient(90deg, #fdba74, #ea580c);
+        }
+        /* 로운-갈색말(주황/갈색) */
+        .lane-S05 .runner-bar {
+            background: linear-gradient(90deg, #d8b4fe, #8b5cf6);
+        }
+        /* 태민-자전거(보라) */
+
+        .runner-icon {
+            position: absolute;
+            right: -14px;
+            top: -6px;
+            font-size: 16px;
+            background: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            z-index: 2;
+        }
+
+        /* 계획 수립용 UI */
         .time-block {
             background: #fff;
             border: 1px solid #e2e8f0;
@@ -251,6 +377,7 @@
             border: 1px solid #cbd5e1;
         }
 
+        /* 미션 실행 화면 */
         .mission-item {
             background: white;
             border: 1px solid #e2e8f0;
@@ -324,10 +451,16 @@
             letter-spacing: 2px;
         }
 
-        .mission-item.fixed-item {
+        .schedule-block {
             background: #f8fafc;
-            border-color: #e2e8f0;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            text-align: center;
             color: #475569;
+            font-weight: bold;
+            font-size: 15px;
         }
 
         #modal, #reflectionModal, #sinmungoModal, #adminModalOverlay, #adminTimeModal, #lateStartModal {
@@ -392,6 +525,11 @@
             width: 45px;
             height: 45px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            line-height: 1;
         }
 
         #adminBtn {
@@ -406,6 +544,12 @@
             height: 30px;
             border-radius: 50%;
             border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            line-height: 1;
+            z-index: 999;
         }
     </style>
 </head>
@@ -414,13 +558,32 @@
     <div id="view-dashboard" class="view active container">
         <button id="sinmungoBtn" onclick="openSinmungo()">📩</button>
         <button id="adminBtn" onclick="openAdminModal()">⚙️</button>
+
         <div class="lds-header"><div class="lds-logo-text">LIFE DESIGN STUDIO</div><h1 class="lds-main-title">LDS 사원 앱</h1><p id="todayDate" class="lds-date"></p></div>
 
         <div id="topNoticeBar"></div>
 
-        <div class="card user-card" onclick="checkUser('S01','강태윤')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">강태윤</h2></div></div>
-        <div class="card user-card" onclick="checkUser('S02','김대중')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">김대중</h2></div></div>
-        <div class="card user-card" onclick="checkUser('S03','최원준')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">최원준</h2></div></div>
+        <div class="race-card" id="raceWidget" style="display: none;">
+            <h3 class="race-title">🏆 이번 주 실적 레이스 <span class="race-goal">목표 52만 원</span></h3>
+            <div class="race-track" id="raceTrackArea">
+                <div class="finish-line"></div>
+            </div>
+        </div>
+
+        <div id="adminPanel" class="hidden" style="background: #1e293b; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="font-weight:bold; color:#fbbf24;">🔧 관리자 타임머신</div>
+            <div style="display: flex; gap: 5px; width: 100%; justify-content: center;">
+                <input type="date" id="simDateInput" style="width:auto; padding:8px; border-radius:8px;">
+                <button onclick="applySimDate()" style="background:var(--p); color:white; border:none; padding:8px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">이동</button>
+            </div>
+            <button onclick="exitAdmin()" style="background:#475569; color:white; border:none; padding:8px 15px; border-radius:8px; width:100%; cursor:pointer;">관리자 모드 종료</button>
+        </div>
+
+        <div class="card user-card" onclick="checkUser('S01','강태윤')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">강태윤 주임</h2></div></div>
+        <div class="card user-card" onclick="checkUser('S02','김대중')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">김대중 사원</h2></div></div>
+        <div class="card user-card" onclick="checkUser('S03','최원준')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">최원준 대리</h2></div></div>
+        <div class="card user-card" onclick="checkUser('S04','이로운')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">이로운 인턴</h2></div></div>
+        <div class="card user-card" onclick="checkUser('S05','최태민')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">최태민 인턴</h2></div></div>
     </div>
 
     <div id="view-plan" class="view container">
@@ -445,16 +608,17 @@
     <div id="sinmungoModal"><div class="modal-box"><h3>📩 LDS 신문고</h3><input type="text" id="smNick" placeholder="닉네임 (익명 가능)"><textarea id="smContent" rows="5" placeholder="건의사항을 적어주세요."></textarea><button onclick="submitSinmungo()" class="primary">보내기</button><button onclick="document.getElementById('sinmungoModal').style.display='none'" style="margin-top:10px; background:none; border:none; color:#666;">닫기</button></div></div>
     <div id="lateStartModal"><div class="modal-box"><h3>⏳ 늦은 시작</h3><div style="display:flex; gap:5px; justify-content:center; margin:15px 0;"><input type="time" id="lateStartT"> ~ <input type="time" id="lateEndT"></div><button onclick="submitLateStart()" class="primary">입력 완료</button><button onclick="document.getElementById('lateStartModal').style.display='none'" style="margin-top:10px; background:none; border:none; color:#666;">취소</button></div></div>
     <div id="adminModalOverlay"><div class="modal-box"><h3>🔒 관리자 인증</h3><input type="password" id="adminPw" placeholder="비밀번호"><button onclick="checkAdminPw()" class="primary" style="margin-top:10px;">확인</button><button onclick="document.getElementById('adminModalOverlay').style.display='none'" style="margin-top:10px; border:none; background:none;">취소</button></div></div>
-    <div id="adminTimeModal"><div class="modal-box"><h3>⏰ 시간 수정</h3><input type="time" id="admStart"> ~ <input type="time" id="admEnd"><button onclick="finishAdminMission()" class="primary" style="margin-top:10px;">완료 처리</button><button onclick="document.getElementById('adminTimeModal').style.display='none'" style="margin-top:10px; border:none; background:none;">취소</button></div></div>
+    <div id="adminTimeModal"><div class="modal-box"><h3>⏰ 시간 입력 (관리자 권한)</h3><input type="time" id="admStart" style="margin-bottom:10px;"> ~ <input type="time" id="admEnd" style="margin-bottom:10px;"><button onclick="finishAdminMission()" class="primary" style="margin-top:10px;">강제 완료 처리</button><button onclick="document.getElementById('adminTimeModal').style.display='none'" style="margin-top:10px; border:none; background:none;">취소</button></div></div>
 
     <script>
-        // ▼▼▼▼▼ 선생님의 배포 URL 입력 ▼▼▼▼▼
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzue5yUPKqFVlg3JyhYhtWiA1VsN2o8ksbaopA4OYrG-384Zqk5224J1Aw3apqwH7_X-w/exec";
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzUggqi6Wugy1SfMwak8eJYut0t2M2XGwvn15GcKNQlTNHIwE6B4EAOD5mos5pMAIp33Q/exec";
 
         const NO_LEVEL_LIST = ["음악", "검정고시", "SCL책력", "심화공부", "교류수업", "오후활동", "맞춤학습", "예배", "축구"];
         const LIST_AUTO_SELECT = ["운동", "영어회화", "글씨연습", "컴퓨터"];
         const LIST_CHOICE = ["검정고시", "음악", "SCL책력", "심화공부", "교류수업"];
+
+        // 목표 금액 52만 원 설정
+        const MAX_GOAL = 520000;
 
         let appDate = new Date(); let curId, curName; let currentScheduleData = null; let currentLogs = {};
         let currentEventMission = null; let curLateMission = null; let curLateLevel = null; let isAdminMode = false; let curM;
@@ -462,14 +626,12 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             renderDate();
-            // [★신규] 활성화된 다중 공지사항 불러오기
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getActiveNotices" }) }).then(r => r.json()).then(res => {
                 if (res.notices && res.notices.length > 0) {
                     const bar = document.getElementById('topNoticeBar');
                     bar.style.display = 'flex';
                     let html = "";
                     res.notices.forEach(n => {
-                        // 정규식을 이용해 날짜 [YYYY-MM-DD] 분리 (UI 예쁘게)
                         let dateMatch = n.match(/^\[(.*?)\] (.*)$/);
                         if (dateMatch) html += `<div class="notice-banner"><span class="n-date">${dateMatch[1]}</span><span>📢 ${dateMatch[2]}</span></div>`;
                         else html += `<div class="notice-banner">📢 ${n}</div>`;
@@ -477,37 +639,69 @@
                     bar.innerHTML = html;
                 }
             });
+            loadRaceBoard();
         });
+
+        function loadRaceBoard() {
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getWeeklyRank", date: getAppDateStr() }) })
+                .then(r => r.json()).then(res => {
+                    if (res.ok && res.rank) {
+                        const track = document.getElementById('raceTrackArea');
+                        document.getElementById('raceWidget').style.display = 'block';
+                        let html = `<div class="finish-line"></div>`;
+
+                        // [★수정] 선생님 요청 아이콘 적용 (해골, 권총, 컴퓨터, 갈색말, 자전거)
+                        const sList = [
+                            { id: 'S01', name: '강태윤 주임', icon: '💀' },
+                            { id: 'S02', name: '김대중 사원', icon: '🔫' },
+                            { id: 'S03', name: '최원준 대리', icon: '💻' },
+                            { id: 'S04', name: '이로운 인턴', icon: '🐎' },
+                            { id: 'S05', name: '최태민 인턴', icon: '🚲' }
+                        ];
+
+                        sList.forEach(s => {
+                            let money = res.rank[s.id] || 0;
+                            let percent = Math.min(100, (money / MAX_GOAL) * 100);
+                            let visualWidth = percent * 0.9;
+
+                            html += `
+                    <div class="lane lane-${s.id}">
+                        <div class="lane-info">
+                            <span class="runner-name">${s.name}</span>
+                            <span class="runner-money">₩${money.toLocaleString()}</span>
+                        </div>
+                        <div class="track-bg">
+                            <div class="runner-bar" style="width:0%;" data-width="${visualWidth}%">
+                                <div class="runner-icon">${s.icon}</div>
+                            </div>
+                        </div>
+                    </div>`;
+                        });
+                        track.innerHTML = html;
+                        setTimeout(() => { document.querySelectorAll('.runner-bar').forEach(b => { b.style.width = b.getAttribute('data-width'); }); }, 300);
+                    }
+                });
+        }
 
         function renderDate() { const days = ['일', '월', '화', '수', '목', '금', '토']; document.getElementById('todayDate').innerText = `${appDate.toLocaleDateString()} (${days[appDate.getDay()]})`; }
         function getAppDateStr() { const offset = appDate.getTimezoneOffset() * 60000; return new Date(appDate.getTime() - offset).toISOString().slice(0, 10); }
         function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-        function goHome() { showView('view-dashboard'); }
+        function goHome() { showView('view-dashboard'); loadRaceBoard(); }
 
         function checkUser(id, name) {
             curId = id; curName = name;
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "checkSchedule", id: id, date: getAppDateStr() }) }).then(r => r.json()).then(res => {
                 currentLogs = res.logs || {};
                 if (res.hasSchedule) {
-                    currentScheduleData = res.data;
-                    renderMissions(res.data);
-                    showView('view-mission');
-                    document.getElementById('missionTitle').innerText = `${name} 사원 (${getAppDateStr()})`;
+                    currentScheduleData = res.data; renderMissions(res.data); showView('view-mission'); document.getElementById('missionTitle').innerText = `${name} 사원 (${getAppDateStr()})`;
                 } else {
-                    generatePlanForm();
-                    showView('view-plan');
+                    generatePlanForm(); showView('view-plan');
                 }
             });
         }
 
-        function editPlan() {
-            generatePlanForm();
-            showView('view-plan');
-        }
+        function editPlan() { generatePlanForm(); showView('view-plan'); }
 
-        // -----------------------------------------------------------
-        // [계획 수립 UI]
-        // -----------------------------------------------------------
         function generatePlanForm() {
             const container = document.getElementById('planContainer');
             container.innerHTML = "";
@@ -520,19 +714,18 @@
             ];
 
             blocks.forEach((b, idx) => {
-                const div = document.createElement('div');
-                div.className = "time-block";
+                const div = document.createElement('div'); div.className = "time-block";
+                let isFixed = false; let fixedText = ""; let fixedValue = "";
 
-                let isFixed = false; let fixedText = "";
-                if (day === 4 && idx === 0) { isFixed = true; fixedText = "⚽ 오전 축구 수업 (09:30 ~ 12:00)"; }
-                if (day === 5 && idx === 1) { isFixed = true; fixedText = "🙏 예배 및 우리다움 (13:00 ~ 15:00)"; }
+                if (day === 4 && idx === 0) { isFixed = true; fixedText = "⚽ 오전 축구 수업 (09:30 ~ 12:00)"; fixedValue = "축구"; }
+                if (day === 5 && idx === 1) { isFixed = true; fixedText = "🙏 예배 및 우리다움 (13:00 ~ 15:00)"; fixedValue = "예배"; }
 
                 let html = `<div class="time-title"><span>🕰️ ${b.time}</span><span style="font-size:12px;color:#64748b;">${b.label}</span></div>`;
 
                 if (isFixed) {
                     html += `<div class="fixed-box">${fixedText}</div>
                          <input type="hidden" id="type_${b.id}" value="fixed">
-                         <input type="hidden" id="m1_${b.id}" value="${fixedText.split(' ')[1]}">`;
+                         <input type="hidden" id="m1_${b.id}" value="${fixedValue}">`;
                 } else {
                     html += `
                 <div class="cat-selector" id="cat_${b.id}">
@@ -541,21 +734,16 @@
                     <div class="cat-btn" onclick="setCat('${b.id}', 'event', this)">🎉 행사</div>
                 </div>
                 <input type="hidden" id="type_${b.id}" value="auto">
-                <div id="area_${b.id}">
-                    ${renderAutoRows(b.id)}
-                </div>`;
+                <div id="area_${b.id}">${renderAutoRows(b.id)}</div>`;
                 }
-                div.innerHTML = html;
-                container.appendChild(div);
+                div.innerHTML = html; container.appendChild(div);
             });
         }
 
         function setCat(bid, type, btn) {
             const parent = document.getElementById(`cat_${bid}`);
-            Array.from(parent.children).forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
+            Array.from(parent.children).forEach(c => c.classList.remove('active')); btn.classList.add('active');
             document.getElementById(`type_${bid}`).value = type;
-
             const area = document.getElementById(`area_${bid}`);
             if (type === 'auto') area.innerHTML = renderAutoRows(bid);
             else if (type === 'choice') area.innerHTML = renderChoiceRows(bid);
@@ -570,140 +758,101 @@
         <div class="mission-row"><div class="fixed-label">📚 독서</div><select id="l2_${bid}">${lvOpts}</select><input type="hidden" id="m2_${bid}" value="독서"></div>
         <div class="mission-row"><div class="fixed-label">📖 자서전</div><select id="l3_${bid}">${lvOpts}</select><input type="hidden" id="m3_${bid}" value="자서전"></div>
         <div class="mission-row"><select id="m4_${bid}">${selectOpts}</select><select id="l4_${bid}">${lvOpts}</select></div>
-        <div class="mission-row"><select id="m5_${bid}">${selectOpts}</select><select id="l5_${bid}">${lvOpts}</select></div>
-        `;
+        <div class="mission-row"><select id="m5_${bid}">${selectOpts}</select><select id="l5_${bid}">${lvOpts}</select></div>`;
         }
 
-        function renderChoiceRows(bid) {
-            const selectOpts = LIST_CHOICE.map(i => `<option value="${i}">${i}</option>`).join('');
-            return `<div class="mission-row"><select id="m1_${bid}">${selectOpts}</select></div>`;
-        }
+        function renderChoiceRows(bid) { const selectOpts = LIST_CHOICE.map(i => `<option value="${i}">${i}</option>`).join(''); return `<div class="mission-row"><select id="m1_${bid}">${selectOpts}</select></div>`; }
 
         function savePlan() {
             let data = { action: "saveSchedule", id: curId, date: getAppDateStr(), dayStr: ["일", "월", "화", "수", "목", "금", "토"][appDate.getDay()] };
             const dbSlots = [
                 { n: 'm1n', l: 'm1l' }, { n: 'm2n', l: 'm2l' }, { n: 'm3n', l: 'm3l' },
-                { n: 'c1an', l: 'c1al' }, { n: 'c1bn', l: 'c1bl' }, { n: 'c2n', l: null }
+                { n: 'c1an', l: 'c1al' }, { n: 'c1bn', l: 'c1bl' }, { n: 'c2n', l: 'c2l' }, { n: 'c3n', l: 'c3l' }
             ];
             let slotIdx = 0;
-
             const mapBlock = (bid) => {
                 const type = document.getElementById(`type_${bid}`).value;
                 if (type === 'fixed' || type === 'event') {
-                    if (slotIdx < 6) {
-                        data[dbSlots[slotIdx].n] = (type === 'fixed') ? document.getElementById(`m1_${bid}`).value : "행사";
-                        slotIdx++;
-                    }
+                    if (slotIdx < 7) { data[dbSlots[slotIdx].n] = (type === 'fixed') ? document.getElementById(`m1_${bid}`).value : "행사"; slotIdx++; }
                 } else if (type === 'auto') {
-                    const items = [
-                        { n: "글쓰기", l: document.getElementById(`l1_${bid}`).value },
-                        { n: "독서", l: document.getElementById(`l2_${bid}`).value },
-                        { n: "자서전", l: document.getElementById(`l3_${bid}`).value },
-                        { n: document.getElementById(`m4_${bid}`).value, l: document.getElementById(`l4_${bid}`).value },
-                        { n: document.getElementById(`m5_${bid}`).value, l: document.getElementById(`l5_${bid}`).value }
-                    ];
-                    items.forEach(item => {
-                        if (slotIdx < 6) {
-                            data[dbSlots[slotIdx].n] = item.n;
-                            if (dbSlots[slotIdx].l) data[dbSlots[slotIdx].l] = item.l;
-                            slotIdx++;
-                        }
-                    });
+                    const items = [{ n: "글쓰기", l: document.getElementById(`l1_${bid}`).value }, { n: "독서", l: document.getElementById(`l2_${bid}`).value }, { n: "자서전", l: document.getElementById(`l3_${bid}`).value }, { n: document.getElementById(`m4_${bid}`).value, l: document.getElementById(`l4_${bid}`).value }, { n: document.getElementById(`m5_${bid}`).value, l: document.getElementById(`l5_${bid}`).value }];
+                    items.forEach(item => { if (slotIdx < 7) { data[dbSlots[slotIdx].n] = item.n; if (dbSlots[slotIdx].l) data[dbSlots[slotIdx].l] = item.l; slotIdx++; } });
                 } else if (type === 'choice') {
-                    if (slotIdx < 6) {
-                        data[dbSlots[slotIdx].n] = document.getElementById(`m1_${bid}`).value;
-                        slotIdx++;
-                    }
+                    if (slotIdx < 7) { data[dbSlots[slotIdx].n] = document.getElementById(`m1_${bid}`).value; slotIdx++; }
                 }
             };
-
             mapBlock('b1'); mapBlock('b2'); mapBlock('b3');
-
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(data) });
             alert("계획이 제출되었습니다.");
-
             currentScheduleData = {
                 day: data.dayStr,
                 m1: { n: data.m1n, l: data.m1l }, m2: { n: data.m2n, l: data.m2l }, m3: { n: data.m3n, l: data.m3l },
-                c1a: { n: data.c1an, l: data.c1al }, c1b: { n: data.c1bn, l: data.c1bl }, c2: { n: data.c2n, l: null }
+                c1a: { n: data.c1an, l: data.c1al }, c1b: { n: data.c1bn, l: data.c1bl }, c2: { n: data.c2n, l: data.c2l }, c3: { n: data.c3n, l: data.c3l }
             };
-            renderMissions(currentScheduleData);
-            showView('view-mission');
+            renderMissions(currentScheduleData); showView('view-mission');
         }
 
-        // -----------------------------------------------------------
-        // [미션 실행 UI]
-        // -----------------------------------------------------------
         function renderMissions(d) {
             const list = document.getElementById('missionList'); list.innerHTML = "";
-
-            const lifeLog = currentLogs["생활미션"];
-            let lifeSt = "미완료", imgH = "", msgH = "";
-            if (lifeLog) {
-                if (lifeLog.status === 'life_ok') lifeSt = "✅ 확인됨";
-                else if (lifeLog.status === 'fail') lifeSt = "❌ 실패";
-                if (lifeLog.photo) imgH = `<img src="${lifeLog.photo}" class="proof-photo" onclick="window.open(this.src)">`;
-                if (lifeLog.message) msgH = `<div class="teacher-msg">📢 ${lifeLog.message}</div>`;
-            }
+            const lifeLog = currentLogs["생활미션"]; let lifeSt = "미완료", imgH = "", msgH = "";
+            if (lifeLog) { if (lifeLog.status === 'life_ok') lifeSt = "✅ 확인됨"; else if (lifeLog.status === 'fail') lifeSt = "❌ 실패"; if (lifeLog.photo) imgH = `<img src="${lifeLog.photo}" class="proof-photo" onclick="window.open(this.src)">`; if (lifeLog.message) msgH = `<div class="teacher-msg">📢 ${lifeLog.message}</div>`; }
             list.innerHTML += `<div class="mission-item" style="border-left:5px solid #f59e0b; background:#fffbeb;"><div class="mission-header"><span class="mission-name">🌞 생활미션</span><span class="mission-lv">${lifeSt}</span></div>${imgH}${msgH}</div>`;
 
-            const slots = [d.m1, d.m2, d.m3, d.c1a, d.c1b, d.c2];
+            const slots = [d.m1, d.m2, d.m3, d.c1a, d.c1b, d.c2, d.c3];
             slots.forEach(t => {
                 if (!t || !t.n) return;
-                if (t.n === '행사') renderEventCard(list, "🎉 행사", "행사");
-                else renderItem(list, t);
+                if (t.n === '축구' || t.n === '예배') {
+                    list.innerHTML += `<div class="schedule-block">${t.n === '축구' ? '⚽' : '🙏'} ${t.n} <span style="font-size:11px; font-weight:normal;">(고정 일정)</span></div>`;
+                }
+                else if (t.n === '행사') {
+                    renderEventCard(list, "🎉 행사", "행사");
+                }
+                else {
+                    renderItem(list, t);
+                }
             });
         }
 
         function renderItem(container, t) {
             if (!t || !t.n) return;
 
-            if (t.n.includes('축구') || t.n.includes('예배')) {
-                const div = document.createElement('div');
-                div.className = "mission-item fixed-item";
-                div.innerHTML = `<div class="mission-header"><span class="mission-name">${t.n.includes('축구') ? '⚽' : '🙏'} ${t.n}</span><span class="mission-lv">고정 일정</span></div>
-                             <div style="font-size:12px; color:#64748b;">시간에 맞춰 참여하세요 (버튼 없음)</div>`;
-                container.appendChild(div);
-                return;
-            }
-
             const serverLog = currentLogs[t.n];
             const isDone = serverLog && (serverLog.status === 'end' || serverLog.status === 'ok' || serverLog.status === 'gong');
             const isStart = serverLog && serverLog.status === 'start';
-
             const isAnyRunning = Object.values(currentLogs).some(l => l.status === 'start');
             const lvDisplay = NO_LEVEL_LIST.includes(t.n) ? "-" : (t.l || "-");
 
             const div = document.createElement('div'); div.className = "mission-item";
             let btns = "";
 
-            if (isDone) {
-                let btnText = serverLog.status === 'gong' ? "✅ 공결" : "✅ 완료됨";
-                btns = `<button class="btn-action done" disabled>${btnText}</button>`;
-                if (isAdminMode) btns = `<button class="btn-action done" style="border:1px solid red; color:red;" onclick="handleMission('${t.n}','${t.l}')">🛠 수정(관리자)</button>`;
-            } else if (isStart) {
-                btns = `<div class="live-timer" id="timer-${t.n}">00:00:00</div>
-                    <button class="btn-action ing" onclick="handleMission('${t.n}','${t.l}')">🔥 완료하기</button>`;
-                startTimer(t.n);
+            if (isAdminMode) {
+                let stateTxt = isDone ? "수정" : "강제 완료";
+                btns = `<button class="btn-action" style="border:1px solid red; color:red;" onclick="handleMission('${t.n}','${t.l}')">🛠 ${stateTxt}(관리자)</button>`;
             } else {
-                let disabledAttr = isAnyRunning ? "disabled" : "";
-                btns = `<div style="display:flex; gap:5px;">
-                      <button class="btn-action" onclick="handleMission('${t.n}','${t.l}')" ${disabledAttr}>시작</button>
-                      <button class="btn-action" style="background:#f1f5f9; color:#64748b; font-size:13px; border:1px solid #cbd5e1;" onclick="openLateStart('${t.n}','${t.l}')" ${disabledAttr}>늦은 시작</button>
-                    </div>`;
+                if (isDone) {
+                    let btnText = serverLog.status === 'gong' ? "✅ 공결" : "✅ 완료됨";
+                    btns = `<button class="btn-action done" disabled>${btnText}</button>`;
+                } else if (isStart) {
+                    btns = `<div class="live-timer" id="timer-${t.n}">00:00:00</div><button class="btn-action ing" onclick="handleMission('${t.n}','${t.l}')">🔥 완료하기</button>`;
+                    startTimer(t.n);
+                } else {
+                    let disabledAttr = isAnyRunning ? "disabled" : "";
+                    btns = `<div style="display:flex; gap:5px;">
+                          <button class="btn-action" onclick="handleMission('${t.n}','${t.l}')" ${disabledAttr}>시작</button>
+                          <button class="btn-action" style="background:#f1f5f9; color:#64748b; font-size:13px; border:1px solid #cbd5e1;" onclick="openLateStart('${t.n}','${t.l}')" ${disabledAttr}>늦은 시작</button>
+                        </div>`;
+                }
             }
             div.innerHTML = `<div class="mission-header"><span class="mission-name">${t.n}</span><span class="mission-lv">${lvDisplay}</span></div>${btns}`;
             container.appendChild(div);
         }
 
         function renderEventCard(container, name, keyName) {
-            const log = currentLogs[keyName];
-            const isDone = log && (log.status === 'end' || log.status === 'gong');
+            const log = currentLogs[keyName]; const isDone = log && (log.status === 'end' || log.status === 'gong');
             if (document.getElementById(`evt_${keyName}`)) return;
             const div = document.createElement('div'); div.className = "mission-item"; div.id = `evt_${keyName}`;
             let btnText = isDone ? "✅ 완료됨" : "📝 소감문 작성";
-            div.innerHTML = `<div class="mission-header"><span class="mission-name">${name}</span></div>
-                         <button class="btn-action ${isDone ? 'done' : ''}" onclick="openReflectionModal('${name}','${keyName}')" ${isDone ? 'disabled' : ''}>${btnText}</button>`;
+            div.innerHTML = `<div class="mission-header"><span class="mission-name">${name}</span></div><button class="btn-action ${isDone ? 'done' : ''}" onclick="openReflectionModal('${name}','${keyName}')" ${isDone ? 'disabled' : ''}>${btnText}</button>`;
             container.appendChild(div);
         }
 
@@ -713,33 +862,28 @@
             const txt = document.getElementById('reflectionText').value; if (txt.length < 1) return alert("내용을 입력하세요");
             let diff = "EASY"; if (txt.length >= 200) diff = "HARD"; else if (txt.length >= 100) diff = "NORMAL";
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveEventReflection", student_id: curId, student_name: curName, eventName: document.getElementById('eventNameInput').value, mission_id: "행사", date: getAppDateStr(), difficulty: diff, content: txt }) });
-            currentLogs["행사"] = { status: 'end' };
-            renderMissions(currentScheduleData);
-            document.getElementById('reflectionModal').style.display = 'none';
+            currentLogs["행사"] = { status: 'end' }; renderMissions(currentScheduleData); document.getElementById('reflectionModal').style.display = 'none';
         }
 
         function handleMission(name, level) {
-            const key = `${curId}_active_${getAppDateStr()}`;
-            const serverLog = currentLogs[name];
-            if (isAdminMode && serverLog && (serverLog.status === 'end' || serverLog.status === 'gong')) { curM = name; document.getElementById('adminTimeModal').style.display = 'flex'; return; }
+            const key = `${curId}_active_${getAppDateStr()}`; const serverLog = currentLogs[name];
+
+            if (isAdminMode) {
+                curM = name;
+                curLateLevel = level;
+                document.getElementById('adminTimeModal').style.display = 'flex';
+                return;
+            }
 
             if (!serverLog || serverLog.status !== 'start') {
                 if (Object.values(currentLogs).some(l => l.status === 'start')) return alert("이미 진행 중인 업무가 있습니다!");
-                currentLogs[name] = { status: 'start' };
-                localStorage.setItem(`${key}_start`, Date.now());
+                currentLogs[name] = { status: 'start' }; localStorage.setItem(`${key}_start`, Date.now());
                 fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "start", student_id: curId, mission_id: name, date: getAppDateStr(), note: "Start" }) });
                 renderMissions(currentScheduleData);
             } else {
                 if (!confirm("완료하시겠습니까?")) return;
-                const st = parseInt(localStorage.getItem(`${key}_start`));
-                const endT = Date.now();
-                let note = "완료";
-                if (st) {
-                    const diff = Math.round((endT - st) / 60000);
-                    const sTime = new Date(st).toTimeString().slice(0, 5);
-                    const eTime = new Date(endT).toTimeString().slice(0, 5);
-                    note = `${sTime}~${eTime} (${diff}분)`;
-                }
+                const st = parseInt(localStorage.getItem(`${key}_start`)); const endT = Date.now(); let note = "완료";
+                if (st) { const diff = Math.round((endT - st) / 60000); const sTime = new Date(st).toTimeString().slice(0, 5); const eTime = new Date(endT).toTimeString().slice(0, 5); note = `${sTime}~${eTime} (${diff}분)`; }
                 currentLogs[name] = { status: 'end' };
                 fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: name, date: getAppDateStr(), difficulty: level, note: note }) });
                 renderMissions(currentScheduleData);
@@ -752,36 +896,63 @@
             if (!s || !e) return alert("시간을 입력해주세요");
             const note = `${s}~${e} (수동)`;
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: curLateMission, date: getAppDateStr(), difficulty: curLateLevel, note: note }) });
-            currentLogs[curLateMission] = { status: 'end' };
-            alert("기록되었습니다."); document.getElementById('lateStartModal').style.display = 'none'; renderMissions(currentScheduleData);
+            currentLogs[curLateMission] = { status: 'end' }; alert("기록되었습니다."); document.getElementById('lateStartModal').style.display = 'none'; renderMissions(currentScheduleData);
         }
 
         function startTimer(name) {
             if (timerInterval) clearInterval(timerInterval);
-            const key = `${curId}_active_${getAppDateStr()}`;
-            let st = parseInt(localStorage.getItem(`${key}_start`));
-            if (!st) st = Date.now();
+            const key = `${curId}_active_${getAppDateStr()}`; let st = parseInt(localStorage.getItem(`${key}_start`)); if (!st) st = Date.now();
             timerInterval = setInterval(() => {
-                const diff = Math.floor((Date.now() - st) / 1000);
-                const h = String(Math.floor(diff / 3600)).padStart(2, '0');
-                const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
-                const s = String(diff % 60).padStart(2, '0');
-                const el = document.getElementById(`timer-${name}`);
-                if (el) el.innerText = `${h}:${m}:${s}`;
+                const diff = Math.floor((Date.now() - st) / 1000); const h = String(Math.floor(diff / 3600)).padStart(2, '0'); const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0'); const s = String(diff % 60).padStart(2, '0');
+                const el = document.getElementById(`timer-${name}`); if (el) el.innerText = `${h}:${m}:${s}`;
             }, 1000);
         }
 
         function openSinmungo() { document.getElementById('sinmungoModal').style.display = 'flex'; }
         function submitSinmungo() { fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveSinmungo", nickname: document.getElementById('smNick').value, content: document.getElementById('smContent').value }) }); alert("전송됨"); document.getElementById('sinmungoModal').style.display = 'none'; }
+
         function openAdminModal() { document.getElementById('adminModalOverlay').style.display = 'flex'; }
-        function checkAdminPw() { if (document.getElementById('adminPw').value === "1q2w3e4r!@") { isAdminMode = true; document.getElementById('adminModalOverlay').style.display = 'none'; document.getElementById('adminBtn').style.display = 'none'; renderMissions(currentScheduleData); } }
-        function finishAdminMission() {
-            const s = document.getElementById('admStart').value; const e = document.getElementById('admEnd').value;
-            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: curM, date: getAppDateStr(), difficulty: "NORMAL", note: `${s}~${e}` }) })
-                .then(() => { alert("수정완료"); document.getElementById('adminTimeModal').style.display = 'none'; checkUser(curId, curName); });
+        function checkAdminPw() {
+            if (document.getElementById('adminPw').value === "1q2w3e4r!@") {
+                isAdminMode = true;
+                document.getElementById('adminModalOverlay').style.display = 'none';
+                document.getElementById('adminBtn').style.display = 'none';
+                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('simDateInput').value = getAppDateStr();
+                if (currentScheduleData) renderMissions(currentScheduleData);
+            } else { alert("비밀번호가 틀렸습니다."); }
         }
-        function applySimDate() { appDate = new Date(document.getElementById('simDateInput').value); renderDate(); goHome(); }
-        function exitAdmin() { isAdminMode = false; document.getElementById('adminBtn').style.display = 'block'; renderMissions(currentScheduleData); }
+
+        function finishAdminMission() {
+            const s = document.getElementById('admStart').value;
+            const e = document.getElementById('admEnd').value;
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "saveLog", subAction: "end", student_id: curId, mission_id: curM,
+                    date: getAppDateStr(), difficulty: curLateLevel || "NORMAL", note: `${s}~${e} (관리자)`
+                })
+            }).then(() => {
+                alert("관리자 권한으로 완료 처리되었습니다.");
+                document.getElementById('adminTimeModal').style.display = 'none';
+                checkUser(curId, curName);
+            });
+        }
+
+        function applySimDate() {
+            appDate = new Date(document.getElementById('simDateInput').value);
+            renderDate();
+            goHome();
+        }
+
+        function exitAdmin() {
+            isAdminMode = false;
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('adminBtn').style.display = 'flex';
+            appDate = new Date();
+            renderDate();
+            if (curId) checkUser(curId, curName); else goHome();
+        }
     </script>
 </body>
 </html>

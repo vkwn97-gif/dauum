@@ -536,7 +536,13 @@
     <div id="weekly" class="view">
         <div class="weekly-card" style="background:white; padding:20px; border-radius:20px;">
             <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <select id="wStudent" onchange="loadWeekly()" style="padding:10px; font-weight:bold;"><option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option></select>
+                <select id="wStudent" onchange="loadWeekly()" style="padding:10px; font-weight:bold;">
+                    <option value="S01">강태윤 주임</option>
+                    <option value="S02">김대중 사원</option>
+                    <option value="S03">최원준 대리</option>
+                    <option value="S04">이로운 인턴</option>
+                    <option value="S05">최태민 인턴</option>
+                </select>
                 <select id="wWeekSelect" onchange="loadWeekly()" style="padding:10px; width:auto; border-radius:8px;"></select>
             </div>
 
@@ -570,7 +576,13 @@
 
     <div id="monthly" class="view">
         <div style="text-align: center; margin-bottom: 20px;">
-            <select id="mStudent" onchange="loadMonthly()" style="padding:10px; font-weight:bold; width: auto; border-radius:8px;"><option value="S01">강태윤</option><option value="S02">김대중</option><option value="S03">최원준</option></select>
+            <select id="mStudent" onchange="loadMonthly()" style="padding:10px; font-weight:bold; width: auto; border-radius:8px;">
+                <option value="S01">강태윤 주임</option>
+                <option value="S02">김대중 사원</option>
+                <option value="S03">최원준 대리</option>
+                <option value="S04">이로운 인턴</option>
+                <option value="S05">최태민 인턴</option>
+            </select>
             <input type="month" id="mMonth" onchange="loadMonthly()" style="padding:10px; border-radius:8px; border:1px solid #ddd; width:auto;">
         </div>
 
@@ -610,7 +622,6 @@
             <h2 style="margin-top:0;">📢 새로운 공지사항 등록</h2>
             <textarea id="noticeInput" rows="4" placeholder="학생들에게 알릴 내용을 적어주세요." style="width:100%; border:1px solid #ddd; padding:10px; border-radius:8px; margin-bottom:10px;"></textarea>
             <button onclick="saveNotice()" class="btn" style="background:var(--p); color:white;">공지 등록 및 학생 앱에 띄우기</button>
-
             <h2 style="margin-top:40px; border-top:2px solid #f1f5f9; padding-top:20px;">📋 공지사항 목록 (ON/OFF)</h2>
             <div style="font-size:12px; color:#666; margin-bottom:15px;">켜져 있는(녹색) 공지사항만 학생 화면 상단에 여러 개 표시됩니다.</div>
             <div id="noticeListArea"></div>
@@ -620,19 +631,16 @@
     <div id="modal">
         <div class="modal-box">
             <h3 id="mTitle" style="color:var(--p);"></h3><input type="hidden" id="mSid"><input type="hidden" id="mMid">
-
             <div id="ui-life" style="display:none; text-align:left;">
                 <div class="chk-group"><label><input type="checkbox" class="life-chk"> 1. 개인 위생</label><label><input type="checkbox" class="life-chk"> 2. 침구 정리</label><label><input type="checkbox" class="life-chk"> 3. 빨래 정리</label><label><input type="checkbox" class="life-chk"> 4. 의복 정리</label><label><input type="checkbox" class="life-chk"> 5. 신발 정리</label><label><input type="checkbox" class="life-chk"> 6. 쓰레기 정리</label><label><input type="checkbox" class="life-chk"> 7. 물건 정리</label><label><input type="checkbox" class="life-chk"> 8. 안전 확인</label><label><input type="checkbox" class="life-chk"> 9. 출석체크</label><label><input type="checkbox" class="life-chk"> 10. 개인 구역 청결</label></div>
                 <textarea id="lifeMsg" placeholder="코멘트"></textarea><input type="file" id="lifePhoto">
                 <button class="btn" style="background:var(--ok);" onclick="handleLife('life_ok')">승인</button><button class="btn" style="background:var(--fail);" onclick="handleLife('fail')">실패</button>
             </div>
-
             <div id="ui-appearance" style="display:none; text-align:center;">
                 <div id="appPreviewArea" style="margin-bottom:15px; font-size:14px; color:#666;">등록된 사진이 없습니다.</div>
                 <input type="file" id="appPhotoFile" accept="image/*" style="margin-bottom:10px;">
                 <button class="btn" style="background:var(--p);" onclick="uploadAppPhoto()">📸 사진 등록/변경</button>
             </div>
-
             <div id="ui-normal">
                 <select id="ctrlMissionSelect">
                     <option value="">(미션명 변경 시 선택)</option>
@@ -647,7 +655,6 @@
                 <button class="btn" style="background:#94a3b8;margin-top:5px;" onclick="sendCtrl('delete')">삭제</button>
                 <button class="btn" style="background:#8b5cf6;margin-top:5px;" onclick="sendCtrl('gong')">✅ 공결 처리</button>
             </div>
-
             <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
                 <h4 style="margin:0 0 5px;">💰 금액 조정 (상벌점)</h4>
                 <input type="number" id="adjAmount" placeholder="금액 (예: 5000, -3000)">
@@ -663,10 +670,17 @@
 
     <script>
         // ▼▼▼▼▼ 선생님의 배포 URL 입력 ▼▼▼▼▼
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzue5yUPKqFVlg3JyhYhtWiA1VsN2o8ksbaopA4OYrG-384Zqk5224J1Aw3apqwH7_X-w/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzUggqi6Wugy1SfMwak8eJYut0t2M2XGwvn15GcKNQlTNHIwE6B4EAOD5mos5pMAIp33Q/exec";
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
-        const students = { "S01": "강태윤", "S02": "김대중", "S03": "최원준" };
+        // [★수정] 5인 체제 반영
+        const students = {
+            "S01": "강태윤 주임",
+            "S02": "김대중 사원",
+            "S03": "최원준 대리",
+            "S04": "이로운 인턴",
+            "S05": "최태민 인턴"
+        };
         const NO_LEVEL_LIST = ["음악", "검정고시", "SCL책력", "심화공부", "교류수업", "오후활동", "맞춤학습", "예배", "축구"];
         let weeklyCharts = {}; let monthlyCharts = {}; let radarChart = null;
         Chart.register(ChartDataLabels);
@@ -691,10 +705,9 @@
             if (id === 'daily') document.getElementById('tab-daily').classList.add('active');
             if (id === 'weekly') { document.getElementById('tab-weekly').classList.add('active'); loadWeekly(); }
             if (id === 'monthly') { document.getElementById('tab-monthly').classList.add('active'); loadMonthly(); }
-            if (id === 'notice') { document.getElementById('tab-notice').classList.add('active'); loadNotices(); } // 공지사항 로드 추가
+            if (id === 'notice') { document.getElementById('tab-notice').classList.add('active'); loadNotices(); }
         }
 
-        // [★신규] 공지사항 관리 UI
         function loadNotices() {
             document.getElementById('noticeListArea').innerHTML = "불러오는 중...";
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getAllNotices" }) }).then(r => r.json()).then(res => {
@@ -756,17 +769,10 @@
                     col.innerHTML += `<div class="m-item ${appCls}" onclick="openModal('${sid}','용모체크', '${appLog ? appLog.note : ''}')"><b>👔 용모단정</b> <span>${appSt}</span></div>`;
 
                     if (s) {
-                        const morning = ['m1', 'm2', 'm3']; const isMorningEvent = morning.every(k => s[k] && s[k].n === '행사'); let displayedEvents = new Set();
-                        ['m1', 'm2', 'm3', 'c1a', 'c1b', 'c2'].forEach(k => {
+                        // [★수정] c3까지 포함해서 렌더링
+                        ['m1', 'm2', 'm3', 'c1a', 'c1b', 'c2', 'c3'].forEach(k => {
                             if (!s[k] || !s[k].n) return; let mName = s[k].n;
-                            if (isMorningEvent && morning.includes(k)) {
-                                if (!displayedEvents.has('morning_event')) {
-                                    let log = l['행사_오전'] || l['행사']; let c = ""; let priceHtml = "";
-                                    if (log) { if (log.status == 'end' || log.status == 'ok') c = 'done'; if (log.money) priceHtml = ` <span class="cell-price">₩${log.money.toLocaleString()}</span>`; }
-                                    col.innerHTML += `<div class="m-item ${c}" onclick="openModal('${sid}','행사')">🎉 오전 행사 (통합) ${priceHtml}</div>`;
-                                    displayedEvents.add('morning_event');
-                                } return;
-                            }
+
                             let displayName = mName; let logKey = mName;
                             if (mName === '행사') { if (k.startsWith('c1')) logKey = '행사_선택'; else if (k === 'c2') logKey = (s.day === '목') ? '행사_목오후' : '행사_오후'; else logKey = '행사_오전'; displayName = `🎉 ${mName}`; }
                             let log = l[logKey] || l[mName]; let c = ""; let priceHtml = ""; let timeStr = ""; let badge = "";
@@ -809,9 +815,9 @@
                         const d = res.days[i].data; const sched = d.schedules[sid]; const l = d.logs[sid] || {}; let content = "";
                         if (slot.k === 'life') { content = "생활미션"; if (l["생활미션"]) { if (l["생활미션"].status === 'life_ok') content += "<br>✅"; if (l["생활미션"].money) content += `<br>₩${l["생활미션"].money.toLocaleString()}`; } }
                         else if (sched) {
-                            let keys = slot.k === 'am' ? ['m1', 'm2', 'm3'] : (slot.k === 'sel1' ? ['c1a', 'c1b'] : ['c2']); let items = [];
+                            let keys = slot.k === 'am' ? ['m1', 'm2', 'm3'] : (slot.k === 'sel1' ? ['c1a', 'c1b'] : ['c2', 'c3']); let items = [];
                             keys.forEach(k => {
-                                if (sched[k]) {
+                                if (sched[k] && sched[k].n) {
                                     let mName = sched[k].n; let logKey = mName; if (mName === '행사') { if (keys.includes('m1')) logKey = '행사_오전'; else if (keys.includes('c1a')) logKey = '행사_선택'; else logKey = '행사_오후'; }
                                     let log = l[logKey] || l[mName]; let badge = "";
                                     if (log) {
@@ -850,9 +856,7 @@
                 const base64 = e.target.result.split(',')[1];
                 const sText = students[sid];
                 fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "uploadPhoto", base64: base64, mimeType: file.type, sid: sid, mid: "용모체크", name: sText, date: date }) }).then(r => r.json()).then(res => {
-                    alert("업로드 완료!");
-                    document.getElementById('modal').style.display = 'none';
-                    loadDaily();
+                    alert("업로드 완료!"); document.getElementById('modal').style.display = 'none'; loadDaily();
                 });
             }
         }
@@ -863,28 +867,9 @@
         function downloadWeeklyJPG() { html2canvas(document.getElementById('weeklyReportContainer')).then(c => { const a = document.createElement('a'); a.download = 'WeekReport.jpg'; a.href = c.toDataURL(); a.click(); }); }
 
         function openModal(sid, mid, note = "") {
-            document.getElementById('modal').style.display = 'flex';
-            document.getElementById('mTitle').innerText = mid;
-            document.getElementById('mSid').value = sid;
-            document.getElementById('mMid').value = mid;
-
-            document.getElementById('ui-life').style.display = 'none';
-            document.getElementById('ui-normal').style.display = 'none';
-            document.getElementById('ui-appearance').style.display = 'none';
-
-            if (mid === '생활미션') {
-                document.getElementById('ui-life').style.display = 'block';
-            } else if (mid === '용모체크') {
-                document.getElementById('ui-appearance').style.display = 'block';
-                const preview = document.getElementById('appPreviewArea');
-                if (note && note.includes("ID:")) {
-                    preview.innerHTML = "✅ 이미지가 등록되어 있습니다.";
-                } else {
-                    preview.innerHTML = "등록된 사진이 없습니다.";
-                }
-            } else {
-                document.getElementById('ui-normal').style.display = 'block';
-            }
+            document.getElementById('modal').style.display = 'flex'; document.getElementById('mTitle').innerText = mid; document.getElementById('mSid').value = sid; document.getElementById('mMid').value = mid;
+            document.getElementById('ui-life').style.display = 'none'; document.getElementById('ui-normal').style.display = 'none'; document.getElementById('ui-appearance').style.display = 'none';
+            if (mid === '생활미션') { document.getElementById('ui-life').style.display = 'block'; } else if (mid === '용모체크') { document.getElementById('ui-appearance').style.display = 'block'; const preview = document.getElementById('appPreviewArea'); if (note && note.includes("ID:")) { preview.innerHTML = "✅ 이미지가 등록되어 있습니다."; } else { preview.innerHTML = "등록된 사진이 없습니다."; } } else { document.getElementById('ui-normal').style.display = 'block'; }
         }
 
         function handleLife(s) { const f = document.getElementById('lifePhoto').files[0]; const msg = document.getElementById('lifeMsg').value; if (f) { const r = new FileReader(); r.readAsDataURL(f); r.onload = function (e) { sendData(s, msg, e.target.result.split(',')[1], f.type); } } else { sendData(s, msg, null, null); } }
