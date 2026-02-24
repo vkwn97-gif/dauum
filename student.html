@@ -238,27 +238,25 @@
             transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        /* 5인 레인 색상 */
         .lane-S01 .runner-bar {
             background: linear-gradient(90deg, #64748b, #334155);
         }
-        /* 태윤-해골(어두운색) */
+
         .lane-S02 .runner-bar {
             background: linear-gradient(90deg, #93c5fd, #3b82f6);
         }
-        /* 대중-권총(파랑) */
+
         .lane-S03 .runner-bar {
             background: linear-gradient(90deg, #6ee7b7, #10b981);
         }
-        /* 원준-컴퓨터(초록) */
+
         .lane-S04 .runner-bar {
             background: linear-gradient(90deg, #fdba74, #ea580c);
         }
-        /* 로운-갈색말(주황/갈색) */
+
         .lane-S05 .runner-bar {
             background: linear-gradient(90deg, #d8b4fe, #8b5cf6);
         }
-        /* 태민-자전거(보라) */
 
         .runner-icon {
             position: absolute;
@@ -616,8 +614,6 @@
         const NO_LEVEL_LIST = ["음악", "검정고시", "SCL책력", "심화공부", "교류수업", "오후활동", "맞춤학습", "예배", "축구"];
         const LIST_AUTO_SELECT = ["운동", "영어회화", "글씨연습", "컴퓨터"];
         const LIST_CHOICE = ["검정고시", "음악", "SCL책력", "심화공부", "교류수업"];
-
-        // 목표 금액 52만 원 설정
         const MAX_GOAL = 520000;
 
         let appDate = new Date(); let curId, curName; let currentScheduleData = null; let currentLogs = {};
@@ -650,7 +646,6 @@
                         document.getElementById('raceWidget').style.display = 'block';
                         let html = `<div class="finish-line"></div>`;
 
-                        // [★수정] 선생님 요청 아이콘 적용 (해골, 권총, 컴퓨터, 갈색말, 자전거)
                         const sList = [
                             { id: 'S01', name: '강태윤 주임', icon: '💀' },
                             { id: 'S02', name: '김대중 사원', icon: '🔫' },
@@ -702,22 +697,25 @@
 
         function editPlan() { generatePlanForm(); showView('view-plan'); }
 
+        // [★수정] 모든 요일의 블록을 2개(오전, 오후)로 통일
         function generatePlanForm() {
             const container = document.getElementById('planContainer');
             container.innerHTML = "";
             const day = appDate.getDay();
 
+            // 모든 요일은 15시에 종료되므로 블록은 2개입니다.
             const blocks = [
                 { id: "b1", time: "09:00 ~ 12:00", label: "오전 활동" },
-                { id: "b2", time: "13:00 ~ 15:00", label: "오후 1부" },
-                { id: "b3", time: "15:00 ~ 17:00", label: "오후 2부" }
+                { id: "b2", time: "13:00 ~ 15:00", label: (day === 4) ? "오후 1부" : "오후 활동" }
             ];
 
             blocks.forEach((b, idx) => {
                 const div = document.createElement('div'); div.className = "time-block";
                 let isFixed = false; let fixedText = ""; let fixedValue = "";
 
+                // 목요일 오전 고정
                 if (day === 4 && idx === 0) { isFixed = true; fixedText = "⚽ 오전 축구 수업 (09:30 ~ 12:00)"; fixedValue = "축구"; }
+                // 금요일 오후 고정
                 if (day === 5 && idx === 1) { isFixed = true; fixedText = "🙏 예배 및 우리다움 (13:00 ~ 15:00)"; fixedValue = "예배"; }
 
                 let html = `<div class="time-title"><span>🕰️ ${b.time}</span><span style="font-size:12px;color:#64748b;">${b.label}</span></div>`;
@@ -770,8 +768,13 @@
                 { n: 'c1an', l: 'c1al' }, { n: 'c1bn', l: 'c1bl' }, { n: 'c2n', l: 'c2l' }, { n: 'c3n', l: 'c3l' }
             ];
             let slotIdx = 0;
+
+            // 블록이 b1, b2 두 개만 존재하므로 안전하게 매핑됩니다.
             const mapBlock = (bid) => {
-                const type = document.getElementById(`type_${bid}`).value;
+                const typeEl = document.getElementById(`type_${bid}`);
+                if (!typeEl) return;
+
+                const type = typeEl.value;
                 if (type === 'fixed' || type === 'event') {
                     if (slotIdx < 7) { data[dbSlots[slotIdx].n] = (type === 'fixed') ? document.getElementById(`m1_${bid}`).value : "행사"; slotIdx++; }
                 } else if (type === 'auto') {
@@ -781,7 +784,8 @@
                     if (slotIdx < 7) { data[dbSlots[slotIdx].n] = document.getElementById(`m1_${bid}`).value; slotIdx++; }
                 }
             };
-            mapBlock('b1'); mapBlock('b2'); mapBlock('b3');
+            mapBlock('b1'); mapBlock('b2');
+
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(data) });
             alert("계획이 제출되었습니다.");
             currentScheduleData = {
