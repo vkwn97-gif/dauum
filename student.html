@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LDS 사원 앱</title>
     <style>
+        /* CSS 동일 */
         :root {
             --p: #4f46e5;
             --bg: #f8fafc;
@@ -123,22 +124,33 @@
             font-weight: 500;
         }
 
+        /* [★신규] 다중 공지사항을 위한 CSS */
         #topNoticeBar {
-            background: #fef3c7;
-            color: #92400e;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-weight: bold;
-            text-align: left;
             display: none;
-            border: 1px solid #fcd34d;
-            font-size: 14px;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
+            margin-bottom: 20px;
         }
 
-        /* 계획 수립용 UI */
+        .notice-banner {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: bold;
+            text-align: left;
+            border: 1px solid #fcd34d;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+            .notice-banner .n-date {
+                font-size: 11px;
+                color: #b45309;
+            }
+
         .time-block {
             background: #fff;
             border: 1px solid #e2e8f0;
@@ -239,7 +251,6 @@
             border: 1px solid #cbd5e1;
         }
 
-        /* 미션 실행 화면 */
         .mission-item {
             background: white;
             border: 1px solid #e2e8f0;
@@ -270,7 +281,6 @@
             border-radius: 4px;
         }
 
-        /* [★복구] 버튼 및 타이머 스타일 */
         .btn-action {
             width: 100%;
             padding: 12px;
@@ -320,7 +330,6 @@
             color: #475569;
         }
 
-        /* 모달 */
         #modal, #reflectionModal, #sinmungoModal, #adminModalOverlay, #adminTimeModal, #lateStartModal {
             position: fixed;
             top: 0;
@@ -406,7 +415,9 @@
         <button id="sinmungoBtn" onclick="openSinmungo()">📩</button>
         <button id="adminBtn" onclick="openAdminModal()">⚙️</button>
         <div class="lds-header"><div class="lds-logo-text">LIFE DESIGN STUDIO</div><h1 class="lds-main-title">LDS 사원 앱</h1><p id="todayDate" class="lds-date"></p></div>
-        <div id="topNoticeBar">📢 <span id="topNoticeText">...</span></div>
+
+        <div id="topNoticeBar"></div>
+
         <div class="card user-card" onclick="checkUser('S01','강태윤')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">강태윤</h2></div></div>
         <div class="card user-card" onclick="checkUser('S02','김대중')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">김대중</h2></div></div>
         <div class="card user-card" onclick="checkUser('S03','최원준')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">최원준</h2></div></div>
@@ -438,7 +449,7 @@
 
     <script>
         // ▼▼▼▼▼ 선생님의 배포 URL 입력 ▼▼▼▼▼
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyX4L2SQbGyj9G2DSarZBeYmUjwSfMZvPtLMoQsC0jfDewDtxfZS2pR37cLGlgRyUalXA/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzue5yUPKqFVlg3JyhYhtWiA1VsN2o8ksbaopA4OYrG-384Zqk5224J1Aw3apqwH7_X-w/exec";
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const NO_LEVEL_LIST = ["음악", "검정고시", "SCL책력", "심화공부", "교류수업", "오후활동", "맞춤학습", "예배", "축구"];
@@ -451,7 +462,21 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             renderDate();
-            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getLatestNotice" }) }).then(r => r.json()).then(res => { if (res.notice) { document.getElementById('topNoticeBar').style.display = 'block'; document.getElementById('topNoticeText').innerText = res.notice; } });
+            // [★신규] 활성화된 다중 공지사항 불러오기
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getActiveNotices" }) }).then(r => r.json()).then(res => {
+                if (res.notices && res.notices.length > 0) {
+                    const bar = document.getElementById('topNoticeBar');
+                    bar.style.display = 'flex';
+                    let html = "";
+                    res.notices.forEach(n => {
+                        // 정규식을 이용해 날짜 [YYYY-MM-DD] 분리 (UI 예쁘게)
+                        let dateMatch = n.match(/^\[(.*?)\] (.*)$/);
+                        if (dateMatch) html += `<div class="notice-banner"><span class="n-date">${dateMatch[1]}</span><span>📢 ${dateMatch[2]}</span></div>`;
+                        else html += `<div class="notice-banner">📢 ${n}</div>`;
+                    });
+                    bar.innerHTML = html;
+                }
+            });
         });
 
         function renderDate() { const days = ['일', '월', '화', '수', '목', '금', '토']; document.getElementById('todayDate').innerText = `${appDate.toLocaleDateString()} (${days[appDate.getDay()]})`; }
@@ -469,13 +494,12 @@
                     showView('view-mission');
                     document.getElementById('missionTitle').innerText = `${name} 사원 (${getAppDateStr()})`;
                 } else {
-                    generatePlanForm(); // 폼 먼저 생성
+                    generatePlanForm();
                     showView('view-plan');
                 }
             });
         }
 
-        // [★복구] 수정 버튼 누르면 폼을 다시 생성하고 보여줌 (빈 화면 오류 해결)
         function editPlan() {
             generatePlanForm();
             showView('view-plan');
@@ -552,9 +576,7 @@
 
         function renderChoiceRows(bid) {
             const selectOpts = LIST_CHOICE.map(i => `<option value="${i}">${i}</option>`).join('');
-            return `
-        <div class="mission-row"><select id="m1_${bid}">${selectOpts}</select></div>
-        `;
+            return `<div class="mission-row"><select id="m1_${bid}">${selectOpts}</select></div>`;
         }
 
         function savePlan() {
@@ -628,38 +650,28 @@
             const slots = [d.m1, d.m2, d.m3, d.c1a, d.c1b, d.c2];
             slots.forEach(t => {
                 if (!t || !t.n) return;
-                if (t.n === '행사') {
-                    renderEventCard(list, "🎉 행사", "행사");
-                } else {
-                    renderItem(list, t);
-                }
+                if (t.n === '행사') renderEventCard(list, "🎉 행사", "행사");
+                else renderItem(list, t);
             });
         }
 
         function renderItem(container, t) {
             if (!t || !t.n) return;
 
-            // 1. 고정 일정 (버튼 없음)
             if (t.n.includes('축구') || t.n.includes('예배')) {
                 const div = document.createElement('div');
                 div.className = "mission-item fixed-item";
-                div.innerHTML = `<div class="mission-header">
-                                <span class="mission-name">${t.n.includes('축구') ? '⚽' : '🙏'} ${t.n}</span>
-                                <span class="mission-lv">고정 일정</span>
-                             </div>
+                div.innerHTML = `<div class="mission-header"><span class="mission-name">${t.n.includes('축구') ? '⚽' : '🙏'} ${t.n}</span><span class="mission-lv">고정 일정</span></div>
                              <div style="font-size:12px; color:#64748b;">시간에 맞춰 참여하세요 (버튼 없음)</div>`;
                 container.appendChild(div);
                 return;
             }
 
-            // 2. 일반 미션 로직
             const serverLog = currentLogs[t.n];
             const isDone = serverLog && (serverLog.status === 'end' || serverLog.status === 'ok' || serverLog.status === 'gong');
             const isStart = serverLog && serverLog.status === 'start';
 
-            // [★복구] 진행 중인 미션이 있는지 확인 (다른 미션 버튼 잠금용)
             const isAnyRunning = Object.values(currentLogs).some(l => l.status === 'start');
-
             const lvDisplay = NO_LEVEL_LIST.includes(t.n) ? "-" : (t.l || "-");
 
             const div = document.createElement('div'); div.className = "mission-item";
@@ -669,22 +681,17 @@
                 let btnText = serverLog.status === 'gong' ? "✅ 공결" : "✅ 완료됨";
                 btns = `<button class="btn-action done" disabled>${btnText}</button>`;
                 if (isAdminMode) btns = `<button class="btn-action done" style="border:1px solid red; color:red;" onclick="handleMission('${t.n}','${t.l}')">🛠 수정(관리자)</button>`;
-
             } else if (isStart) {
-                // [★복구] 타이머와 진행 중 버튼 표시
                 btns = `<div class="live-timer" id="timer-${t.n}">00:00:00</div>
                     <button class="btn-action ing" onclick="handleMission('${t.n}','${t.l}')">🔥 완료하기</button>`;
                 startTimer(t.n);
-
             } else {
-                // [★복구] 시작 및 늦은 시작 버튼 (다른 게 켜져 있으면 disabled 속성 추가)
                 let disabledAttr = isAnyRunning ? "disabled" : "";
                 btns = `<div style="display:flex; gap:5px;">
                       <button class="btn-action" onclick="handleMission('${t.n}','${t.l}')" ${disabledAttr}>시작</button>
                       <button class="btn-action" style="background:#f1f5f9; color:#64748b; font-size:13px; border:1px solid #cbd5e1;" onclick="openLateStart('${t.n}','${t.l}')" ${disabledAttr}>늦은 시작</button>
                     </div>`;
             }
-
             div.innerHTML = `<div class="mission-header"><span class="mission-name">${t.n}</span><span class="mission-lv">${lvDisplay}</span></div>${btns}`;
             container.appendChild(div);
         }
@@ -717,9 +724,7 @@
             if (isAdminMode && serverLog && (serverLog.status === 'end' || serverLog.status === 'gong')) { curM = name; document.getElementById('adminTimeModal').style.display = 'flex'; return; }
 
             if (!serverLog || serverLog.status !== 'start') {
-                // [★복구] 이미 진행 중인 업무가 있으면 시작 차단
                 if (Object.values(currentLogs).some(l => l.status === 'start')) return alert("이미 진행 중인 업무가 있습니다!");
-
                 currentLogs[name] = { status: 'start' };
                 localStorage.setItem(`${key}_start`, Date.now());
                 fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "start", student_id: curId, mission_id: name, date: getAppDateStr(), note: "Start" }) });
@@ -747,15 +752,10 @@
             if (!s || !e) return alert("시간을 입력해주세요");
             const note = `${s}~${e} (수동)`;
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: curLateMission, date: getAppDateStr(), difficulty: curLateLevel, note: note }) });
-
-            // 즉시 반영을 위해 로컬 currentLogs 업데이트
             currentLogs[curLateMission] = { status: 'end' };
-            alert("기록되었습니다.");
-            document.getElementById('lateStartModal').style.display = 'none';
-            renderMissions(currentScheduleData);
+            alert("기록되었습니다."); document.getElementById('lateStartModal').style.display = 'none'; renderMissions(currentScheduleData);
         }
 
-        // [★복구] 타이머 로직 정상 작동 확인
         function startTimer(name) {
             if (timerInterval) clearInterval(timerInterval);
             const key = `${curId}_active_${getAppDateStr()}`;
