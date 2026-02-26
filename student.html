@@ -609,7 +609,7 @@
     <div id="adminTimeModal"><div class="modal-box"><h3>⏰ 시간 입력 (관리자 권한)</h3><input type="time" id="admStart" style="margin-bottom:10px;"> ~ <input type="time" id="admEnd" style="margin-bottom:10px;"><button onclick="finishAdminMission()" class="primary" style="margin-top:10px;">강제 완료 처리</button><button onclick="document.getElementById('adminTimeModal').style.display='none'" style="margin-top:10px; border:none; background:none;">취소</button></div></div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzUggqi6Wugy1SfMwak8eJYut0t2M2XGwvn15GcKNQlTNHIwE6B4EAOD5mos5pMAIp33Q/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzzoQh5m7y8vJlyHpJdYE2HdniYTAPTLdSWCN4H3xVeUpfjPsg_qWBAVIea3p7uZofEQA/exec";
 
         const NO_LEVEL_LIST = ["음악", "검정고시", "SCL책력", "심화공부", "교류수업", "오후활동", "맞춤학습", "예배", "축구"];
         const LIST_AUTO_SELECT = ["운동", "영어회화", "글씨연습", "컴퓨터"];
@@ -660,17 +660,17 @@
                             let visualWidth = percent * 0.9;
 
                             html += `
-                    <div class="lane lane-${s.id}">
-                        <div class="lane-info">
-                            <span class="runner-name">${s.name}</span>
-                            <span class="runner-money">₩${money.toLocaleString()}</span>
-                        </div>
-                        <div class="track-bg">
-                            <div class="runner-bar" style="width:0%;" data-width="${visualWidth}%">
-                                <div class="runner-icon">${s.icon}</div>
+                        <div class="lane lane-${s.id}">
+                            <div class="lane-info">
+                                <span class="runner-name">${s.name}</span>
+                                <span class="runner-money">₩${money.toLocaleString()}</span>
                             </div>
-                        </div>
-                    </div>`;
+                            <div class="track-bg">
+                                <div class="runner-bar" style="width:0%;" data-width="${visualWidth}%">
+                                    <div class="runner-icon">${s.icon}</div>
+                                </div>
+                            </div>
+                        </div>`;
                         });
                         track.innerHTML = html;
                         setTimeout(() => { document.querySelectorAll('.runner-bar').forEach(b => { b.style.width = b.getAttribute('data-width'); }); }, 300);
@@ -697,42 +697,50 @@
 
         function editPlan() { generatePlanForm(); showView('view-plan'); }
 
-        // [★수정] 모든 요일의 블록을 2개(오전, 오후)로 통일
+        // [★완벽수정] 목요일만 3개 블록(15시~17시 추가), 나머지는 2개 블록 복구
         function generatePlanForm() {
             const container = document.getElementById('planContainer');
             container.innerHTML = "";
             const day = appDate.getDay();
 
-            // 모든 요일은 15시에 종료되므로 블록은 2개입니다.
-            const blocks = [
-                { id: "b1", time: "09:00 ~ 12:00", label: "오전 활동" },
-                { id: "b2", time: "13:00 ~ 15:00", label: (day === 4) ? "오후 1부" : "오후 활동" }
-            ];
+            let blocks = [];
+            if (day === 4) { // 목요일: 오전, 오후 1부, 오후 2부
+                blocks = [
+                    { id: "b1", time: "09:00 ~ 12:00", label: "오전 활동" },
+                    { id: "b2", time: "13:00 ~ 15:00", label: "오후 1부" },
+                    { id: "b3", time: "15:00 ~ 17:00", label: "오후 2부" }
+                ];
+            } else { // 나머지 요일: 오전, 오후 1부
+                blocks = [
+                    { id: "b1", time: "09:00 ~ 12:00", label: "오전 활동" },
+                    { id: "b2", time: "13:00 ~ 15:00", label: "오후 활동" }
+                ];
+            }
 
             blocks.forEach((b, idx) => {
                 const div = document.createElement('div'); div.className = "time-block";
                 let isFixed = false; let fixedText = ""; let fixedValue = "";
 
                 // 목요일 오전 고정
-                if (day === 4 && idx === 0) { isFixed = true; fixedText = "⚽ 오전 축구 수업 (09:30 ~ 12:00)"; fixedValue = "축구"; }
+                if (day === 4 && b.id === "b1") { isFixed = true; fixedText = "⚽ 오전 축구 수업 (10:00 ~ 12:00)"; fixedValue = "축구"; }
                 // 금요일 오후 고정
-                if (day === 5 && idx === 1) { isFixed = true; fixedText = "🙏 예배 및 우리다움 (13:00 ~ 15:00)"; fixedValue = "예배"; }
+                if (day === 5 && b.id === "b2") { isFixed = true; fixedText = "🙏 예배 및 우리다움 (13:00 ~ 15:00)"; fixedValue = "예배"; }
 
                 let html = `<div class="time-title"><span>🕰️ ${b.time}</span><span style="font-size:12px;color:#64748b;">${b.label}</span></div>`;
 
                 if (isFixed) {
                     html += `<div class="fixed-box">${fixedText}</div>
-                         <input type="hidden" id="type_${b.id}" value="fixed">
-                         <input type="hidden" id="m1_${b.id}" value="${fixedValue}">`;
+                             <input type="hidden" id="type_${b.id}" value="fixed">
+                             <input type="hidden" id="m1_${b.id}" value="${fixedValue}">`;
                 } else {
                     html += `
-                <div class="cat-selector" id="cat_${b.id}">
-                    <div class="cat-btn active" onclick="setCat('${b.id}', 'auto', this)">자율 미션</div>
-                    <div class="cat-btn" onclick="setCat('${b.id}', 'choice', this)">선택 미션</div>
-                    <div class="cat-btn" onclick="setCat('${b.id}', 'event', this)">🎉 행사</div>
-                </div>
-                <input type="hidden" id="type_${b.id}" value="auto">
-                <div id="area_${b.id}">${renderAutoRows(b.id)}</div>`;
+                    <div class="cat-selector" id="cat_${b.id}">
+                        <div class="cat-btn active" onclick="setCat('${b.id}', 'auto', this)">자율 미션</div>
+                        <div class="cat-btn" onclick="setCat('${b.id}', 'choice', this)">선택 미션</div>
+                        <div class="cat-btn" onclick="setCat('${b.id}', 'event', this)">🎉 행사</div>
+                    </div>
+                    <input type="hidden" id="type_${b.id}" value="auto">
+                    <div id="area_${b.id}">${renderAutoRows(b.id)}</div>`;
                 }
                 div.innerHTML = html; container.appendChild(div);
             });
@@ -752,11 +760,11 @@
             const lvOpts = `<option>NORMAL</option><option>EASY</option><option>HARD</option>`;
             const selectOpts = LIST_AUTO_SELECT.map(i => `<option value="${i}">${i}</option>`).join('');
             return `
-        <div class="mission-row"><div class="fixed-label">✍️ 글쓰기</div><select id="l1_${bid}">${lvOpts}</select><input type="hidden" id="m1_${bid}" value="글쓰기"></div>
-        <div class="mission-row"><div class="fixed-label">📚 독서</div><select id="l2_${bid}">${lvOpts}</select><input type="hidden" id="m2_${bid}" value="독서"></div>
-        <div class="mission-row"><div class="fixed-label">📖 자서전</div><select id="l3_${bid}">${lvOpts}</select><input type="hidden" id="m3_${bid}" value="자서전"></div>
-        <div class="mission-row"><select id="m4_${bid}">${selectOpts}</select><select id="l4_${bid}">${lvOpts}</select></div>
-        <div class="mission-row"><select id="m5_${bid}">${selectOpts}</select><select id="l5_${bid}">${lvOpts}</select></div>`;
+            <div class="mission-row"><div class="fixed-label">✍️ 글쓰기</div><select id="l1_${bid}">${lvOpts}</select><input type="hidden" id="m1_${bid}" value="글쓰기"></div>
+            <div class="mission-row"><div class="fixed-label">📚 독서</div><select id="l2_${bid}">${lvOpts}</select><input type="hidden" id="m2_${bid}" value="독서"></div>
+            <div class="mission-row"><div class="fixed-label">📖 자서전</div><select id="l3_${bid}">${lvOpts}</select><input type="hidden" id="m3_${bid}" value="자서전"></div>
+            <div class="mission-row"><select id="m4_${bid}">${selectOpts}</select><select id="l4_${bid}">${lvOpts}</select></div>
+            <div class="mission-row"><select id="m5_${bid}">${selectOpts}</select><select id="l5_${bid}">${lvOpts}</select></div>`;
         }
 
         function renderChoiceRows(bid) { const selectOpts = LIST_CHOICE.map(i => `<option value="${i}">${i}</option>`).join(''); return `<div class="mission-row"><select id="m1_${bid}">${selectOpts}</select></div>`; }
@@ -769,7 +777,6 @@
             ];
             let slotIdx = 0;
 
-            // 블록이 b1, b2 두 개만 존재하므로 안전하게 매핑됩니다.
             const mapBlock = (bid) => {
                 const typeEl = document.getElementById(`type_${bid}`);
                 if (!typeEl) return;
@@ -784,7 +791,9 @@
                     if (slotIdx < 7) { data[dbSlots[slotIdx].n] = document.getElementById(`m1_${bid}`).value; slotIdx++; }
                 }
             };
-            mapBlock('b1'); mapBlock('b2');
+
+            // [★완벽수정] b3도 안전하게 매핑되도록 복구
+            mapBlock('b1'); mapBlock('b2'); mapBlock('b3');
 
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(data) });
             alert("계획이 제출되었습니다.");
@@ -842,9 +851,9 @@
                 } else {
                     let disabledAttr = isAnyRunning ? "disabled" : "";
                     btns = `<div style="display:flex; gap:5px;">
-                          <button class="btn-action" onclick="handleMission('${t.n}','${t.l}')" ${disabledAttr}>시작</button>
-                          <button class="btn-action" style="background:#f1f5f9; color:#64748b; font-size:13px; border:1px solid #cbd5e1;" onclick="openLateStart('${t.n}','${t.l}')" ${disabledAttr}>늦은 시작</button>
-                        </div>`;
+                              <button class="btn-action" onclick="handleMission('${t.n}','${t.l}')" ${disabledAttr}>시작</button>
+                              <button class="btn-action" style="background:#f1f5f9; color:#64748b; font-size:13px; border:1px solid #cbd5e1;" onclick="openLateStart('${t.n}','${t.l}')" ${disabledAttr}>늦은 시작</button>
+                            </div>`;
                 }
             }
             div.innerHTML = `<div class="mission-header"><span class="mission-name">${t.n}</span><span class="mission-lv">${lvDisplay}</span></div>${btns}`;

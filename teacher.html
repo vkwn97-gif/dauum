@@ -670,10 +670,9 @@
 
     <script>
         // ▼▼▼▼▼ 선생님의 배포 URL 입력 ▼▼▼▼▼
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzUggqi6Wugy1SfMwak8eJYut0t2M2XGwvn15GcKNQlTNHIwE6B4EAOD5mos5pMAIp33Q/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzzoQh5m7y8vJlyHpJdYE2HdniYTAPTLdSWCN4H3xVeUpfjPsg_qWBAVIea3p7uZofEQA/exec";
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
-        // [★수정] 5인 체제 반영
         const students = {
             "S01": "강태윤 주임",
             "S02": "김대중 사원",
@@ -717,19 +716,19 @@
                     let bg = isON ? '#ecfdf5' : '#f8fafc';
                     let border = isON ? '#10b981' : '#e2e8f0';
                     html += `
-                <div style="background:${bg}; border:2px solid ${border}; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="flex:1; text-align:left;">
-                        <div style="font-size:11px; color:#64748b;">${new Date(n.date).toLocaleDateString()} ${isON ? '<b style="color:#10b981;">[게시 중]</b>' : ''}</div>
-                        <div style="font-size:15px; font-weight:bold; margin-top:5px; color:#1e293b; white-space:pre-wrap;">${n.content}</div>
-                    </div>
-                    <div style="display:flex; gap:5px; flex-direction:column;">
-                        ${isON ?
+                    <div style="background:${bg}; border:2px solid ${border}; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="flex:1; text-align:left;">
+                            <div style="font-size:11px; color:#64748b;">${new Date(n.date).toLocaleDateString()} ${isON ? '<b style="color:#10b981;">[게시 중]</b>' : ''}</div>
+                            <div style="font-size:15px; font-weight:bold; margin-top:5px; color:#1e293b; white-space:pre-wrap;">${n.content}</div>
+                        </div>
+                        <div style="display:flex; gap:5px; flex-direction:column;">
+                            ${isON ?
                             `<button onclick="toggleNotice('${n.id}', 'INACTIVE')" style="background:#ef4444; color:white; border:none; padding:8px; border-radius:8px; cursor:pointer; font-weight:bold;">숨기기</button>` :
                             `<button onclick="toggleNotice('${n.id}', 'ACTIVE')" style="background:#10b981; color:white; border:none; padding:8px; border-radius:8px; cursor:pointer; font-weight:bold;">다시 띄우기</button>`
                         }
-                        <button onclick="deleteNotice('${n.id}')" style="background:#cbd5e1; color:#475569; border:none; padding:5px; border-radius:8px; cursor:pointer; font-size:12px;">영구 삭제</button>
-                    </div>
-                </div>`;
+                            <button onclick="deleteNotice('${n.id}')" style="background:#cbd5e1; color:#475569; border:none; padding:5px; border-radius:8px; cursor:pointer; font-size:12px;">영구 삭제</button>
+                        </div>
+                    </div>`;
                 });
                 document.getElementById('noticeListArea').innerHTML = html || "<div style='text-align:center; color:#888; padding:20px;'>등록된 공지가 없습니다.</div>";
             });
@@ -769,7 +768,6 @@
                     col.innerHTML += `<div class="m-item ${appCls}" onclick="openModal('${sid}','용모체크', '${appLog ? appLog.note : ''}')"><b>👔 용모단정</b> <span>${appSt}</span></div>`;
 
                     if (s) {
-                        // [★수정] c3까지 포함해서 렌더링
                         ['m1', 'm2', 'm3', 'c1a', 'c1b', 'c2', 'c3'].forEach(k => {
                             if (!s[k] || !s[k].n) return; let mName = s[k].n;
 
@@ -861,7 +859,31 @@
             }
         }
 
-        function initWeekSelector() { const wSel = document.getElementById('wWeekSelect'); const today = new Date(); for (let i = 0; i < 5; i++) { const d = new Date(today); d.setDate(today.getDate() - (i * 7)); const diff = d.getDate() - d.getDay() + (d.getDay() == 0 ? -6 : 1); const monday = new Date(d.setDate(diff)); const val = monday.toISOString().slice(0, 10); const opt = document.createElement('option'); opt.value = val; opt.innerText = `${monday.getMonth() + 1}월 ${Math.ceil(monday.getDate() / 7)}주차 (${val}~)`; wSel.appendChild(opt); } }
+        // [★완벽수정] 로딩 시간 0초! 2026년 1월부터 최대 52주치 리스트를 즉시 자동 생성합니다.
+        function initWeekSelector() {
+            const wSel = document.getElementById('wWeekSelect');
+            wSel.innerHTML = "";
+            const today = new Date();
+            const startYear = 2026;
+
+            // 최근 52주 치 옵션을 생성 (약 1년)
+            for (let i = 0; i < 52; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() - (i * 7));
+                const diff = d.getDate() - d.getDay() + (d.getDay() == 0 ? -6 : 1);
+                const monday = new Date(d.setDate(diff));
+
+                // 2026년 이전 날짜로는 내려가지 않도록 차단
+                if (monday.getFullYear() < startYear) break;
+
+                const val = monday.toISOString().slice(0, 10);
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.innerText = `${monday.getMonth() + 1}월 ${Math.ceil(monday.getDate() / 7)}주차 (${val}~)`;
+                wSel.appendChild(opt);
+            }
+        }
+
         function openQrModal(sid, name) { document.getElementById('qrModal').style.display = 'flex'; document.getElementById('qrName').innerText = name; document.getElementById('qrImage').innerHTML = `<img src="https://quickchart.io/qr?text=${encodeURIComponent(sid + "," + name)}&size=200">`; }
         function downloadMonthlyJPG() { html2canvas(document.getElementById('monthlyReportContainer')).then(c => { const a = document.createElement('a'); a.download = 'MonthReport.jpg'; a.href = c.toDataURL(); a.click(); }); }
         function downloadWeeklyJPG() { html2canvas(document.getElementById('weeklyReportContainer')).then(c => { const a = document.createElement('a'); a.download = 'WeekReport.jpg'; a.href = c.toDataURL(); a.click(); }); }
