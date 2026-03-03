@@ -149,7 +149,6 @@
                 color: #b45309;
             }
 
-        /* 레이스 위젯 */
         .race-card {
             background: white;
             border-radius: 20px;
@@ -238,24 +237,28 @@
             transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .lane-S01 .runner-bar {
+        .bg-color-0 {
             background: linear-gradient(90deg, #64748b, #334155);
         }
 
-        .lane-S02 .runner-bar {
+        .bg-color-1 {
             background: linear-gradient(90deg, #93c5fd, #3b82f6);
         }
 
-        .lane-S03 .runner-bar {
+        .bg-color-2 {
             background: linear-gradient(90deg, #6ee7b7, #10b981);
         }
 
-        .lane-S04 .runner-bar {
+        .bg-color-3 {
             background: linear-gradient(90deg, #fdba74, #ea580c);
         }
 
-        .lane-S05 .runner-bar {
+        .bg-color-4 {
             background: linear-gradient(90deg, #d8b4fe, #8b5cf6);
+        }
+
+        .bg-color-5 {
+            background: linear-gradient(90deg, #fcd34d, #d97706);
         }
 
         .runner-icon {
@@ -274,7 +277,6 @@
             z-index: 2;
         }
 
-        /* 계획 수립용 UI */
         .time-block {
             background: #fff;
             border: 1px solid #e2e8f0;
@@ -375,7 +377,6 @@
             border: 1px solid #cbd5e1;
         }
 
-        /* 미션 실행 화면 */
         .mission-item {
             background: white;
             border: 1px solid #e2e8f0;
@@ -549,6 +550,32 @@
             line-height: 1;
             z-index: 999;
         }
+
+        .onb-banner {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #fcd34d;
+            text-align: left;
+        }
+
+        /* [★신규] 증빙 사진 최적화 스타일 (가로/세로 제한 및 예쁜 박스 처리) */
+        .proof-photo {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+
+            .proof-photo:active {
+                transform: scale(0.98);
+            }
     </style>
 </head>
 <body>
@@ -563,9 +590,7 @@
 
         <div class="race-card" id="raceWidget" style="display: none;">
             <h3 class="race-title">🏆 이번 주 실적 레이스 <span class="race-goal">목표 52만 원</span></h3>
-            <div class="race-track" id="raceTrackArea">
-                <div class="finish-line"></div>
-            </div>
+            <div class="race-track" id="raceTrackArea"></div>
         </div>
 
         <div id="adminPanel" class="hidden" style="background: #1e293b; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
@@ -577,11 +602,7 @@
             <button onclick="exitAdmin()" style="background:#475569; color:white; border:none; padding:8px 15px; border-radius:8px; width:100%; cursor:pointer;">관리자 모드 종료</button>
         </div>
 
-        <div class="card user-card" onclick="checkUser('S01','강태윤')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">강태윤 주임</h2></div></div>
-        <div class="card user-card" onclick="checkUser('S02','김대중')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">김대중 사원</h2></div></div>
-        <div class="card user-card" onclick="checkUser('S03','최원준')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">최원준 대리</h2></div></div>
-        <div class="card user-card" onclick="checkUser('S04','이로운')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">이로운 인턴</h2></div></div>
-        <div class="card user-card" onclick="checkUser('S05','최태민')"><div class="avatar">👨‍💼</div><div class="user-info"><h2 class="user-name">최태민 인턴</h2></div></div>
+        <div id="userLobbyArea"></div>
     </div>
 
     <div id="view-plan" class="view container">
@@ -596,7 +617,7 @@
     <div id="view-mission" class="view container">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h2 id="missionTitle" style="font-size:18px; margin:0;"></h2>
-            <button onclick="editPlan()" style="background:white; border:1px solid #cbd5e1; padding:5px 10px; border-radius:8px; font-size:13px; font-weight:bold; color:#4f46e5;">✏️ 계획 수정</button>
+            <button id="btnEditPlan" onclick="editPlan()" style="background:white; border:1px solid #cbd5e1; padding:5px 10px; border-radius:8px; font-size:13px; font-weight:bold; color:#4f46e5;">✏️ 계획 수정</button>
             <button onclick="goHome()" style="background:#f1f5f9; border:none; padding:5px 10px; border-radius:8px; font-size:13px; margin-left:5px;">나가기</button>
         </div>
         <div id="missionList"></div>
@@ -609,16 +630,16 @@
     <div id="adminTimeModal"><div class="modal-box"><h3>⏰ 시간 입력 (관리자 권한)</h3><input type="time" id="admStart" style="margin-bottom:10px;"> ~ <input type="time" id="admEnd" style="margin-bottom:10px;"><button onclick="finishAdminMission()" class="primary" style="margin-top:10px;">강제 완료 처리</button><button onclick="document.getElementById('adminTimeModal').style.display='none'" style="margin-top:10px; border:none; background:none;">취소</button></div></div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzzoQh5m7y8vJlyHpJdYE2HdniYTAPTLdSWCN4H3xVeUpfjPsg_qWBAVIea3p7uZofEQA/exec";
-
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby_h4mLBi3P7JjQWj3qqPIuA7ka6FqBNpktWsLuHC7TQPdFheybM4a0zlmSX8qw3jgLjA/exec";
         const NO_LEVEL_LIST = ["음악", "검정고시", "SCL책력", "심화공부", "교류수업", "오후활동", "맞춤학습", "예배", "축구"];
         const LIST_AUTO_SELECT = ["운동", "영어회화", "글씨연습", "컴퓨터"];
         const LIST_CHOICE = ["검정고시", "음악", "SCL책력", "심화공부", "교류수업"];
         const MAX_GOAL = 520000;
 
-        let appDate = new Date(); let curId, curName; let currentScheduleData = null; let currentLogs = {};
-        let currentEventMission = null; let curLateMission = null; let curLateLevel = null; let isAdminMode = false; let curM;
-        let timerInterval = null;
+        let appDate = new Date(); let curId, curName, curRole;
+        let currentScheduleData = null; let currentLogs = {}; let currentOnbData = [];
+        let curLateMission = null; let curLateLevel = null; let isAdminMode = false; let curM;
+        let timerInterval = null; let allUsers = [];
 
         document.addEventListener("DOMContentLoaded", () => {
             renderDate();
@@ -635,337 +656,195 @@
                     bar.innerHTML = html;
                 }
             });
-            loadRaceBoard();
+            loadUsersAndRace();
         });
 
-        function loadRaceBoard() {
+        function loadUsersAndRace() {
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getWeeklyRank", date: getAppDateStr() }) })
                 .then(r => r.json()).then(res => {
-                    if (res.ok && res.rank) {
+                    if (res.ok && res.users) {
+                        allUsers = res.users;
+                        const lobby = document.getElementById('userLobbyArea');
+                        lobby.innerHTML = "";
+                        allUsers.forEach((u, i) => {
+                            let roleTag = u.role === '인턴' ? `<span style="color:#d97706; font-size:12px; background:#fef3c7; padding:2px 6px; border-radius:4px; margin-left:5px;">인턴 과정 진행 중</span>` : "";
+                            lobby.innerHTML += `
+                            <div class="card user-card" onclick="checkUser('${u.id}','${u.name}','${u.role}')">
+                                <div class="avatar">${u.icon}</div>
+                                <div class="user-info"><h2 class="user-name">${u.name} ${u.role} ${roleTag}</h2></div>
+                            </div>`;
+                        });
+
                         const track = document.getElementById('raceTrackArea');
                         document.getElementById('raceWidget').style.display = 'block';
                         let html = `<div class="finish-line"></div>`;
-
-                        const sList = [
-                            { id: 'S01', name: '강태윤 주임', icon: '💀' },
-                            { id: 'S02', name: '김대중 사원', icon: '🔫' },
-                            { id: 'S03', name: '최원준 대리', icon: '💻' },
-                            { id: 'S04', name: '이로운 인턴', icon: '🐎' },
-                            { id: 'S05', name: '최태민 인턴', icon: '🚲' }
-                        ];
-
-                        sList.forEach(s => {
-                            let money = res.rank[s.id] || 0;
+                        allUsers.forEach((u, i) => {
+                            let money = res.rank[u.id] || 0;
                             let percent = Math.min(100, (money / MAX_GOAL) * 100);
                             let visualWidth = percent * 0.9;
-
+                            let bgClass = `bg-color-${i % 6}`;
                             html += `
-                        <div class="lane lane-${s.id}">
-                            <div class="lane-info">
-                                <span class="runner-name">${s.name}</span>
-                                <span class="runner-money">₩${money.toLocaleString()}</span>
-                            </div>
-                            <div class="track-bg">
-                                <div class="runner-bar" style="width:0%;" data-width="${visualWidth}%">
-                                    <div class="runner-icon">${s.icon}</div>
-                                </div>
-                            </div>
-                        </div>`;
+                            <div class="lane">
+                                <div class="lane-info"><span class="runner-name">${u.name} ${u.role}</span><span class="runner-money">₩${money.toLocaleString()}</span></div>
+                                <div class="track-bg"><div class="runner-bar ${bgClass}" style="width:0%;" data-width="${visualWidth}%"><div class="runner-icon">${u.icon}</div></div></div>
+                            </div>`;
                         });
                         track.innerHTML = html;
                         setTimeout(() => { document.querySelectorAll('.runner-bar').forEach(b => { b.style.width = b.getAttribute('data-width'); }); }, 300);
                     }
+                }).catch(e => {
+                    alert("서버 연결 실패! 선생님께 '새 배포'를 요청해주세요.");
                 });
         }
 
         function renderDate() { const days = ['일', '월', '화', '수', '목', '금', '토']; document.getElementById('todayDate').innerText = `${appDate.toLocaleDateString()} (${days[appDate.getDay()]})`; }
         function getAppDateStr() { const offset = appDate.getTimezoneOffset() * 60000; return new Date(appDate.getTime() - offset).toISOString().slice(0, 10); }
         function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-        function goHome() { showView('view-dashboard'); loadRaceBoard(); }
+        function goHome() { showView('view-dashboard'); loadUsersAndRace(); }
 
-        function checkUser(id, name) {
-            curId = id; curName = name;
+        function checkUser(id, name, role) {
+            curId = id; curName = name; curRole = role;
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "checkSchedule", id: id, date: getAppDateStr() }) }).then(r => r.json()).then(res => {
                 currentLogs = res.logs || {};
-                if (res.hasSchedule) {
-                    currentScheduleData = res.data; renderMissions(res.data); showView('view-mission'); document.getElementById('missionTitle').innerText = `${name} 사원 (${getAppDateStr()})`;
+
+                if (res.isIntern) {
+                    currentOnbData = res.onbDaily;
+                    document.getElementById('missionTitle').innerText = `${name} 인턴의 오늘 I-BASIC 과제`;
+                    document.getElementById('btnEditPlan').style.display = 'none';
+                    renderInternMissions();
+                    showView('view-mission');
                 } else {
-                    generatePlanForm(); showView('view-plan');
+                    document.getElementById('btnEditPlan').style.display = 'block';
+                    if (res.hasSchedule) {
+                        currentScheduleData = res.data; renderMissions(res.data); showView('view-mission'); document.getElementById('missionTitle').innerText = `${name} 사원 (${getAppDateStr()})`;
+                    } else {
+                        generatePlanForm(); showView('view-plan');
+                    }
                 }
+            });
+        }
+
+        function renderInternMissions() {
+            const list = document.getElementById('missionList'); list.innerHTML = "";
+            list.innerHTML += `<div class="onb-banner"><b>🐣 인턴 사원님 환영합니다!</b><br><span style="font-size:12px; color:#92400e;">선생님이 짜주신 오늘의 온보딩 퀘스트를 완료해주세요. 생활미션도 잊지 마세요!</span></div>`;
+
+            const lifeLog = currentLogs["생활미션"]; let lifeSt = "미완료", imgH = "", msgH = "";
+            // [★수정] 사진에 proof-photo 클래스 적용
+            if (lifeLog) { if (lifeLog.status === 'life_ok') lifeSt = "✅ 확인됨"; else if (lifeLog.status === 'fail') lifeSt = "❌ 실패"; if (lifeLog.photo) imgH = `<img src="${lifeLog.photo}" class="proof-photo" onclick="window.open(this.src)">`; if (lifeLog.message) msgH = `<div class="teacher-msg">📢 ${lifeLog.message}</div>`; }
+            list.innerHTML += `<div class="mission-item" style="border-left:5px solid #f59e0b; background:#fffbeb;"><div class="mission-header"><span class="mission-name">🌞 생활미션 (필수)</span><span class="mission-lv">${lifeSt}</span></div>${imgH}${msgH}</div>`;
+
+            const timeLabels = ["10:00 ~ 12:00", "13:00 ~ 15:00", "15:00 ~ 17:00"];
+            currentOnbData.forEach((task, idx) => {
+                if (!task) return;
+                let mName = `온보딩_${idx + 1}`;
+                const serverLog = currentLogs[mName];
+                const isDone = serverLog && (serverLog.status === 'end' || serverLog.status === 'ok');
+                const isStart = serverLog && serverLog.status === 'start';
+                const isAnyRunning = Object.values(currentLogs).some(l => l.status === 'start');
+
+                const div = document.createElement('div'); div.className = "mission-item";
+                let btns = "";
+                if (isAdminMode) { let stateTxt = isDone ? "수정" : "강제 완료"; btns = `<button class="btn-action" style="border:1px solid red; color:red;" onclick="handleMission('${mName}','NORMAL')">🛠 ${stateTxt}(관리자)</button>`; }
+                else {
+                    if (isDone) { btns = `<button class="btn-action done" disabled>✅ 완료됨</button>`; }
+                    else if (isStart) { btns = `<div class="live-timer" id="timer-${mName}">00:00:00</div><button class="btn-action ing" onclick="handleMission('${mName}','NORMAL')">🔥 교육 완료하기</button>`; startTimer(mName); }
+                    else { let disabledAttr = isAnyRunning ? "disabled" : ""; btns = `<button class="btn-action" onclick="handleMission('${mName}','NORMAL')" ${disabledAttr}>과제 시작</button>`; }
+                }
+                div.innerHTML = `<div style="font-size:11px; color:#p; font-weight:bold; margin-bottom:5px;">⏰ ${timeLabels[idx]}</div><div class="mission-header" style="margin-bottom:10px;"><span class="mission-name" style="color:#1e293b;">${task}</span></div>${btns}`;
+                list.appendChild(div);
             });
         }
 
         function editPlan() { generatePlanForm(); showView('view-plan'); }
 
-        // [★완벽수정] 목요일만 3개 블록(15시~17시 추가), 나머지는 2개 블록 복구
         function generatePlanForm() {
-            const container = document.getElementById('planContainer');
-            container.innerHTML = "";
-            const day = appDate.getDay();
-
+            const container = document.getElementById('planContainer'); container.innerHTML = ""; const day = appDate.getDay();
             let blocks = [];
-            if (day === 4) { // 목요일: 오전, 오후 1부, 오후 2부
-                blocks = [
-                    { id: "b1", time: "09:00 ~ 12:00", label: "오전 활동" },
-                    { id: "b2", time: "13:00 ~ 15:00", label: "오후 1부" },
-                    { id: "b3", time: "15:00 ~ 17:00", label: "오후 2부" }
-                ];
-            } else { // 나머지 요일: 오전, 오후 1부
-                blocks = [
-                    { id: "b1", time: "09:00 ~ 12:00", label: "오전 활동" },
-                    { id: "b2", time: "13:00 ~ 15:00", label: "오후 활동" }
-                ];
-            }
-
+            if (day === 4) { blocks = [{ id: "b1", time: "09:00 ~ 12:00", label: "오전 활동" }, { id: "b2", time: "13:00 ~ 15:00", label: "오후 1부" }, { id: "b3", time: "15:00 ~ 17:00", label: "오후 2부" }]; }
+            else { blocks = [{ id: "b1", time: "09:00 ~ 12:00", label: "오전 활동" }, { id: "b2", time: "13:00 ~ 15:00", label: "오후 활동" }]; }
             blocks.forEach((b, idx) => {
                 const div = document.createElement('div'); div.className = "time-block";
                 let isFixed = false; let fixedText = ""; let fixedValue = "";
-
-                // 목요일 오전 고정
                 if (day === 4 && b.id === "b1") { isFixed = true; fixedText = "⚽ 오전 축구 수업 (10:00 ~ 12:00)"; fixedValue = "축구"; }
-                // 금요일 오후 고정
                 if (day === 5 && b.id === "b2") { isFixed = true; fixedText = "🙏 예배 및 우리다움 (13:00 ~ 15:00)"; fixedValue = "예배"; }
-
                 let html = `<div class="time-title"><span>🕰️ ${b.time}</span><span style="font-size:12px;color:#64748b;">${b.label}</span></div>`;
-
-                if (isFixed) {
-                    html += `<div class="fixed-box">${fixedText}</div>
-                             <input type="hidden" id="type_${b.id}" value="fixed">
-                             <input type="hidden" id="m1_${b.id}" value="${fixedValue}">`;
-                } else {
-                    html += `
-                    <div class="cat-selector" id="cat_${b.id}">
-                        <div class="cat-btn active" onclick="setCat('${b.id}', 'auto', this)">자율 미션</div>
-                        <div class="cat-btn" onclick="setCat('${b.id}', 'choice', this)">선택 미션</div>
-                        <div class="cat-btn" onclick="setCat('${b.id}', 'event', this)">🎉 행사</div>
-                    </div>
-                    <input type="hidden" id="type_${b.id}" value="auto">
-                    <div id="area_${b.id}">${renderAutoRows(b.id)}</div>`;
-                }
+                if (isFixed) { html += `<div class="fixed-box">${fixedText}</div><input type="hidden" id="type_${b.id}" value="fixed"><input type="hidden" id="m1_${b.id}" value="${fixedValue}">`; }
+                else { html += `<div class="cat-selector" id="cat_${b.id}"><div class="cat-btn active" onclick="setCat('${b.id}', 'auto', this)">자율 미션</div><div class="cat-btn" onclick="setCat('${b.id}', 'choice', this)">선택 미션</div><div class="cat-btn" onclick="setCat('${b.id}', 'event', this)">🎉 행사</div></div><input type="hidden" id="type_${b.id}" value="auto"><div id="area_${b.id}">${renderAutoRows(b.id)}</div>`; }
                 div.innerHTML = html; container.appendChild(div);
             });
         }
 
-        function setCat(bid, type, btn) {
-            const parent = document.getElementById(`cat_${bid}`);
-            Array.from(parent.children).forEach(c => c.classList.remove('active')); btn.classList.add('active');
-            document.getElementById(`type_${bid}`).value = type;
-            const area = document.getElementById(`area_${bid}`);
-            if (type === 'auto') area.innerHTML = renderAutoRows(bid);
-            else if (type === 'choice') area.innerHTML = renderChoiceRows(bid);
-            else if (type === 'event') area.innerHTML = `<div class="fixed-box" style="background:#fff7ed; color:#d97706; border-color:#fdba74;">🎉 이 시간은 전체 행사로 진행됩니다.</div>`;
-        }
-
-        function renderAutoRows(bid) {
-            const lvOpts = `<option>NORMAL</option><option>EASY</option><option>HARD</option>`;
-            const selectOpts = LIST_AUTO_SELECT.map(i => `<option value="${i}">${i}</option>`).join('');
-            return `
-            <div class="mission-row"><div class="fixed-label">✍️ 글쓰기</div><select id="l1_${bid}">${lvOpts}</select><input type="hidden" id="m1_${bid}" value="글쓰기"></div>
-            <div class="mission-row"><div class="fixed-label">📚 독서</div><select id="l2_${bid}">${lvOpts}</select><input type="hidden" id="m2_${bid}" value="독서"></div>
-            <div class="mission-row"><div class="fixed-label">📖 자서전</div><select id="l3_${bid}">${lvOpts}</select><input type="hidden" id="m3_${bid}" value="자서전"></div>
-            <div class="mission-row"><select id="m4_${bid}">${selectOpts}</select><select id="l4_${bid}">${lvOpts}</select></div>
-            <div class="mission-row"><select id="m5_${bid}">${selectOpts}</select><select id="l5_${bid}">${lvOpts}</select></div>`;
-        }
-
+        function setCat(bid, type, btn) { const parent = document.getElementById(`cat_${bid}`); Array.from(parent.children).forEach(c => c.classList.remove('active')); btn.classList.add('active'); document.getElementById(`type_${bid}`).value = type; const area = document.getElementById(`area_${bid}`); if (type === 'auto') area.innerHTML = renderAutoRows(bid); else if (type === 'choice') area.innerHTML = renderChoiceRows(bid); else if (type === 'event') area.innerHTML = `<div class="fixed-box" style="background:#fff7ed; color:#d97706; border-color:#fdba74;">🎉 이 시간은 전체 행사로 진행됩니다.</div>`; }
+        function renderAutoRows(bid) { const lvOpts = `<option>NORMAL</option><option>EASY</option><option>HARD</option>`; const selectOpts = LIST_AUTO_SELECT.map(i => `<option value="${i}">${i}</option>`).join(''); return `<div class="mission-row"><div class="fixed-label">✍️ 글쓰기</div><select id="l1_${bid}">${lvOpts}</select><input type="hidden" id="m1_${bid}" value="글쓰기"></div><div class="mission-row"><div class="fixed-label">📚 독서</div><select id="l2_${bid}">${lvOpts}</select><input type="hidden" id="m2_${bid}" value="독서"></div><div class="mission-row"><div class="fixed-label">📖 자서전</div><select id="l3_${bid}">${lvOpts}</select><input type="hidden" id="m3_${bid}" value="자서전"></div><div class="mission-row"><select id="m4_${bid}">${selectOpts}</select><select id="l4_${bid}">${lvOpts}</select></div><div class="mission-row"><select id="m5_${bid}">${selectOpts}</select><select id="l5_${bid}">${lvOpts}</select></div>`; }
         function renderChoiceRows(bid) { const selectOpts = LIST_CHOICE.map(i => `<option value="${i}">${i}</option>`).join(''); return `<div class="mission-row"><select id="m1_${bid}">${selectOpts}</select></div>`; }
 
         function savePlan() {
             let data = { action: "saveSchedule", id: curId, date: getAppDateStr(), dayStr: ["일", "월", "화", "수", "목", "금", "토"][appDate.getDay()] };
-            const dbSlots = [
-                { n: 'm1n', l: 'm1l' }, { n: 'm2n', l: 'm2l' }, { n: 'm3n', l: 'm3l' },
-                { n: 'c1an', l: 'c1al' }, { n: 'c1bn', l: 'c1bl' }, { n: 'c2n', l: 'c2l' }, { n: 'c3n', l: 'c3l' }
-            ];
+            const dbSlots = [{ n: 'm1n', l: 'm1l' }, { n: 'm2n', l: 'm2l' }, { n: 'm3n', l: 'm3l' }, { n: 'c1an', l: 'c1al' }, { n: 'c1bn', l: 'c1bl' }, { n: 'c2n', l: 'c2l' }, { n: 'c3n', l: 'c3l' }];
             let slotIdx = 0;
-
             const mapBlock = (bid) => {
-                const typeEl = document.getElementById(`type_${bid}`);
-                if (!typeEl) return;
-
-                const type = typeEl.value;
-                if (type === 'fixed' || type === 'event') {
-                    if (slotIdx < 7) { data[dbSlots[slotIdx].n] = (type === 'fixed') ? document.getElementById(`m1_${bid}`).value : "행사"; slotIdx++; }
-                } else if (type === 'auto') {
-                    const items = [{ n: "글쓰기", l: document.getElementById(`l1_${bid}`).value }, { n: "독서", l: document.getElementById(`l2_${bid}`).value }, { n: "자서전", l: document.getElementById(`l3_${bid}`).value }, { n: document.getElementById(`m4_${bid}`).value, l: document.getElementById(`l4_${bid}`).value }, { n: document.getElementById(`m5_${bid}`).value, l: document.getElementById(`l5_${bid}`).value }];
-                    items.forEach(item => { if (slotIdx < 7) { data[dbSlots[slotIdx].n] = item.n; if (dbSlots[slotIdx].l) data[dbSlots[slotIdx].l] = item.l; slotIdx++; } });
-                } else if (type === 'choice') {
-                    if (slotIdx < 7) { data[dbSlots[slotIdx].n] = document.getElementById(`m1_${bid}`).value; slotIdx++; }
-                }
+                const typeEl = document.getElementById(`type_${bid}`); if (!typeEl) return; const type = typeEl.value;
+                if (type === 'fixed' || type === 'event') { if (slotIdx < 7) { data[dbSlots[slotIdx].n] = (type === 'fixed') ? document.getElementById(`m1_${bid}`).value : "행사"; slotIdx++; } } else if (type === 'auto') { const items = [{ n: "글쓰기", l: document.getElementById(`l1_${bid}`).value }, { n: "독서", l: document.getElementById(`l2_${bid}`).value }, { n: "자서전", l: document.getElementById(`l3_${bid}`).value }, { n: document.getElementById(`m4_${bid}`).value, l: document.getElementById(`l4_${bid}`).value }, { n: document.getElementById(`m5_${bid}`).value, l: document.getElementById(`l5_${bid}`).value }]; items.forEach(item => { if (slotIdx < 7) { data[dbSlots[slotIdx].n] = item.n; if (dbSlots[slotIdx].l) data[dbSlots[slotIdx].l] = item.l; slotIdx++; } }); } else if (type === 'choice') { if (slotIdx < 7) { data[dbSlots[slotIdx].n] = document.getElementById(`m1_${bid}`).value; slotIdx++; } }
             };
-
-            // [★완벽수정] b3도 안전하게 매핑되도록 복구
             mapBlock('b1'); mapBlock('b2'); mapBlock('b3');
-
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(data) });
             alert("계획이 제출되었습니다.");
-            currentScheduleData = {
-                day: data.dayStr,
-                m1: { n: data.m1n, l: data.m1l }, m2: { n: data.m2n, l: data.m2l }, m3: { n: data.m3n, l: data.m3l },
-                c1a: { n: data.c1an, l: data.c1al }, c1b: { n: data.c1bn, l: data.c1bl }, c2: { n: data.c2n, l: data.c2l }, c3: { n: data.c3n, l: data.c3l }
-            };
+            currentScheduleData = { day: data.dayStr, m1: { n: data.m1n, l: data.m1l }, m2: { n: data.m2n, l: data.m2l }, m3: { n: data.m3n, l: data.m3l }, c1a: { n: data.c1an, l: data.c1al }, c1b: { n: data.c1bn, l: data.c1bl }, c2: { n: data.c2n, l: data.c2l }, c3: { n: data.c3n, l: data.c3l } };
             renderMissions(currentScheduleData); showView('view-mission');
         }
 
         function renderMissions(d) {
             const list = document.getElementById('missionList'); list.innerHTML = "";
+
+            const uInfo = allUsers.find(u => u.id === curId);
+            if (uInfo && uInfo.basicInfo) {
+                try {
+                    let bData = JSON.parse(uInfo.basicInfo);
+                    if (bData.comp) {
+                        list.innerHTML += `<div class="mission-item" style="background:#e0e7ff; border-color:#a5b4fc;"><div class="mission-name" style="color:#4338ca; margin-bottom:5px;">📊 나의 HARD 기준점</div><div style="font-size:13px;">${bData.comp}</div></div>`;
+                    }
+                } catch (e) { }
+            }
+
             const lifeLog = currentLogs["생활미션"]; let lifeSt = "미완료", imgH = "", msgH = "";
+            // [★수정] 사진 크기 최적화 클래스 적용
             if (lifeLog) { if (lifeLog.status === 'life_ok') lifeSt = "✅ 확인됨"; else if (lifeLog.status === 'fail') lifeSt = "❌ 실패"; if (lifeLog.photo) imgH = `<img src="${lifeLog.photo}" class="proof-photo" onclick="window.open(this.src)">`; if (lifeLog.message) msgH = `<div class="teacher-msg">📢 ${lifeLog.message}</div>`; }
             list.innerHTML += `<div class="mission-item" style="border-left:5px solid #f59e0b; background:#fffbeb;"><div class="mission-header"><span class="mission-name">🌞 생활미션</span><span class="mission-lv">${lifeSt}</span></div>${imgH}${msgH}</div>`;
 
             const slots = [d.m1, d.m2, d.m3, d.c1a, d.c1b, d.c2, d.c3];
             slots.forEach(t => {
                 if (!t || !t.n) return;
-                if (t.n === '축구' || t.n === '예배') {
-                    list.innerHTML += `<div class="schedule-block">${t.n === '축구' ? '⚽' : '🙏'} ${t.n} <span style="font-size:11px; font-weight:normal;">(고정 일정)</span></div>`;
-                }
-                else if (t.n === '행사') {
-                    renderEventCard(list, "🎉 행사", "행사");
-                }
-                else {
-                    renderItem(list, t);
-                }
+                if (t.n === '축구' || t.n === '예배') { list.innerHTML += `<div class="schedule-block">${t.n === '축구' ? '⚽' : '🙏'} ${t.n} <span style="font-size:11px; font-weight:normal;">(고정 일정)</span></div>`; }
+                else if (t.n === '행사') { renderEventCard(list, "🎉 행사", "행사"); }
+                else { renderItem(list, t); }
             });
         }
 
         function renderItem(container, t) {
             if (!t || !t.n) return;
-
-            const serverLog = currentLogs[t.n];
-            const isDone = serverLog && (serverLog.status === 'end' || serverLog.status === 'ok' || serverLog.status === 'gong');
-            const isStart = serverLog && serverLog.status === 'start';
-            const isAnyRunning = Object.values(currentLogs).some(l => l.status === 'start');
-            const lvDisplay = NO_LEVEL_LIST.includes(t.n) ? "-" : (t.l || "-");
-
-            const div = document.createElement('div'); div.className = "mission-item";
-            let btns = "";
-
-            if (isAdminMode) {
-                let stateTxt = isDone ? "수정" : "강제 완료";
-                btns = `<button class="btn-action" style="border:1px solid red; color:red;" onclick="handleMission('${t.n}','${t.l}')">🛠 ${stateTxt}(관리자)</button>`;
-            } else {
-                if (isDone) {
-                    let btnText = serverLog.status === 'gong' ? "✅ 공결" : "✅ 완료됨";
-                    btns = `<button class="btn-action done" disabled>${btnText}</button>`;
-                } else if (isStart) {
-                    btns = `<div class="live-timer" id="timer-${t.n}">00:00:00</div><button class="btn-action ing" onclick="handleMission('${t.n}','${t.l}')">🔥 완료하기</button>`;
-                    startTimer(t.n);
-                } else {
-                    let disabledAttr = isAnyRunning ? "disabled" : "";
-                    btns = `<div style="display:flex; gap:5px;">
-                              <button class="btn-action" onclick="handleMission('${t.n}','${t.l}')" ${disabledAttr}>시작</button>
-                              <button class="btn-action" style="background:#f1f5f9; color:#64748b; font-size:13px; border:1px solid #cbd5e1;" onclick="openLateStart('${t.n}','${t.l}')" ${disabledAttr}>늦은 시작</button>
-                            </div>`;
-                }
-            }
-            div.innerHTML = `<div class="mission-header"><span class="mission-name">${t.n}</span><span class="mission-lv">${lvDisplay}</span></div>${btns}`;
-            container.appendChild(div);
+            const serverLog = currentLogs[t.n]; const isDone = serverLog && (serverLog.status === 'end' || serverLog.status === 'ok' || serverLog.status === 'gong'); const isStart = serverLog && serverLog.status === 'start'; const isAnyRunning = Object.values(currentLogs).some(l => l.status === 'start'); const lvDisplay = NO_LEVEL_LIST.includes(t.n) ? "-" : (t.l || "-");
+            const div = document.createElement('div'); div.className = "mission-item"; let btns = "";
+            if (isAdminMode) { let stateTxt = isDone ? "수정" : "강제 완료"; btns = `<button class="btn-action" style="border:1px solid red; color:red;" onclick="handleMission('${t.n}','${t.l}')">🛠 ${stateTxt}(관리자)</button>`; }
+            else { if (isDone) { let btnText = serverLog.status === 'gong' ? "✅ 공결" : "✅ 완료됨"; btns = `<button class="btn-action done" disabled>${btnText}</button>`; } else if (isStart) { btns = `<div class="live-timer" id="timer-${t.n}">00:00:00</div><button class="btn-action ing" onclick="handleMission('${t.n}','${t.l}')">🔥 완료하기</button>`; startTimer(t.n); } else { let disabledAttr = isAnyRunning ? "disabled" : ""; btns = `<div style="display:flex; gap:5px;"><button class="btn-action" onclick="handleMission('${t.n}','${t.l}')" ${disabledAttr}>시작</button><button class="btn-action" style="background:#f1f5f9; color:#64748b; font-size:13px; border:1px solid #cbd5e1;" onclick="openLateStart('${t.n}','${t.l}')" ${disabledAttr}>늦은 시작</button></div>`; } }
+            div.innerHTML = `<div class="mission-header"><span class="mission-name">${t.n}</span><span class="mission-lv">${lvDisplay}</span></div>${btns}`; container.appendChild(div);
         }
 
-        function renderEventCard(container, name, keyName) {
-            const log = currentLogs[keyName]; const isDone = log && (log.status === 'end' || log.status === 'gong');
-            if (document.getElementById(`evt_${keyName}`)) return;
-            const div = document.createElement('div'); div.className = "mission-item"; div.id = `evt_${keyName}`;
-            let btnText = isDone ? "✅ 완료됨" : "📝 소감문 작성";
-            div.innerHTML = `<div class="mission-header"><span class="mission-name">${name}</span></div><button class="btn-action ${isDone ? 'done' : ''}" onclick="openReflectionModal('${name}','${keyName}')" ${isDone ? 'disabled' : ''}>${btnText}</button>`;
-            container.appendChild(div);
-        }
-
+        function renderEventCard(container, name, keyName) { const log = currentLogs[keyName]; const isDone = log && (log.status === 'end' || log.status === 'gong'); if (document.getElementById(`evt_${keyName}`)) return; const div = document.createElement('div'); div.className = "mission-item"; div.id = `evt_${keyName}`; let btnText = isDone ? "✅ 완료됨" : "📝 소감문 작성"; div.innerHTML = `<div class="mission-header"><span class="mission-name">${name}</span></div><button class="btn-action ${isDone ? 'done' : ''}" onclick="openReflectionModal('${name}','${keyName}')" ${isDone ? 'disabled' : ''}>${btnText}</button>`; container.appendChild(div); }
         function openReflectionModal(name, key) { currentEventMission = key; document.getElementById('eventNameInput').value = name; document.getElementById('reflectionText').value = ""; document.getElementById('reflectionModal').style.display = 'flex'; }
         function checkRefLen() { const len = document.getElementById('reflectionText').value.length; let t = "EASY"; if (len >= 200) t = "HARD"; else if (len >= 100) t = "NORMAL"; document.getElementById('refFeedback').innerText = `${t} (${len}자)`; }
-        function submitReflection() {
-            const txt = document.getElementById('reflectionText').value; if (txt.length < 1) return alert("내용을 입력하세요");
-            let diff = "EASY"; if (txt.length >= 200) diff = "HARD"; else if (txt.length >= 100) diff = "NORMAL";
-            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveEventReflection", student_id: curId, student_name: curName, eventName: document.getElementById('eventNameInput').value, mission_id: "행사", date: getAppDateStr(), difficulty: diff, content: txt }) });
-            currentLogs["행사"] = { status: 'end' }; renderMissions(currentScheduleData); document.getElementById('reflectionModal').style.display = 'none';
-        }
+        function submitReflection() { const txt = document.getElementById('reflectionText').value; if (txt.length < 1) return alert("내용을 입력하세요"); let diff = "EASY"; if (txt.length >= 200) diff = "HARD"; else if (txt.length >= 100) diff = "NORMAL"; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveEventReflection", student_id: curId, student_name: curName, eventName: document.getElementById('eventNameInput').value, mission_id: "행사", date: getAppDateStr(), difficulty: diff, content: txt }) }); currentLogs["행사"] = { status: 'end' }; if (curRole === '인턴') renderInternMissions(); else renderMissions(currentScheduleData); document.getElementById('reflectionModal').style.display = 'none'; }
 
-        function handleMission(name, level) {
-            const key = `${curId}_active_${getAppDateStr()}`; const serverLog = currentLogs[name];
-
-            if (isAdminMode) {
-                curM = name;
-                curLateLevel = level;
-                document.getElementById('adminTimeModal').style.display = 'flex';
-                return;
-            }
-
-            if (!serverLog || serverLog.status !== 'start') {
-                if (Object.values(currentLogs).some(l => l.status === 'start')) return alert("이미 진행 중인 업무가 있습니다!");
-                currentLogs[name] = { status: 'start' }; localStorage.setItem(`${key}_start`, Date.now());
-                fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "start", student_id: curId, mission_id: name, date: getAppDateStr(), note: "Start" }) });
-                renderMissions(currentScheduleData);
-            } else {
-                if (!confirm("완료하시겠습니까?")) return;
-                const st = parseInt(localStorage.getItem(`${key}_start`)); const endT = Date.now(); let note = "완료";
-                if (st) { const diff = Math.round((endT - st) / 60000); const sTime = new Date(st).toTimeString().slice(0, 5); const eTime = new Date(endT).toTimeString().slice(0, 5); note = `${sTime}~${eTime} (${diff}분)`; }
-                currentLogs[name] = { status: 'end' };
-                fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: name, date: getAppDateStr(), difficulty: level, note: note }) });
-                renderMissions(currentScheduleData);
-            }
-        }
-
+        function handleMission(name, level) { const key = `${curId}_active_${getAppDateStr()}`; const serverLog = currentLogs[name]; if (isAdminMode) { curM = name; curLateLevel = level; document.getElementById('adminTimeModal').style.display = 'flex'; return; } if (!serverLog || serverLog.status !== 'start') { if (Object.values(currentLogs).some(l => l.status === 'start')) return alert("이미 진행 중인 업무가 있습니다!"); currentLogs[name] = { status: 'start' }; localStorage.setItem(`${key}_start`, Date.now()); fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "start", student_id: curId, mission_id: name, date: getAppDateStr(), note: "Start" }) }); if (curRole === '인턴') renderInternMissions(); else renderMissions(currentScheduleData); } else { if (!confirm("완료하시겠습니까?")) return; const st = parseInt(localStorage.getItem(`${key}_start`)); const endT = Date.now(); let note = "완료"; if (st) { const diff = Math.round((endT - st) / 60000); const sTime = new Date(st).toTimeString().slice(0, 5); const eTime = new Date(endT).toTimeString().slice(0, 5); note = `${sTime}~${eTime} (${diff}분)`; } currentLogs[name] = { status: 'end' }; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: name, date: getAppDateStr(), difficulty: level, note: note }) }); if (curRole === '인턴') renderInternMissions(); else renderMissions(currentScheduleData); } }
         function openLateStart(name, level) { curLateMission = name; curLateLevel = level; document.getElementById('lateStartModal').style.display = 'flex'; }
-        function submitLateStart() {
-            const s = document.getElementById('lateStartT').value; const e = document.getElementById('lateEndT').value;
-            if (!s || !e) return alert("시간을 입력해주세요");
-            const note = `${s}~${e} (수동)`;
-            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: curLateMission, date: getAppDateStr(), difficulty: curLateLevel, note: note }) });
-            currentLogs[curLateMission] = { status: 'end' }; alert("기록되었습니다."); document.getElementById('lateStartModal').style.display = 'none'; renderMissions(currentScheduleData);
-        }
-
-        function startTimer(name) {
-            if (timerInterval) clearInterval(timerInterval);
-            const key = `${curId}_active_${getAppDateStr()}`; let st = parseInt(localStorage.getItem(`${key}_start`)); if (!st) st = Date.now();
-            timerInterval = setInterval(() => {
-                const diff = Math.floor((Date.now() - st) / 1000); const h = String(Math.floor(diff / 3600)).padStart(2, '0'); const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0'); const s = String(diff % 60).padStart(2, '0');
-                const el = document.getElementById(`timer-${name}`); if (el) el.innerText = `${h}:${m}:${s}`;
-            }, 1000);
-        }
-
+        function submitLateStart() { const s = document.getElementById('lateStartT').value; const e = document.getElementById('lateEndT').value; if (!s || !e) return alert("시간을 입력해주세요"); const note = `${s}~${e} (수동)`; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: curLateMission, date: getAppDateStr(), difficulty: curLateLevel, note: note }) }); currentLogs[curLateMission] = { status: 'end' }; alert("기록되었습니다."); document.getElementById('lateStartModal').style.display = 'none'; if (curRole === '인턴') renderInternMissions(); else renderMissions(currentScheduleData); }
+        function startTimer(name) { if (timerInterval) clearInterval(timerInterval); const key = `${curId}_active_${getAppDateStr()}`; let st = parseInt(localStorage.getItem(`${key}_start`)); if (!st) st = Date.now(); timerInterval = setInterval(() => { const diff = Math.floor((Date.now() - st) / 1000); const h = String(Math.floor(diff / 3600)).padStart(2, '0'); const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0'); const s = String(diff % 60).padStart(2, '0'); const el = document.getElementById(`timer-${name}`); if (el) el.innerText = `${h}:${m}:${s}`; }, 1000); }
         function openSinmungo() { document.getElementById('sinmungoModal').style.display = 'flex'; }
         function submitSinmungo() { fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveSinmungo", nickname: document.getElementById('smNick').value, content: document.getElementById('smContent').value }) }); alert("전송됨"); document.getElementById('sinmungoModal').style.display = 'none'; }
-
         function openAdminModal() { document.getElementById('adminModalOverlay').style.display = 'flex'; }
-        function checkAdminPw() {
-            if (document.getElementById('adminPw').value === "1q2w3e4r!@") {
-                isAdminMode = true;
-                document.getElementById('adminModalOverlay').style.display = 'none';
-                document.getElementById('adminBtn').style.display = 'none';
-                document.getElementById('adminPanel').classList.remove('hidden');
-                document.getElementById('simDateInput').value = getAppDateStr();
-                if (currentScheduleData) renderMissions(currentScheduleData);
-            } else { alert("비밀번호가 틀렸습니다."); }
-        }
-
-        function finishAdminMission() {
-            const s = document.getElementById('admStart').value;
-            const e = document.getElementById('admEnd').value;
-            fetch(WEB_APP_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "saveLog", subAction: "end", student_id: curId, mission_id: curM,
-                    date: getAppDateStr(), difficulty: curLateLevel || "NORMAL", note: `${s}~${e} (관리자)`
-                })
-            }).then(() => {
-                alert("관리자 권한으로 완료 처리되었습니다.");
-                document.getElementById('adminTimeModal').style.display = 'none';
-                checkUser(curId, curName);
-            });
-        }
-
-        function applySimDate() {
-            appDate = new Date(document.getElementById('simDateInput').value);
-            renderDate();
-            goHome();
-        }
-
-        function exitAdmin() {
-            isAdminMode = false;
-            document.getElementById('adminPanel').classList.add('hidden');
-            document.getElementById('adminBtn').style.display = 'flex';
-            appDate = new Date();
-            renderDate();
-            if (curId) checkUser(curId, curName); else goHome();
-        }
+        function checkAdminPw() { if (document.getElementById('adminPw').value === "1q2w3e4r!@") { isAdminMode = true; document.getElementById('adminModalOverlay').style.display = 'none'; document.getElementById('adminBtn').style.display = 'none'; document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('simDateInput').value = getAppDateStr(); if (curRole === '인턴') renderInternMissions(); else if (currentScheduleData) renderMissions(currentScheduleData); } else { alert("비밀번호가 틀렸습니다."); } }
+        function finishAdminMission() { const s = document.getElementById('admStart').value; const e = document.getElementById('admEnd').value; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveLog", subAction: "end", student_id: curId, mission_id: curM, date: getAppDateStr(), difficulty: curLateLevel || "NORMAL", note: `${s}~${e} (관리자)` }) }).then(() => { alert("관리자 권한으로 완료 처리되었습니다."); document.getElementById('adminTimeModal').style.display = 'none'; checkUser(curId, curName, curRole); }); }
+        function applySimDate() { appDate = new Date(document.getElementById('simDateInput').value); renderDate(); goHome(); }
+        function exitAdmin() { isAdminMode = false; document.getElementById('adminPanel').classList.add('hidden'); document.getElementById('adminBtn').style.display = 'flex'; appDate = new Date(); renderDate(); if (curId) checkUser(curId, curName, curRole); else goHome(); }
     </script>
 </body>
 </html>
