@@ -139,7 +139,16 @@
             font-size: 18px;
             font-weight: bold;
             margin: 0;
+            cursor: pointer;
+            transition: 0.2s;
+            border-radius: 8px;
+            padding: 2px 5px;
         }
+
+            .student-name:hover {
+                background: #e2e8f0;
+                color: var(--p);
+            }
 
         .money-badge {
             background: #fff7ed;
@@ -454,7 +463,7 @@
             position: relative;
         }
 
-        #modal, #qrModal, #imgModal, #mailModal {
+        #modal, #qrModal, #imgModal, #mailModal, #roleModal {
             position: fixed;
             top: 0;
             left: 0;
@@ -491,7 +500,6 @@
             font-size: 14px;
         }
 
-        /* 온보딩 관리 탭 전용 스타일 */
         .onb-layout {
             display: flex;
             gap: 20px;
@@ -612,23 +620,31 @@
     </style>
 </head>
 <body>
-
     <div class="tabs">
         <div class="tab active" id="tab-daily" onclick="goTab('daily')">📅 일간 관리</div>
         <div class="tab" id="tab-weekly" onclick="goTab('weekly')">📊 주간 리포트</div>
         <div class="tab" id="tab-monthly" onclick="goTab('monthly')">🏆 월간 리포트</div>
         <div class="tab" id="tab-notice" onclick="goTab('notice')">📢 공지사항</div>
         <div class="tab" id="tab-onb" onclick="goTab('onb')" style="background:#fef3c7; color:#b45309;">🐣 온보딩 관리</div>
+        <div class="tab" id="tab-promo" onclick="goTab('promo')" style="background:#fce7f3; color:#9d174d;">👑 특진자 관리</div>
     </div>
-
     <div class="mail-icon" onclick="openMailModal()">📩</div>
 
     <div id="daily" class="view active">
         <div style="margin-bottom: 15px;">
             <input type="date" id="dDate" style="width:auto; padding:8px;" onchange="loadDaily()">
             <button onclick="loadDaily()" style="background:var(--p); color:white; border:none; padding:8px 15px; border-radius:8px;">새로고침</button>
+            <span style="font-size:12px; color:#666; margin-left:10px;">(이름을 클릭하면 직급 변경 및 특진 처리가 가능합니다.)</span>
         </div>
         <div class="daily-grid" id="dailyBoard"></div>
+    </div>
+
+    <div id="promo" class="view">
+        <div style="background:white; padding:25px; border-radius:20px; max-width:600px; margin:0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h2 style="margin-top:0; color:#9d174d;">👑 다움 진학 특진자 명단</h2>
+            <p style="font-size:13px; color:#666; margin-bottom:20px;">특진 처리된 학생들은 일간/레이스 화면에서 숨겨집니다. 특진자의 리포트는 주간/월간 탭의 학생 선택 드롭다운에서 확인할 수 있습니다.</p>
+            <div id="promoListArea"></div>
+        </div>
     </div>
 
     <div id="weekly" class="view">
@@ -725,6 +741,30 @@
         </div>
     </div>
 
+    <div id="roleModal">
+        <div class="modal-box" style="width:300px;">
+            <h3 style="color:var(--p); margin-top:0;">💼 직급 및 상태 관리</h3>
+            <div style="font-size:18px; font-weight:bold; margin-bottom:15px;" id="rmName"></div>
+            <input type="hidden" id="rmSid">
+            <select id="rmRole" style="padding:10px; font-size:16px;">
+                <option value="인턴">인턴</option>
+                <option value="사원">사원</option>
+                <option value="주임">주임</option>
+                <option value="대리">대리</option>
+                <option value="과장">과장</option>
+                <option value="차장">차장</option>
+                <option value="부장">부장</option>
+            </select>
+            <button class="btn" style="background:var(--p);" onclick="saveRole()">직급 저장하기</button>
+
+            <hr style="border:0; border-top:2px dashed #eee; margin:20px 0;">
+            <div style="font-size:12px; color:#666; margin-bottom:5px;">다움학교로 진학하는 경우 특진 처리합니다.</div>
+            <button class="btn" style="background:#f59e0b; color:white; font-size:16px;" onclick="doPromotion()">👑 다움학교 특진 처리</button>
+
+            <button class="btn" style="background:#eee; color:#333; margin-top:15px;" onclick="document.getElementById('roleModal').style.display='none'">닫기</button>
+        </div>
+    </div>
+
     <div id="modal">
         <div class="modal-box">
             <h3 id="mTitle" style="color:var(--p);"></h3><input type="hidden" id="mSid"><input type="hidden" id="mMid">
@@ -753,10 +793,11 @@
                 <button class="btn" style="background:#8b5cf6;margin-top:5px;" onclick="sendCtrl('gong')">✅ 공결 처리</button>
             </div>
             <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
-                <h4 style="margin:0 0 5px;">💰 금액 조정 (상벌점)</h4>
+                <h4 style="margin:0 0 5px; color:#f59e0b;">💰 추가 보상 및 차감 (상벌점)</h4>
+                <div id="existingAdjs"></div>
                 <input type="number" id="adjAmount" placeholder="금액 (예: 5000, -3000)">
-                <input type="text" id="adjReason" placeholder="사유 (예: 청소 우수)">
-                <button class="btn" style="background:#f59e0b; color:white;" onclick="sendAdjustment()">적용</button>
+                <input type="text" id="adjReason" placeholder="사유 (자동 입력됨)">
+                <button class="btn" style="background:#f59e0b; color:white;" onclick="sendAdjustment()">금액 적용하기</button>
             </div>
             <button class="btn" style="background:#eee;color:#333;margin-top:10px;" onclick="document.getElementById('modal').style.display='none'">닫기</button>
         </div>
@@ -767,14 +808,13 @@
 
     <script>
         // ▼▼▼▼▼ 선생님의 배포 URL 입력 ▼▼▼▼▼
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby_h4mLBi3P7JjQWj3qqPIuA7ka6FqBNpktWsLuHC7TQPdFheybM4a0zlmSX8qw3jgLjA/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyugQI7JhzSQqsz-AbYY_FfxEHPfUE5ySygGIxSe6OIvdNKj_ZWfXbdRsEypaE6uGcMOg/exec";
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const NO_LEVEL_LIST = ["음악", "검정고시", "SCL책력", "심화공부", "교류수업", "오후활동", "맞춤학습", "예배", "축구"];
+        let allUsers = []; let activeUsers = []; let promotedUsers = [];
+        let selectedOnbId = null; let weeklyCharts = {}; let monthlyCharts = {}; let radarChart = null;
 
-        let allUsers = [];
-        let selectedOnbId = null;
-        let weeklyCharts = {}; let monthlyCharts = {}; let radarChart = null;
         Chart.register(ChartDataLabels);
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -787,21 +827,41 @@
         });
 
         function loadUsers() {
-            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getUsers" }) }).then(r => r.json()).then(res => {
-                if (res.ok) {
-                    allUsers = res.users;
-                    let options = "";
-                    allUsers.forEach(u => { options += `<option value="${u.id}">${u.name} ${u.role}</option>`; });
-                    document.getElementById('wStudent').innerHTML = options;
-                    document.getElementById('mStudent').innerHTML = options;
-                    renderOnbUserList();
-                    loadDaily();
-                    loadWeekly();
-                    loadMonthly();
-                }
-            }).catch(e => {
-                alert("서버 연결 실패! 구글 앱스 스크립트에서 '새 배포(New Deployment)'를 진행했는지 확인해주세요.");
-            });
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getUsers" }) })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.ok) {
+                        allUsers = res.users;
+                        activeUsers = [];
+                        promotedUsers = [];
+
+                        let optActive = "<optgroup label='🟢 활동 중인 사원'>";
+                        let optPromoted = "<optgroup label='👑 특진자 (다움 진학)'>";
+
+                        allUsers.forEach(u => {
+                            let info = {}; try { info = JSON.parse(u.basicInfo); } catch (e) { }
+                            u.status = info.status || 'active';
+
+                            if (u.status === 'active') {
+                                activeUsers.push(u);
+                                optActive += `<option value="${u.id}">${u.name} ${u.role}</option>`;
+                            } else {
+                                promotedUsers.push(u);
+                                optPromoted += `<option value="${u.id}">${u.name} ${u.role}</option>`;
+                            }
+                        });
+
+                        document.getElementById('wStudent').innerHTML = optActive + "</optgroup>" + optPromoted + "</optgroup>";
+                        document.getElementById('mStudent').innerHTML = optActive + "</optgroup>" + optPromoted + "</optgroup>";
+
+                        renderOnbUserList();
+                        renderPromoList();
+                        loadDaily();
+                        loadWeekly();
+                        loadMonthly();
+                    }
+                })
+                .catch(e => { alert("서버 연결 실패! 구글 앱스 스크립트 설정과 웹 앱 주소를 다시 확인해주세요."); });
         }
 
         function goTab(id) {
@@ -813,224 +873,359 @@
             if (id === 'monthly') { document.getElementById('tab-monthly').classList.add('active'); loadMonthly(); }
             if (id === 'notice') { document.getElementById('tab-notice').classList.add('active'); loadNotices(); }
             if (id === 'onb') { document.getElementById('tab-onb').classList.add('active'); }
+            if (id === 'promo') { document.getElementById('tab-promo').classList.add('active'); renderPromoList(); }
         }
 
-        /* ----------------------------------------------------
-           온보딩 관리 시스템 JS
-        ---------------------------------------------------- */
+        /* 직급 및 특진 관리 기능 */
+        function openRoleModal(sid, name, role) {
+            document.getElementById('roleModal').style.display = 'flex';
+            document.getElementById('rmName').innerText = `${name} 사원`;
+            document.getElementById('rmSid').value = sid;
+            document.getElementById('rmRole').value = role || "사원";
+        }
+
+        function saveRole() {
+            const sid = document.getElementById('rmSid').value;
+            const newRole = document.getElementById('rmRole').value;
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "updateRole", id: sid, role: newRole }) })
+                .then(() => { alert("직급이 변경되었습니다!"); document.getElementById('roleModal').style.display = 'none'; loadUsers(); });
+        }
+
+        function doPromotion() {
+            if (!confirm("해당 사원을 '특진' 처리하여 다움학교로 진학시키겠습니까?\n(일간/레이스 화면에서 숨겨지며, 특진자 탭에서 관리됩니다.)")) return;
+            const sid = document.getElementById('rmSid').value;
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "togglePromotion", id: sid, status: "promoted" }) })
+                .then(() => { alert("👑 특진 처리가 완료되었습니다!"); document.getElementById('roleModal').style.display = 'none'; loadUsers(); });
+        }
+
+        function revertPromotion(sid) {
+            if (!confirm("특진자를 다시 활성 사원 상태로 복귀시키겠습니까?")) return;
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "togglePromotion", id: sid, status: "active" }) })
+                .then(() => { alert("복귀 완료!"); loadUsers(); });
+        }
+
+        function renderPromoList() {
+            const list = document.getElementById('promoListArea'); list.innerHTML = "";
+            if (promotedUsers.length === 0) { list.innerHTML = "<div style='text-align:center; color:#888; padding:20px;'>현재 특진자가 없습니다.</div>"; return; }
+            promotedUsers.forEach(u => {
+                list.innerHTML += `<div style="background:#fdf2f8; border:1px solid #fbcfe8; padding:15px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <div><b style="font-size:18px; color:#831843;">${u.icon} ${u.name} ${u.role}</b></div>
+                        <button onclick="revertPromotion('${u.id}')" style="background:#64748b; color:white; padding:8px 12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">🔙 이전 상태로 복귀</button>
+                    </div>`;
+            });
+        }
+
+        /* 온보딩 관리 시스템 JS */
         function renderOnbUserList() {
-            const list = document.getElementById('onbUserList');
-            list.innerHTML = "";
-            allUsers.forEach(u => {
+            const list = document.getElementById('onbUserList'); list.innerHTML = "";
+            activeUsers.forEach(u => {
                 let badge = u.role === '인턴' ? `<span class="onb-badge">인턴 진행중</span>` : `<span class="onb-badge" style="background:#ecfdf5; color:#059669;">정식 사원</span>`;
                 list.innerHTML += `<div class="onb-user-item" id="ou_${u.id}" onclick="selectOnbUser('${u.id}')"><span>${u.icon} ${u.name}</span> ${badge}</div>`;
             });
         }
+        function addInternPrompt() { const name = prompt("신규 인턴의 이름을 입력하세요:"); if (name) { fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "addIntern", name: name }) }).then(() => { alert("인턴이 생성되었습니다."); loadUsers(); }); } }
+        function selectOnbUser(id) { selectedOnbId = id; document.querySelectorAll('.onb-user-item').forEach(el => el.classList.remove('active')); document.getElementById(`ou_${id}`).classList.add('active'); const user = allUsers.find(u => u.id === id); document.getElementById('onbDetailArea').style.display = 'block'; document.getElementById('onbTitle').innerText = `${user.icon} ${user.name} ${user.role}의 베이스캠프`; if (user.role === '인턴') document.getElementById('btnPromote').style.display = 'block'; else document.getElementById('btnPromote').style.display = 'none'; let info = { health: "", life: "", relation: "", comp: "" }; try { if (user.basicInfo) info = JSON.parse(user.basicInfo); } catch (e) { } document.getElementById('obHealth').value = info.health || ""; document.getElementById('obLife').value = info.life || ""; document.getElementById('obRelation').value = info.relation || ""; document.getElementById('obComp').value = info.comp || ""; let sched = { "1": ["", "", ""], "2": ["", "", ""], "3": ["", "", ""], "4": ["", "", ""], "5": ["", "", ""] }; try { if (user.onbSchedule) sched = JSON.parse(user.onbSchedule); } catch (e) { } const grid = document.getElementById('onbSchedGrid'); grid.innerHTML = ""; const days = ["월요일", "화요일", "수요일", "목요일", "금요일"]; for (let i = 1; i <= 5; i++) { let dayData = sched[String(i)] || ["", "", ""]; grid.innerHTML += `<div class="sched-day"><div class="day-title">${days[i - 1]}</div><input type="text" class="sched-input" id="s_${i}_0" value="${dayData[0] || ''}" placeholder="10:00~12:00"><input type="text" class="sched-input" id="s_${i}_1" value="${dayData[1] || ''}" placeholder="13:00~15:00"><input type="text" class="sched-input" id="s_${i}_2" value="${dayData[2] || ''}" placeholder="15:00~17:00"></div>`; } }
+        function saveOnboarding() { if (!selectedOnbId) return; const info = { health: document.getElementById('obHealth').value, life: document.getElementById('obLife').value, relation: document.getElementById('obRelation').value, comp: document.getElementById('obComp').value }; const sched = {}; for (let i = 1; i <= 5; i++) { sched[String(i)] = [document.getElementById(`s_${i}_0`).value, document.getElementById(`s_${i}_1`).value, document.getElementById(`s_${i}_2`).value]; } fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveOnbData", id: selectedOnbId, info: JSON.stringify(info), schedule: JSON.stringify(sched) }) }).then(() => { alert("저장되었습니다."); loadUsers(); }); }
+        function promoteIntern() { if (!confirm("모든 온보딩 과정을 수료하고 정식 사원으로 승진시킵니까?")) return; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "promoteIntern", id: selectedOnbId, icon: "🚲" }) }).then(() => { alert("승진이 완료되었습니다!"); loadUsers(); }); }
 
-        function addInternPrompt() {
-            const name = prompt("신규 인턴의 이름을 입력하세요:");
-            if (name) {
-                fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "addIntern", name: name }) }).then(() => {
-                    alert("인턴이 생성되었습니다."); loadUsers();
-                });
-            }
-        }
+        function compressImage(file, callback) { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = event => { const img = new Image(); img.src = event.target.result; img.onload = () => { const canvas = document.createElement('canvas'); const MAX_WIDTH = 800; const MAX_HEIGHT = 800; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); const dataUrl = canvas.toDataURL('image/jpeg', 0.6); callback(dataUrl.split(',')[1], 'image/jpeg'); }; }; }
+        function uploadAppPhoto() { const file = document.getElementById('appPhotoFile').files[0]; const date = document.getElementById('dDate').value; const sid = document.getElementById('mSid').value; if (!file || !date) return alert("사진을 선택해주세요."); document.getElementById('modal').style.display = 'none'; compressImage(file, (b64, mime) => { const sText = allUsers.find(u => u.id === sid).name; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "uploadPhoto", base64: b64, mimeType: mime, sid: sid, mid: "용모체크", name: sText, date: date }) }).then(r => r.json()).then(res => { alert("사진 압축 및 업로드 완료!"); loadDaily(); }); }); }
+        function handleLife(s) { const f = document.getElementById('lifePhoto').files[0]; const msg = document.getElementById('lifeMsg').value; if (f) { document.getElementById('modal').style.display = 'none'; compressImage(f, (b64, mime) => { sendData(s, msg, b64, mime); }); } else { sendData(s, msg, null, null); } }
+        function sendData(s, msg, b64, mime) { const sid = document.getElementById('mSid').value; const d = document.getElementById('dDate').value; const body = { action: b64 ? "uploadPhoto" : "teacherControl", sid: sid, mid: "생활미션", act: s, message: msg, date: d }; if (b64) { body.base64 = b64; body.mimeType = mime; body.name = allUsers.find(u => u.id === sid).name; } fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(body) }).then(() => { if (!b64) { alert("완료"); document.getElementById('modal').style.display = 'none'; } loadDaily(); }); }
 
-        function selectOnbUser(id) {
-            selectedOnbId = id;
-            document.querySelectorAll('.onb-user-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(`ou_${id}`).classList.add('active');
-
-            const user = allUsers.find(u => u.id === id);
-            document.getElementById('onbDetailArea').style.display = 'block';
-            document.getElementById('onbTitle').innerText = `${user.icon} ${user.name} ${user.role}의 베이스캠프`;
-
-            if (user.role === '인턴') document.getElementById('btnPromote').style.display = 'block';
-            else document.getElementById('btnPromote').style.display = 'none';
-
-            let info = { health: "", life: "", relation: "", comp: "" };
-            try { if (user.basicInfo) info = JSON.parse(user.basicInfo); } catch (e) { }
-            document.getElementById('obHealth').value = info.health || "";
-            document.getElementById('obLife').value = info.life || "";
-            document.getElementById('obRelation').value = info.relation || "";
-            document.getElementById('obComp').value = info.comp || "";
-
-            let sched = { "1": ["", "", ""], "2": ["", "", ""], "3": ["", "", ""], "4": ["", "", ""], "5": ["", "", ""] };
-            try { if (user.onbSchedule) sched = JSON.parse(user.onbSchedule); } catch (e) { }
-
-            const grid = document.getElementById('onbSchedGrid'); grid.innerHTML = "";
-            const days = ["월요일", "화요일", "수요일", "목요일", "금요일"];
-            for (let i = 1; i <= 5; i++) {
-                let dayData = sched[String(i)] || ["", "", ""];
-                grid.innerHTML += `
-                        <div class="sched-day">
-                            <div class="day-title">${days[i - 1]}</div>
-                            <input type="text" class="sched-input" id="s_${i}_0" value="${dayData[0] || ''}" placeholder="10:00~12:00">
-                            <input type="text" class="sched-input" id="s_${i}_1" value="${dayData[1] || ''}" placeholder="13:00~15:00">
-                            <input type="text" class="sched-input" id="s_${i}_2" value="${dayData[2] || ''}" placeholder="15:00~17:00">
-                        </div>`;
-            }
-        }
-
-        function saveOnboarding() {
-            if (!selectedOnbId) return;
-            const info = {
-                health: document.getElementById('obHealth').value,
-                life: document.getElementById('obLife').value,
-                relation: document.getElementById('obRelation').value,
-                comp: document.getElementById('obComp').value
-            };
-            const sched = {};
-            for (let i = 1; i <= 5; i++) {
-                sched[String(i)] = [document.getElementById(`s_${i}_0`).value, document.getElementById(`s_${i}_1`).value, document.getElementById(`s_${i}_2`).value];
-            }
-            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveOnbData", id: selectedOnbId, info: JSON.stringify(info), schedule: JSON.stringify(sched) }) }).then(() => {
-                alert("저장되었습니다."); loadUsers();
-            });
-        }
-
-        function promoteIntern() {
-            if (!confirm("모든 온보딩 과정을 수료하고 정식 사원으로 승진시킵니까?")) return;
-            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "promoteIntern", id: selectedOnbId, icon: "🚲" }) }).then(() => {
-                alert("승진이 완료되었습니다!"); loadUsers();
-            });
-        }
-
-        /* ----------------------------------------------------
-           [★신규] 사진 고속 압축 엔진 (Canvas 활용)
-        ---------------------------------------------------- */
-        function compressImage(file, callback) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = event => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800; // 최대 가로 픽셀
-                    const MAX_HEIGHT = 800; // 최대 세로 픽셀
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    } else {
-                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // 화질 60%로 압축하여 base64 추출
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-                    callback(dataUrl.split(',')[1], 'image/jpeg');
-                };
-            };
-        }
-
-        function uploadAppPhoto() {
-            const file = document.getElementById('appPhotoFile').files[0];
-            const date = document.getElementById('dDate').value;
-            const sid = document.getElementById('mSid').value;
-            if (!file || !date) return alert("사진을 선택해주세요.");
-
-            document.getElementById('modal').style.display = 'none'; // 창 먼저 닫기
-
-            compressImage(file, (b64, mime) => {
-                const sText = allUsers.find(u => u.id === sid).name;
-                fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "uploadPhoto", base64: b64, mimeType: mime, sid: sid, mid: "용모체크", name: sText, date: date }) }).then(r => r.json()).then(res => {
-                    alert("사진 압축 및 업로드 완료!"); loadDaily();
-                });
-            });
-        }
-
-        function handleLife(s) {
-            const f = document.getElementById('lifePhoto').files[0];
-            const msg = document.getElementById('lifeMsg').value;
-            if (f) {
-                document.getElementById('modal').style.display = 'none'; // 창 먼저 닫기
-                compressImage(f, (b64, mime) => {
-                    sendData(s, msg, b64, mime);
-                });
-            } else {
-                sendData(s, msg, null, null);
-            }
-        }
-
-        function sendData(s, msg, b64, mime) {
-            const sid = document.getElementById('mSid').value;
-            const d = document.getElementById('dDate').value;
-            const body = { action: b64 ? "uploadPhoto" : "teacherControl", sid: sid, mid: "생활미션", act: s, message: msg, date: d };
-            if (b64) { body.base64 = b64; body.mimeType = mime; body.name = allUsers.find(u => u.id === sid).name; }
-            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(body) }).then(() => {
-                if (!b64) { alert("완료"); document.getElementById('modal').style.display = 'none'; }
-                loadDaily();
-            });
-        }
-
-        /* ----------------------------------------------------
-           기존 메인 시스템 JS (동적 유저 연동)
-        ---------------------------------------------------- */
         function loadDaily() {
             const date = document.getElementById('dDate').value;
-            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getDailyData", date: date }) }).then(res => res.json()).then(data => {
-                const board = document.getElementById('dailyBoard'); board.innerHTML = "";
-                if (!data.logs) data.logs = {};
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getDailyData", date: date }) })
+                .then(res => res.json())
+                .then(data => {
+                    const board = document.getElementById('dailyBoard'); board.innerHTML = "";
+                    if (!data.logs) data.logs = {};
 
-                allUsers.forEach(u => {
-                    const sid = u.id;
-                    const col = document.createElement('div'); col.className = 'student-col';
-                    const l = data.logs[sid] || {}; const s = (data.schedules && data.schedules[sid]) ? data.schedules[sid] : null;
-                    let currentTotal = 0; Object.keys(l).forEach(k => { if (k === 'adjustments') { l[k].forEach(a => currentTotal += a.amount); } else if (l[k].money) currentTotal += l[k].money; });
-                    col.innerHTML = `<div class="col-header"><h3 class="student-name">${u.name} ${u.role}</h3><span class="money-badge">₩${currentTotal.toLocaleString()}</span><button class="qr-btn" onclick="openQrModal('${sid}','${u.name}')">🪪 QR</button></div>`;
+                    // [★업데이트] 활성 사원(activeUsers)만 일간 화면에 표시!
+                    activeUsers.forEach(u => {
+                        const sid = u.id; const col = document.createElement('div'); col.className = 'student-col';
+                        const l = data.logs[sid] || {}; const s = (data.schedules && data.schedules[sid]) ? data.schedules[sid] : null;
 
-                    // 온보딩 가이드라인 노출
-                    let infoObj = {}; try { infoObj = JSON.parse(u.basicInfo); } catch (e) { }
-                    if (infoObj.comp) {
-                        col.innerHTML += `<div class="admin-baseline-panel"><b>💡 HARD 목표:</b> ${infoObj.comp}</div>`;
-                    }
-
-                    let lifeCls = "", lifeTxt = "미완료"; if (l["생활미션"]) { if (l["생활미션"].status === 'life_ok') { lifeCls = 'life-ok'; lifeTxt = '성공'; } else if (l["생활미션"].status === 'fail') { lifeCls = 'fail'; lifeTxt = '실패'; } }
-                    col.innerHTML += `<div class="m-item ${lifeCls}" onclick="openModal('${sid}','생활미션')"><b>🌞 생활미션</b> <span>${lifeTxt}</span></div>`;
-
-                    let appLog = l["용모체크"]; let appSt = appLog ? "✅ 확인됨" : "미확인"; let appCls = appLog ? "done" : "";
-                    col.innerHTML += `<div class="m-item ${appCls}" onclick="openModal('${sid}','용모체크', '${appLog ? appLog.note : ''}')"><b>👔 용모단정</b> <span>${appSt}</span></div>`;
-
-                    if (s) {
-                        ['m1', 'm2', 'm3', 'c1a', 'c1b', 'c2', 'c3'].forEach(k => {
-                            if (!s[k] || !s[k].n) return; let mName = s[k].n;
-                            let displayName = mName; let logKey = mName;
-                            if (mName === '행사') { if (k.startsWith('c1')) logKey = '행사_선택'; else if (k === 'c2') logKey = (s.day === '목') ? '행사_목오후' : '행사_오후'; else logKey = '행사_오전'; displayName = `🎉 ${mName}`; }
-                            let log = l[logKey] || l[mName]; let c = ""; let priceHtml = ""; let timeStr = ""; let badge = "";
-                            if (log) {
-                                if (log.status == 'end' || log.status == 'ok') c = 'done'; else if (log.status == 'start') c = 'ing'; else if (log.status == 'gong') c = 'gong';
-                                if (log.money) priceHtml = ` <span class="cell-price">₩${log.money.toLocaleString()}</span>`;
-                                if (log.note && log.note.includes("분")) timeStr = ` <div style="font-size:10px;color:#888;margin-top:2px;">⏱ ${log.note}</div>`;
-                                if (log.message) { let msgStr = String(log.message); let d = msgStr.charAt(0).toUpperCase(); if (['E', 'N', 'H'].includes(d) && !NO_LEVEL_LIST.includes(mName)) badge = ` <span style="font-size:10px;font-weight:bold;color:#666;">(${d})</span>`; }
-                            }
-                            col.innerHTML += `<div class="m-item ${c}" onclick="openModal('${sid}','${mName}')"><div>${displayName}${badge} ${priceHtml}</div>${timeStr}</div>`;
+                        let currentTotal = 0;
+                        Object.keys(l).forEach(k => {
+                            if (k === 'adjustments_etc') { l[k].forEach(a => currentTotal += a.amount); }
+                            else if (l[k].money) currentTotal += l[k].money;
                         });
-                    }
-                    board.appendChild(col);
+
+                        col.innerHTML = `<div class="col-header">
+                            <h3 class="student-name" title="클릭하여 직급 및 특진 관리" onclick="openRoleModal('${sid}','${u.name}','${u.role}')">${u.name} ${u.role} ✏️</h3>
+                            <span class="money-badge">₩${currentTotal.toLocaleString()}</span>
+                            <button class="qr-btn" onclick="openQrModal('${sid}','${u.name}')">🪪 QR</button>
+                        </div>`;
+
+                        let infoObj = {}; try { infoObj = JSON.parse(u.basicInfo); } catch (e) { }
+                        if (infoObj.comp) { col.innerHTML += `<div class="admin-baseline-panel"><b>💡 HARD 목표:</b> ${infoObj.comp}</div>`; }
+
+                        let lifeCls = "", lifeTxt = "미완료";
+                        if (l["생활미션"]) {
+                            if (l["생활미션"].status === 'life_ok') { lifeCls = 'life-ok'; lifeTxt = '성공'; }
+                            else if (l["생활미션"].status === 'fail') { lifeCls = 'fail'; lifeTxt = '실패'; }
+                        }
+
+                        let lifePriceHtml = "";
+                        if (l["생활미션"] && l["생활미션"].money !== undefined) {
+                            if (l["생활미션"].adjSum) {
+                                let aCol = l["생활미션"].adjSum > 0 ? '#059669' : '#ef4444'; let aSign = l["생활미션"].adjSum > 0 ? '+' : '';
+                                lifePriceHtml = `<div style="text-align:right; font-size:11px; margin-top:5px;"><div style="color:#888;">기본 ₩${l["생활미션"].baseMoney.toLocaleString()}</div><div style="color:${aCol};">조정 ${aSign}${l["생활미션"].adjSum.toLocaleString()}</div><div style="font-size:13px; font-weight:800; color:#059669;">총 ₩${l["생활미션"].money.toLocaleString()}</div></div>`;
+                            } else if (l["생활미션"].money > 0) {
+                                lifePriceHtml = `<div class="cell-price" style="margin-top:5px; text-align:right;">₩${l["생활미션"].money.toLocaleString()}</div>`;
+                            }
+                        }
+                        let adjDataLifeStr = l["생활미션"] && l["생활미션"].adjList ? encodeURIComponent(JSON.stringify(l["생활미션"].adjList)) : "";
+                        col.innerHTML += `<div class="m-item ${lifeCls}" onclick="openModal('${sid}','생활미션', '', '${adjDataLifeStr}')"><div style="display:flex; justify-content:space-between; width:100%; align-items:center;"><div><b>🌞 생활미션</b> <span>${lifeTxt}</span></div>${lifePriceHtml}</div></div>`;
+
+                        let appLog = l["용모체크"]; let appSt = appLog ? "✅ 확인됨" : "미확인"; let appCls = appLog ? "done" : "";
+                        col.innerHTML += `<div class="m-item ${appCls}" onclick="openModal('${sid}','용모체크', '${appLog ? appLog.note : ''}')"><b>👔 용모단정</b> <span>${appSt}</span></div>`;
+
+                        if (s) {
+                            ['m1', 'm2', 'm3', 'c1a', 'c1b', 'c2', 'c3'].forEach(k => {
+                                if (!s[k] || !s[k].n) return;
+                                let mName = s[k].n;
+                                let displayName = mName; let logKey = mName;
+
+                                if (mName === '행사') {
+                                    if (k.startsWith('c1')) logKey = '행사_선택';
+                                    else if (k === 'c2') logKey = (s.day === '목') ? '행사_목오후' : '행사_오후';
+                                    else logKey = '행사_오전';
+                                    displayName = `🎉 ${mName}`;
+                                }
+
+                                let log = l[logKey] || l[mName];
+                                let c = ""; let priceHtml = ""; let badge = "";
+
+                                if (log) {
+                                    if (log.status == 'end' || log.status == 'ok') c = 'done'; else if (log.status == 'start') c = 'ing'; else if (log.status == 'gong') c = 'gong';
+
+                                    if (log.adjSum) {
+                                        let adjSign = log.adjSum > 0 ? '+' : ''; let adjColor = log.adjSum > 0 ? '#059669' : '#ef4444';
+                                        priceHtml = `<div style="text-align:right; font-size:11px; margin-top:5px;"><div style="color:#888;">기본 ₩${log.baseMoney.toLocaleString()}</div><div style="color:${adjColor};">조정 ${adjSign}${log.adjSum.toLocaleString()}</div><div style="font-size:13px; font-weight:800; color:#059669;">총 ₩${log.money.toLocaleString()}</div></div>`;
+                                    } else if (log.money) {
+                                        priceHtml = `<div class="cell-price" style="margin-top:5px; text-align:right;">₩${log.money.toLocaleString()}</div>`;
+                                    }
+
+                                    if (log.message) {
+                                        let msgStr = String(log.message); let d = msgStr.charAt(0).toUpperCase();
+                                        if (['E', 'N', 'H'].includes(d) && !NO_LEVEL_LIST.includes(mName)) badge = ` <span style="font-size:10px;font-weight:bold;color:#666;">(${d})</span>`;
+                                    }
+                                }
+                                let adjDataStr = log && log.adjList ? encodeURIComponent(JSON.stringify(log.adjList)) : "";
+                                col.innerHTML += `<div class="m-item ${c}" onclick="openModal('${sid}','${mName}', '', '${adjDataStr}')"><div style="display:flex; justify-content:space-between; width:100%; align-items:center;"><div>${displayName}${badge}</div>${priceHtml}</div></div>`;
+                            });
+                        }
+
+                        if (l["adjustments_etc"]) {
+                            l["adjustments_etc"].forEach(adj => {
+                                let adjClass = adj.amount >= 0 ? 'done' : 'fail';
+                                col.innerHTML += `<div class="m-item ${adjClass}" style="border-left: 5px solid ${adj.amount >= 0 ? '#059669' : '#ef4444'};" onclick="openModal('${sid}','기타','','${encodeURIComponent(JSON.stringify([adj]))}')"><div>💰 일반 추가/차감 <span class="cell-price" style="color:${adj.amount >= 0 ? '#059669' : '#ef4444'}">${adj.amount > 0 ? '+' : ''}${adj.amount.toLocaleString()}</span></div></div>`;
+                            });
+                        }
+                        board.appendChild(col);
+                    });
                 });
-            });
         }
 
-        // 이하 기존 통계/공지사항 기능들... (생략 없이 유지)
-        function loadWeekly() { const sid = document.getElementById('wStudent').value; const date = document.getElementById('wWeekSelect').value; if (!date) return; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getWeeklyData", sid: sid, date: date }) }).then(r => r.json()).then(res => { if (!res.ok) return; const s = res.scores || { self: 0, challenge: 0, productivity: 0, completion: 0, detail: {} }; const d = s.detail || { life: "-", chal: "-", prod: "-", comp: "-" }; const optText = document.getElementById('wWeekSelect').selectedOptions[0].text; const titlePart = optText.split('(')[0].trim(); const user = allUsers.find(u => u.id === sid); document.getElementById('wReportTitle').innerText = `${user.name}의 ${titlePart} 리포트`; drawCharts('w', s); document.getElementById('wsSelfMsg').innerText = d.life; document.getElementById('wsChalMsg').innerText = d.chal; document.getElementById('wsProdMsg').innerText = d.prod; document.getElementById('wsCompMsg').innerText = d.comp; const totalIncome = res.total || 0; const bd = res.breakdown || { missionCount: 0, missionMoney: 0, lifeCount: 0, lifeMoney: 0, adjMoney: 0 }; let detailText = `성공 ${bd.missionCount}건(${bd.missionMoney.toLocaleString()}) + 생활 ${bd.lifeCount}건(${bd.lifeMoney.toLocaleString()})`; if (bd.adjMoney !== 0) detailText += ` + 조정(${bd.adjMoney.toLocaleString()})`; detailText += ` = 총 ₩${totalIncome.toLocaleString()}`; document.getElementById('wSalaryDetail').innerText = detailText; document.getElementById('payStatementTitle').innerText = `${user.name}님 ${titlePart} 급여 명세서`; document.getElementById('payStatementTotal').innerText = "₩" + totalIncome.toLocaleString(); let h = `<table class="weekly-table"><thead><tr><th>시간</th>`;["월", "화", "수", "목", "금"].forEach(d => h += `<th>${d}</th>`); h += `</tr></thead><tbody>`; const slots = [{ t: "09:00", k: "life" }, { t: "09:30", k: "am" }, { t: "11:00", k: "sel1" }, { t: "13:00", k: "pm" }]; slots.forEach(slot => { h += `<tr><td>${slot.t}</td>`; for (let i = 0; i < 5; i++) { const d = res.days[i].data; const sched = d.schedules[sid]; const l = d.logs[sid] || {}; let content = ""; if (slot.k === 'life') { content = "생활미션"; if (l["생활미션"]) { if (l["생활미션"].status === 'life_ok') content += "<br>✅"; if (l["생활미션"].money) content += `<br>₩${l["생활미션"].money.toLocaleString()}`; } } else if (sched) { let keys = slot.k === 'am' ? ['m1', 'm2', 'm3'] : (slot.k === 'sel1' ? ['c1a', 'c1b'] : ['c2', 'c3']); let items = []; keys.forEach(k => { if (sched[k] && sched[k].n) { let mName = sched[k].n; let logKey = mName; if (mName === '행사') { if (keys.includes('m1')) logKey = '행사_오전'; else if (keys.includes('c1a')) logKey = '행사_선택'; else logKey = '행사_오후'; } let log = l[logKey] || l[mName]; let badge = ""; if (log) { if (log.status === 'gong') badge = `<span class="w-badge bg-gong">공결</span>`; else if (log.message) { let diff = String(log.message).toUpperCase(); let bgClass = diff === 'HARD' ? 'bg-hard' : (diff === 'EASY' ? 'bg-easy' : 'bg-normal'); if (!NO_LEVEL_LIST.includes(mName)) badge = `<span class="w-badge ${bgClass}">${diff.charAt(0)}</span>`; } } else { badge = `<span class="w-badge bg-none">-</span>`; } let timeStr = ""; if (log && log.note && log.note.includes("분")) { if (log.note.includes("소요")) timeStr = `<span style="font-size:9px;color:#666;">${log.note}</span>`; } items.push(`<div class="w-card"><div class="w-card-header"><span class="w-name">${mName}</span>${badge}</div><div class="w-meta">${timeStr}${log && log.money ? `<span class="w-price">₩${log.money.toLocaleString()}</span>` : ''}</div></div>`); } }); content = items.join(""); } h += `<td>${content}</td>`; } h += `</tr>`; }); h += `<tr><td style="font-weight:bold;">합계</td>`; for (let i = 0; i < 5; i++)h += `<td style="font-weight:bold; color:var(--p);">₩${res.days[i].money.toLocaleString()}</td>`; h += `</tr></tbody></table>`; document.getElementById('weeklyBoard').innerHTML = h; const tbody = document.getElementById('payTableBody'); tbody.innerHTML = ""; const dayNames = ["월요일", "화요일", "수요일", "목요일", "금요일"]; for (let i = 0; i < 5; i++) { const tr = document.createElement('tr'); tr.innerHTML = `<td>${dayNames[i]}</td><td class="money-col">₩${res.days[i].money.toLocaleString()}</td>`; tbody.appendChild(tr); } }); }
-        function loadMonthly() { const sid = document.getElementById('mStudent').value; const month = document.getElementById('mMonth').value; if (!month) return; const mParts = month.split('-'); const user = allUsers.find(u => u.id === sid); document.getElementById('mReportTitle1').innerText = `${user.name}의 ${parseInt(mParts[1])}월 리포트 (역량 상세)`; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getMonthlyData", sid, month }) }).then(r => r.json()).then(res => { const s = res.myScores || { self: 0, challenge: 0, growth: 0, productivity: 0, completion: 0 }; const c = res.counts || {}; drawCharts('m', s); document.getElementById('msgSelf').innerText = `총 ${c.life.total}회 중 ${c.life.success}회 성공 (${s.self}%)`; document.getElementById('msgChal').innerText = `평균 난이도 ${s.challenge}점 (E:${c.chal.easy} / N:${c.chal.normal} / H:${c.chal.hard})`; document.getElementById('msgGrow').innerText = `평균 이상 난이도 선택: ${c.grow.high}회 (${s.growth}%)`; document.getElementById('msgProd').innerText = s.productivity >= 0 ? `평균 대비 +${s.productivity}% 달성` : `평균 대비 ${s.productivity}% (저조)`; document.getElementById('msgComp').innerText = `시간 내 완료 ${c.comp.success}건 / 전체 ${c.comp.total}건 (${s.completion}%)`; const tSalary = document.getElementById('salaryTable').querySelector('tbody'); tSalary.innerHTML = ""; let salRow = `<td>급여</td>`; for (let w = 1; w <= 5; w++) { let inc = (res.weeklyStats && res.weeklyStats[w]) ? res.weeklyStats[w].income : 0; salRow += `<td>₩${inc.toLocaleString()}</td>`; } tSalary.innerHTML = `<tr>${salRow}</tr>`; document.getElementById('mTotalIncome').innerText = "₩" + (res.financials.myTotal || 0).toLocaleString(); let diff = (res.financials.myTotal || 0) - (res.financials.allTotalAvg || 0); document.getElementById('mProdText').innerText = (diff >= 0 ? "+" : "") + "₩" + diff.toLocaleString(); drawRadar(s); const tbody = document.getElementById('mDetailBody'); tbody.innerHTML = "";["생활미션", "독서", "글쓰기", "자서전", "운동", "영어회화", "검정고시", "행사", "특별활동"].forEach(m => { let row = `<td>${m}</td>`; let sum = 0; for (let w = 1; w <= 5; w++) { const d = res.weeklyDetails[w][m] || { count: 0, money: 0 }; row += `<td>${d.count}회</td>`; sum += d.money; } row += `<td style="font-weight:bold;">₩${sum.toLocaleString()}</td>`; tbody.innerHTML += `<tr>${row}</tr>`; }); }); }
+        function loadWeekly() {
+            const sid = document.getElementById('wStudent').value; const date = document.getElementById('wWeekSelect').value; if (!date || !sid) return;
+            const user = allUsers.find(u => u.id === sid) || { name: '사원' };
+
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getWeeklyData", sid: sid, date: date }) })
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.ok) return;
+                    const s = res.scores || { self: 0, challenge: 0, productivity: 0, completion: 0, detail: {} }; const d = s.detail || { life: "-", chal: "-", prod: "-", comp: "-" }; const optText = document.getElementById('wWeekSelect').selectedOptions[0].text; const titlePart = optText.split('(')[0].trim();
+                    document.getElementById('wReportTitle').innerText = `${user.name}의 ${titlePart} 리포트`;
+                    drawCharts('w', s);
+                    document.getElementById('wsSelfMsg').innerText = d.life; document.getElementById('wsChalMsg').innerText = d.chal; document.getElementById('wsProdMsg').innerText = d.prod; document.getElementById('wsCompMsg').innerText = d.comp;
+
+                    const totalIncome = res.total || 0; const bd = res.breakdown || { missionCount: 0, missionMoney: 0, lifeCount: 0, lifeMoney: 0, adjMoney: 0 };
+                    let detailText = `성공 ${bd.missionCount}건(${bd.missionMoney.toLocaleString()}) + 생활 ${bd.lifeCount}건(${bd.lifeMoney.toLocaleString()})`; if (bd.adjMoney !== 0) detailText += ` + 조정(${bd.adjMoney.toLocaleString()})`; detailText += ` = 총 ₩${totalIncome.toLocaleString()}`; document.getElementById('wSalaryDetail').innerText = detailText; document.getElementById('payStatementTitle').innerText = `${user.name}님 ${titlePart} 급여 명세서`; document.getElementById('payStatementTotal').innerText = "₩" + totalIncome.toLocaleString();
+
+                    let h = `<table class="weekly-table"><thead><tr><th>시간</th>`;
+                    ["월", "화", "수", "목", "금"].forEach(day => h += `<th>${day}</th>`); h += `</tr></thead><tbody>`;
+                    const slots = [{ t: "09:00", k: "life" }, { t: "09:30", k: "am" }, { t: "11:00", k: "sel1" }, { t: "13:00", k: "pm" }];
+
+                    slots.forEach(slot => {
+                        h += `<tr><td>${slot.t}</td>`;
+                        for (let i = 0; i < 5; i++) {
+                            const d = res.days[i].data; const sched = d.schedules[sid]; const l = d.logs[sid] || {}; let content = "";
+
+                            if (slot.k === 'life') {
+                                content = "생활미션";
+                                if (l["생활미션"]) {
+                                    if (l["생활미션"].status === 'life_ok') content += "<br>✅";
+                                    if (l["생활미션"].money) content += `<br>₩${l["생활미션"].money.toLocaleString()}`;
+                                }
+                                if (l["adjustments_etc"]) {
+                                    l["adjustments_etc"].forEach(adj => { content += `<br><span style="color:${adj.amount >= 0 ? '#059669' : '#ef4444'}; font-size:11px;">💰 ${adj.reason}<br>(${adj.amount > 0 ? '+' : ''}${adj.amount.toLocaleString()})</span>`; });
+                                }
+                            } else if (sched) {
+                                let keys = slot.k === 'am' ? ['m1', 'm2', 'm3'] : (slot.k === 'sel1' ? ['c1a', 'c1b'] : ['c2', 'c3']); let items = [];
+                                keys.forEach(k => {
+                                    if (sched[k] && sched[k].n) {
+                                        let mName = sched[k].n; let logKey = mName;
+                                        if (mName === '행사') { if (keys.includes('m1')) logKey = '행사_오전'; else if (keys.includes('c1a')) logKey = '행사_선택'; else logKey = '행사_오후'; }
+                                        let log = l[logKey] || l[mName]; let badge = ""; let priceHtml = "";
+
+                                        if (log) {
+                                            if (log.status === 'gong') badge = `<span class="w-badge bg-gong">공결</span>`;
+                                            else if (log.message) { let diff = String(log.message).toUpperCase(); let bgClass = diff === 'HARD' ? 'bg-hard' : (diff === 'EASY' ? 'bg-easy' : 'bg-normal'); if (!NO_LEVEL_LIST.includes(mName)) badge = `<span class="w-badge ${bgClass}">${diff.charAt(0)}</span>`; }
+
+                                            if (log.money !== undefined) {
+                                                if (log.adjSum) {
+                                                    let aSign = log.adjSum > 0 ? '+' : ''; let aCol = log.adjSum > 0 ? '#059669' : '#ef4444';
+                                                    priceHtml = `<div style="text-align:right; font-size:9px; color:#888; line-height:1.2;">기본 ${log.baseMoney.toLocaleString()}<br><span style="color:${aCol}">${aSign}${log.adjSum.toLocaleString()}</span><br><b style="color:#059669; font-size:11px;">총 ₩${log.money.toLocaleString()}</b></div>`;
+                                                } else { priceHtml = `<span class="w-price">₩${log.money.toLocaleString()}</span>`; }
+                                            }
+                                        } else { badge = `<span class="w-badge bg-none">-</span>`; }
+
+                                        let timeStr = ""; if (log && log.note && log.note.includes("분")) { if (log.note.includes("소요")) timeStr = `<span style="font-size:9px;color:#666;">${log.note}</span>`; }
+                                        items.push(`<div class="w-card"><div class="w-card-header"><span class="w-name">${mName}</span>${badge}</div><div class="w-meta" style="flex-direction:column; text-align:right;">${timeStr}${priceHtml}</div></div>`);
+                                    }
+                                });
+                                content = items.join("");
+                            }
+                            h += `<td>${content}</td>`;
+                        }
+                        h += `</tr>`;
+                    });
+
+                    h += `<tr><td style="font-weight:bold;">합계</td>`;
+                    for (let i = 0; i < 5; i++) h += `<td style="font-weight:bold; color:var(--p);">₩${res.days[i].money.toLocaleString()}</td>`;
+                    h += `</tr></tbody></table>`;
+
+                    document.getElementById('weeklyBoard').innerHTML = h;
+                    const tbody = document.getElementById('payTableBody'); tbody.innerHTML = ""; const dayNames = ["월요일", "화요일", "수요일", "목요일", "금요일"];
+                    for (let i = 0; i < 5; i++) {
+                        const tr = document.createElement('tr'); tr.innerHTML = `<td>${dayNames[i]}</td><td class="money-col">₩${res.days[i].money.toLocaleString()}</td>`; tbody.appendChild(tr);
+                    }
+                });
+        }
+
+        function loadMonthly() {
+            const sid = document.getElementById('mStudent').value; const month = document.getElementById('mMonth').value; if (!month || !sid) return; const mParts = month.split('-');
+            const user = allUsers.find(u => u.id === sid) || { name: '사원' };
+
+            document.getElementById('mReportTitle1').innerText = `${user.name}의 ${parseInt(mParts[1])}월 리포트 (역량 상세)`;
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getMonthlyData", sid, month }) })
+                .then(r => r.json())
+                .then(res => {
+                    const s = res.myScores || { self: 0, challenge: 0, growth: 0, productivity: 0, completion: 0 }; const c = res.counts || {};
+                    drawCharts('m', s);
+                    document.getElementById('msgSelf').innerText = `총 ${c.life.total}회 중 ${c.life.success}회 성공 (${s.self}%)`;
+                    document.getElementById('msgChal').innerText = `평균 난이도 ${s.challenge}점 (E:${c.chal.easy} / N:${c.chal.normal} / H:${c.chal.hard})`;
+                    document.getElementById('msgGrow').innerText = `평균 이상 난이도 선택: ${c.grow.high}회 (${s.growth}%)`;
+                    document.getElementById('msgProd').innerText = s.productivity >= 0 ? `평균 대비 +${s.productivity}% 달성` : `평균 대비 ${s.productivity}% (저조)`;
+                    document.getElementById('msgComp').innerText = `시간 내 완료 ${c.comp.success}건 / 전체 ${c.comp.total}건 (${s.completion}%)`;
+
+                    const tSalary = document.getElementById('salaryTable').querySelector('tbody'); tSalary.innerHTML = ""; let salRow = `<td>급여</td>`;
+                    for (let w = 1; w <= 5; w++) { let inc = (res.weeklyStats && res.weeklyStats[w]) ? res.weeklyStats[w].income : 0; salRow += `<td>₩${inc.toLocaleString()}</td>`; }
+                    tSalary.innerHTML = `<tr>${salRow}</tr>`;
+
+                    document.getElementById('mTotalIncome').innerText = "₩" + (res.financials.myTotal || 0).toLocaleString();
+                    let diff = (res.financials.myTotal || 0) - (res.financials.allTotalAvg || 0); document.getElementById('mProdText').innerText = (diff >= 0 ? "+" : "") + "₩" + diff.toLocaleString();
+                    drawRadar(s);
+
+                    const tbody = document.getElementById('mDetailBody'); tbody.innerHTML = "";
+                    ["생활미션", "독서", "글쓰기", "자서전", "운동", "영어회화", "검정고시", "행사", "특별활동"].forEach(m => {
+                        let row = `<td>${m}</td>`; let sum = 0; let adjTotal = 0;
+                        for (let w = 1; w <= 5; w++) { const d = res.weeklyDetails[w][m] || { count: 0, money: 0, adjSum: 0 }; row += `<td>${d.count}회</td>`; sum += d.money; if (d.adjSum) adjTotal += d.adjSum; }
+                        let adjStr = adjTotal ? `<br><span style="font-size:10px; color:${adjTotal > 0 ? '#059669' : '#ef4444'}">(조정액 포함 ${adjTotal > 0 ? '+' : ''}${adjTotal.toLocaleString()})</span>` : '';
+                        row += `<td style="font-weight:bold; line-height:1.3;">₩${sum.toLocaleString()}${adjStr}</td>`; tbody.innerHTML += `<tr>${row}</tr>`;
+                    });
+                });
+        }
+
         function drawCharts(pf, s) { const drawDoughnut = (id, val, color) => { const ctx = document.getElementById(id).getContext('2d'); if (weeklyCharts[id]) weeklyCharts[id].destroy(); weeklyCharts[id] = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [Math.max(1, val), 100 - val], backgroundColor: [val > 0 ? color : '#e2e8f0', '#e2e8f0'] }] }, options: { cutout: '70%', plugins: { legend: false, datalabels: false } } }); }; drawDoughnut(pf + 'cSelf', Math.max(1, s.self), '#10b981'); document.getElementById(pf + 'sSelf').innerText = s.self + "%"; const chalPercent = Math.min(100, Math.max(1, (s.challenge - 1) * 50)); drawDoughnut(pf + 'cChal', chalPercent, '#f59e0b'); document.getElementById(pf + 'sChal').innerText = s.challenge; const ctxProd = document.getElementById(pf + 'cProd').getContext('2d'); if (weeklyCharts[pf + 'prod']) weeklyCharts[pf + 'prod'].destroy(); weeklyCharts[pf + 'prod'] = new Chart(ctxProd, { type: 'bar', data: { labels: [''], datasets: [{ label: '평균 대비', data: [s.productivity], backgroundColor: s.productivity >= 0 ? '#4f46e5' : '#ef4444', barThickness: 20 }] }, options: { indexAxis: 'y', scales: { x: { min: -50, max: 50, grid: { display: true } }, y: { display: false } }, plugins: { legend: false, datalabels: false } } }); if (document.getElementById(pf + 'sProd')) document.getElementById(pf + 'sProd').innerText = (s.productivity > 0 ? "+" : "") + s.productivity + "%"; drawDoughnut(pf + 'cComp', Math.max(1, s.completion), '#ef4444'); document.getElementById(pf + 'sComp').innerText = s.completion + "%"; if (pf === 'm') { drawDoughnut('mcGrow', Math.max(1, s.growth), '#8b5cf6'); document.getElementById('msGrow').innerText = s.growth + "%"; } }
         function drawRadar(s, g) { const ctxRadar = document.getElementById('monthlyRadarChart').getContext('2d'); if (radarChart) radarChart.destroy(); const normChal = Math.max(0, Math.min(100, (s.challenge - 1) * 50)); const normProd = Math.max(0, Math.min(100, (s.productivity / 2) + 50)); radarChart = new Chart(ctxRadar, { type: 'radar', data: { labels: ['자기관리', '도전성향', '성장지향', '생산성', '마감준수'], datasets: [{ label: '나의 역량', data: [s.self, normChal, s.growth, normProd, s.completion], backgroundColor: 'rgba(79, 70, 229, 0.2)', borderColor: '#4f46e5', borderWidth: 2, pointBackgroundColor: '#4f46e5' }] }, options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } } } }); }
-        function initWeekSelector() { const wSel = document.getElementById('wWeekSelect'); wSel.innerHTML = ""; const today = new Date(); const startYear = 2026; for (let i = 0; i < 52; i++) { const d = new Date(today); d.setDate(today.getDate() - (i * 7)); const diff = d.getDate() - d.getDay() + (d.getDay() == 0 ? -6 : 1); const monday = new Date(d.setDate(diff)); if (monday.getFullYear() < startYear) break; const val = monday.toISOString().slice(0, 10); const opt = document.createElement('option'); opt.value = val; opt.innerText = `${monday.getMonth() + 1}월 ${Math.ceil(monday.getDate() / 7)}주차 (${val}~)`; wSel.appendChild(opt); } }
+        function initWeekSelector() {
+            const wSel = document.getElementById('wWeekSelect');
+            wSel.innerHTML = "";
+            const today = new Date();
+            const startYear = 2026;
+
+            for (let i = 0; i < 52; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() - (i * 7));
+
+                // 해당 주의 월요일 찾기
+                const diff = d.getDate() - d.getDay() + (d.getDay() === 0 ? -6 : 1);
+                const monday = new Date(d.setDate(diff));
+
+                if (monday.getFullYear() < startYear) break;
+
+                // [핵심 수정] toISOString()의 타임존 오류를 방지하기 위해 로컬 날짜 문자열(YYYY-MM-DD)을 직접 생성
+                const yyyy = monday.getFullYear();
+                const mm = String(monday.getMonth() + 1).padStart(2, '0');
+                const dd = String(monday.getDate()).padStart(2, '0');
+                const val = `${yyyy}-${mm}-${dd}`;
+
+                // 선생님의 원래 의도대로 직관적인 주차 계산 (예: 9일은 2주차)
+                const weekNum = Math.ceil(monday.getDate() / 7);
+
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.innerText = `${monday.getMonth() + 1}월 ${weekNum}주차 (${val}~)`;
+                wSel.appendChild(opt);
+            }
+        }
+
         function openQrModal(sid, name) { document.getElementById('qrModal').style.display = 'flex'; document.getElementById('qrName').innerText = name; document.getElementById('qrImage').innerHTML = `<img src="https://quickchart.io/qr?text=${encodeURIComponent(sid + "," + name)}&size=200">`; }
         function downloadMonthlyJPG() { html2canvas(document.getElementById('monthlyReportContainer')).then(c => { const a = document.createElement('a'); a.download = 'MonthReport.jpg'; a.href = c.toDataURL(); a.click(); }); }
         function downloadWeeklyJPG() { html2canvas(document.getElementById('weeklyReportContainer')).then(c => { const a = document.createElement('a'); a.download = 'WeekReport.jpg'; a.href = c.toDataURL(); a.click(); }); }
-        function openModal(sid, mid, note = "") { document.getElementById('modal').style.display = 'flex'; document.getElementById('mTitle').innerText = mid; document.getElementById('mSid').value = sid; document.getElementById('mMid').value = mid; document.getElementById('ui-life').style.display = 'none'; document.getElementById('ui-normal').style.display = 'none'; document.getElementById('ui-appearance').style.display = 'none'; if (mid === '생활미션') { document.getElementById('ui-life').style.display = 'block'; } else if (mid === '용모체크') { document.getElementById('ui-appearance').style.display = 'block'; const preview = document.getElementById('appPreviewArea'); if (note && note.includes("ID:")) { preview.innerHTML = "✅ 이미지가 등록되어 있습니다."; } else { preview.innerHTML = "등록된 사진이 없습니다."; } } else { document.getElementById('ui-normal').style.display = 'block'; } }
-        function sendCtrl(act) { const sid = document.getElementById('mSid').value; const mid = document.getElementById('mMid').value; const d = document.getElementById('dDate').value; const newName = document.getElementById('ctrlMissionSelect').value; const finalName = newName ? newName : mid; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "teacherControl", sid: sid, mid: mid, newMissionName: finalName, act: act, date: d, comment: document.getElementById('tComment').value, startTime: document.getElementById('tStart').value, endTime: document.getElementById('tEnd').value }) }).then(() => { alert("처리되었습니다."); document.getElementById('modal').style.display = 'none'; loadDaily(); }); }
-        function sendAdjustment() { const sid = document.getElementById('mSid').value; const d = document.getElementById('dDate').value; const amount = document.getElementById('adjAmount').value; const reason = document.getElementById('adjReason').value; if (!amount) return alert("금액을 입력하세요"); fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "teacherControl", sid: sid, mid: "상벌점", date: d, message: reason, comment: amount }) }).then(() => { alert("상벌점이 적용되었습니다."); document.getElementById('modal').style.display = 'none'; document.getElementById('adjAmount').value = ""; document.getElementById('adjReason').value = ""; loadDaily(); }); }
+
+        function openModal(sid, mid, note = "", adjDataStr = "") {
+            document.getElementById('modal').style.display = 'flex'; document.getElementById('mTitle').innerText = mid;
+            document.getElementById('mSid').value = sid; document.getElementById('mMid').value = mid; document.getElementById('adjReason').value = mid ? `${mid} 추가/차감` : '';
+
+            let adjArea = document.getElementById('existingAdjs');
+            if (!adjArea) { adjArea = document.createElement('div'); adjArea.id = 'existingAdjs'; document.getElementById('adjReason').parentElement.insertBefore(adjArea, document.getElementById('adjReason')); }
+            adjArea.innerHTML = "";
+            if (adjDataStr) {
+                try {
+                    let adjs = JSON.parse(decodeURIComponent(adjDataStr));
+                    if (adjs.length > 0) {
+                        adjArea.innerHTML = `<div style="font-size:12px; color:#666; margin-bottom:10px;"><b>현재 적용된 내역:</b></div>`;
+                        adjs.forEach(a => { adjArea.innerHTML += `<div style="background:#f1f5f9; padding:8px; border-radius:8px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center; font-size:13px;"><span>${a.reason} (<b style="color:${a.amount >= 0 ? '#059669' : '#ef4444'}">${a.amount}원</b>)</span><button onclick="deleteAdjustment('${a.logId}')" style="background:#ef4444; color:white; border:none; border-radius:4px; padding:3px 8px; cursor:pointer;">삭제</button></div>`; });
+                        adjArea.innerHTML += `<hr style="border:0; border-top:1px solid #eee; margin:10px 0;">`;
+                    }
+                } catch (e) { }
+            }
+
+            document.getElementById('ui-life').style.display = 'none'; document.getElementById('ui-normal').style.display = 'none'; document.getElementById('ui-appearance').style.display = 'none';
+            if (mid === '생활미션') { document.getElementById('ui-life').style.display = 'block'; }
+            else if (mid === '용모체크') { document.getElementById('ui-appearance').style.display = 'block'; const preview = document.getElementById('appPreviewArea'); if (note && note.includes("ID:")) { preview.innerHTML = "✅ 이미지가 등록되어 있습니다."; } else { preview.innerHTML = "등록된 사진이 없습니다."; } }
+            else { document.getElementById('ui-normal').style.display = 'block'; }
+        }
+
+        function deleteAdjustment(logId) {
+            if (!confirm("이 상벌점 내역을 삭제하시겠습니까?")) return;
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "deleteLog", logId: logId, date: document.getElementById('dDate').value }) })
+                .then(() => { alert("삭제되었습니다."); document.getElementById('modal').style.display = 'none'; loadDaily(); });
+        }
+
+        function sendCtrl(act) {
+            const sid = document.getElementById('mSid').value; const mid = document.getElementById('mMid').value; const d = document.getElementById('dDate').value; const newName = document.getElementById('ctrlMissionSelect').value; const finalName = newName ? newName : mid;
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "teacherControl", sid: sid, mid: mid, newMissionName: finalName, act: act, date: d, comment: document.getElementById('tComment').value, startTime: document.getElementById('tStart').value, endTime: document.getElementById('tEnd').value }) })
+                .then(() => { alert("처리되었습니다."); document.getElementById('modal').style.display = 'none'; loadDaily(); });
+        }
+
+        function sendAdjustment() {
+            const sid = document.getElementById('mSid').value; const mid = document.getElementById('mMid').value; const d = document.getElementById('dDate').value; const amount = document.getElementById('adjAmount').value; const reason = document.getElementById('adjReason').value;
+            if (!amount) return alert("금액을 입력하세요");
+            fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "teacherControl", sid: sid, mid: "상벌점_" + mid, date: d, message: reason, comment: amount }) })
+                .then(() => { alert("적용되었습니다."); document.getElementById('modal').style.display = 'none'; document.getElementById('adjAmount').value = ""; document.getElementById('adjReason').value = ""; loadDaily(); });
+        }
+
+        function openMailModal() { document.getElementById('mailModal').style.display = 'flex'; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getSinmungoList" }) }).then(r => r.json()).then(res => { let html = ""; res.data.forEach(m => { html += `<div class="mail-item"><div style="font-size:11px; color:#888;">${new Date(m.date).toLocaleString()} | <b>${m.nick}</b></div><div style="margin-top:5px; white-space:pre-wrap;">${m.content}</div></div>`; }); document.getElementById('mailList').innerHTML = html || "건의사항이 없습니다."; }); }
+        function saveNotice() { const txt = document.getElementById('noticeInput').value; if (!txt) return; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "saveNotice", content: txt }) }).then(() => { alert("등록됨!"); document.getElementById('noticeInput').value = ""; loadNotices(); }); }
         function loadNotices() { document.getElementById('noticeListArea').innerHTML = "불러오는 중..."; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "getAllNotices" }) }).then(r => r.json()).then(res => { let html = ""; res.data.forEach(n => { let isON = (n.status === 'ACTIVE'); let bg = isON ? '#ecfdf5' : '#f8fafc'; let border = isON ? '#10b981' : '#e2e8f0'; html += `<div style="background:${bg}; border:2px solid ${border}; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div style="flex:1; text-align:left;"><div style="font-size:11px; color:#64748b;">${new Date(n.date).toLocaleDateString()} ${isON ? '<b style="color:#10b981;">[게시 중]</b>' : ''}</div><div style="font-size:15px; font-weight:bold; margin-top:5px; color:#1e293b; white-space:pre-wrap;">${n.content}</div></div><div style="display:flex; gap:5px; flex-direction:column;">${isON ? `<button onclick="toggleNotice('${n.id}', 'INACTIVE')" style="background:#ef4444; color:white; border:none; padding:8px; border-radius:8px; cursor:pointer; font-weight:bold;">숨기기</button>` : `<button onclick="toggleNotice('${n.id}', 'ACTIVE')" style="background:#10b981; color:white; border:none; padding:8px; border-radius:8px; cursor:pointer; font-weight:bold;">다시 띄우기</button>`}<button onclick="deleteNotice('${n.id}')" style="background:#cbd5e1; color:#475569; border:none; padding:5px; border-radius:8px; cursor:pointer; font-size:12px;">영구 삭제</button></div></div>`; }); document.getElementById('noticeListArea').innerHTML = html || "<div style='text-align:center; color:#888; padding:20px;'>등록된 공지가 없습니다.</div>"; }); }
+        function toggleNotice(id, st) { fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "toggleNotice", id: id, status: st }) }).then(() => loadNotices()); }
+        function deleteNotice(id) { if (!confirm("삭제하시겠습니까?")) return; fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "deleteNotice", id: id }) }).then(() => loadNotices()); }
     </script>
 </body>
 </html>
